@@ -1,0 +1,49 @@
+/* Estilos adicionales para el componente de chat */
+.chat-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+}
+
+/* Scrollbar personalizado para el área de mensajes */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animaciones suaves */
+.message-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.message-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Estados hover mejorados */
+.contact-item:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.send-button:hover {
+  transform: scale(1.05);
+  transition: transform 0.1s ease;
+}
+
+.chat-container { outline: 4px solid magenta !important; }
+.contact-item:hover { background: #ffe4e6 !important; } /* rosa */
