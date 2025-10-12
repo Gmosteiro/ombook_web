@@ -9,7 +9,7 @@ export default [
     // Public landing page
     index("./pages/Landing.tsx"), // Página pública en "/"
     route("login", "../features/auth/components/Login.tsx"),
-    route("forgot-password", "../features/auth/forgot-password/ForgotPassword.tsx"),
+    route("forgot-password", "../features/auth/components/ForgotPassword.tsx"),
 
     // Private routes wrapped in a layout
     layout("../features/auth/components/PrivateRoute.tsx", [
