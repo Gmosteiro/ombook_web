@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router"; // Cambio aquí
 
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate(); // Usar navigate en lugar de window.location
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,8 +28,8 @@ const Login: React.FC = () => {
                 localStorage.setItem('token', data.token); // Guardar token JWT
                 alert('Login exitoso!');
 
-                // Redirigir
-                window.location.href = '/chat'; // Cambiar esto segun ruta deseada
+                // Usar navigate en lugar de window.location
+                navigate('/dashboard'); // o la ruta que desees
             } else {
                 const errorText = await response.text();
                 alert(`Error de login: ${errorText}`);
