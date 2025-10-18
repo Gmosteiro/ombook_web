@@ -11,6 +11,8 @@
 		"noImplicitAny": true,
 		"noUnusedParameters": true,
 		"noUnusedLocals": true,
+		"noImplicitReturns": true,
+		"strictNullChecks": true,
 		"forceConsistentCasingInFileNames": true,
 		"paths": {
 			"~/*": ["./app/*"]
