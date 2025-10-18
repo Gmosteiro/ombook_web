@@ -3,14 +3,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
-import { LoginResponse, ApiError, LoginDTO } from '../types';
+import { LoginResponse, ApiError, LoginRequest } from '../types';
 
 export const useLogin = () => {
     const { login, logout, setLoading, token } = useAuth();
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const loginUser = async (loginData: LoginDTO): Promise<void> => {
+    const loginUser = async (loginData: LoginRequest): Promise<void> => {
         setLoading(true);
         setError(null);
 
