@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User } from '../types'; // Importar el tipo
+import TokenManager from '../utils/TokenManager'
 
 interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     user: User | null;
-    login: (user: User) => void;
+    token: string | null;
+    login: (token: string) => void;
     logout: () => void;
     setLoading: (loading: boolean) => void;
 }
@@ -16,9 +18,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
+    const [token, setToken] = useState<string | null>(null);
 
-    const login = (user: User) => {
-        setUser(user);
+    useEffect(() => {
+        const stored = TokenManager.getToken();
+        if (stored) {
+            setToken(stored);
+            setIsAuthenticated(true);
+            // opcional: decodificar y setear user si necesitas fields del token
+            // try { const decoded = jwtDecode(stored) as any; setUser(decoded.user ?? null); } catch {}
+        }
+        setIsLoading(false);
+    }, []);
+
+    const login = (newToken: string) => {
+        setToken(newToken);
+        TokenManager.setToken(newToken);
         setIsAuthenticated(true);
         setIsLoading(false);
     };
@@ -27,7 +42,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(null);
         setIsAuthenticated(false);
         setIsLoading(false);
-        localStorage.removeItem('auth_token');
+        setToken(null);
+        TokenManager.clearToken();
     };
 
     const setLoadingState = (loading: boolean) => {
@@ -39,6 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             isAuthenticated,
             isLoading,
             user,
+            token,
             login,
             logout,
             setLoading: setLoadingState

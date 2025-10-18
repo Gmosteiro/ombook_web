@@ -3,23 +3,22 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
-import { LoginResponse, ApiError } from '../types';
+import { LoginResponse, ApiError, LoginDTO } from '../types';
 
 export const useLogin = () => {
-    const { login, logout, setLoading } = useAuth();
+    const { login, logout, setLoading, token } = useAuth();
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const loginUser = async (email: string, password: string): Promise<void> => {
+    const loginUser = async (loginData: LoginDTO): Promise<void> => {
         setLoading(true);
         setError(null);
 
         try {
-            console.log('Attempting to log in with', { email, password });
-            debugger
+            console.log('Attempting to log in with', loginData);
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify(loginData),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -28,15 +27,15 @@ export const useLogin = () => {
                 throw new Error(errorData.message || 'Invalid credentials');
             }
 
-            const data: LoginResponse = await response.json();
+            const data: LoginResponse = response.bodyUsed ? await response.json() : JSON.parse(await response.text() || '{}');
 
-            // Validar que la respuesta tenga la estructura esperada
-            if (!data.user || !data.tokenAcceso) {
+            const tokenToStore = (data as any).tokenAcceso ?? (data as any).token;
+            if (!tokenToStore) {
                 throw new Error('Invalid response from server');
             }
 
-            login(data.user);
-            localStorage.setItem('auth_token', data.tokenAcceso);
+            // Delegar persistencia al contexto
+            login(tokenToStore);
 
             // Redirigir a home después del login exitoso
             navigate('/home');
@@ -53,14 +52,13 @@ export const useLogin = () => {
     const checkAuth = async (): Promise<void> => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('auth_token');
-
-            if (!token) {
+            const currentToken = token;
+            if (!currentToken) {
                 logout();
                 return;
             }
 
-            const decodedToken: { exp?: number } = jwtDecode(token);
+            const decodedToken: { exp?: number } = jwtDecode(currentToken);
 
             if (typeof decodedToken.exp !== 'number') {
                 logout();

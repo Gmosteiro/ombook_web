@@ -10,7 +10,13 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await loginUser(email, password);
+        await loginUser({
+            correo: email,
+            contrasena: password,
+            infoCliente: {
+                origen: 'web',
+            },
+        });
     };
 
     return (
