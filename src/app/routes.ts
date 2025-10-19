@@ -13,6 +13,7 @@ export default [
     index(`${FEATURES}/common/pages/Landing.tsx`), // Página pública en "/"
     route("login", `${FEATURES}/auth/components/Login.tsx`),
     route("forgot-password", `${FEATURES}/auth/components/ForgotPassword.tsx`),
+    route("*", `${FEATURES}/common/pages/NotFound.tsx`),
 
     // Private routes wrapped in a layout
     layout(`${FEATURES}/auth/components/PrivateRoute.tsx`, [
