@@ -4,14 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import { useLogin } from '../hooks/useAuth';
 
 const PrivateRoute = () => {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, token } = useAuth();
     const { checkAuth } = useLogin();
 
     useEffect(() => {
-        checkAuth();
-    }, [checkAuth]);
+        if (!isLoading && token) {
+            checkAuth();
+        }
+    }, [token, isLoading, checkAuth]);
 
-    // Mostrar loading mientras se verifica la autenticación
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -20,12 +21,10 @@ const PrivateRoute = () => {
         );
     }
 
-    // Si no está autenticado, redirigir al login
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 
-    // Si está autenticado, renderizar las rutas hijas
     return <Outlet />;
 };
 

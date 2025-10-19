@@ -14,8 +14,8 @@ const CoursesContext = createContext<CoursesContextProps>({
 });
 
 export const CoursesProvider = ({ children }: { children: React.ReactNode }) => {
- // const { user } = useAuthContext();
- const fakeUser = { name: "Ana Gómez", role: "Administrador" };
+  // const { user } = useAuthContext();
+  const fakeUser = { name: "Ana Gómez", role: "Administrador" };
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 

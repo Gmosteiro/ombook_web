@@ -14,6 +14,6 @@ export default [
     // Private routes wrapped in a layout
     layout("../features/auth/components/PrivateRoute.tsx", [
         route("home", "./pages/Home.tsx"), // Home privado en "/home"
-        // Add more private routes here as needed
+        route("usuarios/alta", "../features/users/pages/UserCreatePage.tsx"),
     ]),
 ] satisfies RouteConfig;

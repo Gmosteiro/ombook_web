@@ -1,5 +1,5 @@
 // src/features/auth/hooks/useAuth.ts
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
@@ -13,75 +13,49 @@ export const useLogin = () => {
     const loginUser = async (loginData: LoginRequest): Promise<void> => {
         setLoading(true);
         setError(null);
-
         try {
-            console.log('Attempting to log in with', loginData);
-            const response = await fetch('/api/auth/login', {
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 body: JSON.stringify(loginData),
                 headers: { 'Content-Type': 'application/json' },
             });
 
-            if (!response.ok) {
-                const errorData: ApiError = response.bodyUsed ? await response.json() : { message: response.statusText };
-                throw new Error(errorData.message || 'Invalid credentials');
+            const raw = await res.text();
+            const json = raw ? JSON.parse(raw) : {};
+
+            if (!res.ok) {
+                const errorData: ApiError = json;
+                throw new Error(errorData.message || res.statusText || 'Invalid credentials');
             }
 
-            const data: LoginResponse = response.bodyUsed ? await response.json() : JSON.parse(await response.text() || '{}');
-
+            const data: LoginResponse = json;
             const tokenToStore = (data as any).tokenAcceso ?? (data as any).token;
-            if (!tokenToStore) {
-                throw new Error('Invalid response from server');
-            }
+            if (!tokenToStore) throw new Error('Invalid response from server');
 
-            // Delegar persistencia al contexto
             login(tokenToStore);
-
-            // Redirigir a home después del login exitoso
             navigate('/home');
-
         } catch (err: any) {
-            const errorMessage = err.message ?? 'Login failed';
-            setError(errorMessage);
+            setError(err?.message ?? 'Login failed');
             console.error('Login error:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    const checkAuth = async (): Promise<void> => {
-        setLoading(true);
+    const checkAuth = useCallback((): void => {
+        if (!token) return; // no desloguear por ausencia; el guard ya redirige
+
         try {
-            const currentToken = token;
-            if (!currentToken) {
+            const decoded: any = jwtDecode(token);
+            const exp = typeof decoded?.exp === 'number' ? decoded.exp : undefined;
+            if (exp && exp * 1000 < Date.now()) {
                 logout();
-                return;
             }
-
-            const decodedToken: { exp?: number } = jwtDecode(currentToken);
-
-            if (typeof decodedToken.exp !== 'number') {
-                logout();
-                return;
-            }
-
-            const isExpired = decodedToken.exp * 1000 < Date.now();
-
-            if (isExpired) {
-                logout();
-                return;
-            }
-
-            // Token válido - mantener sesión activa
-            // Aquí podrías hacer una llamada a la API para verificar el usuario si es necesario
-
-        } catch (err) {
-            console.error('Auth check error:', err);
-            logout();
-        } finally {
-            setLoading(false);
+            // si no hay exp, asumimos válido (o valida con /api/auth/me)
+        } catch {
+            // si no es JWT, no forzar logout aquí
         }
-    };
+    }, [token, logout]);
 
     return { loginUser, checkAuth, error };
 };

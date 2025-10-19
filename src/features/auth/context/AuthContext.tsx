@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { User } from '../types'; // Importar el tipo
+import { User } from '../types';
 import TokenManager from '../utils/TokenManager'
 
 interface AuthContextType {
@@ -15,35 +15,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
+    const isAuthenticated = !!token;
 
     useEffect(() => {
         const stored = TokenManager.getToken();
-        if (stored) {
-            setToken(stored);
-            setIsAuthenticated(true);
-            // opcional: decodificar y setear user si necesitas fields del token
-            // try { const decoded = jwtDecode(stored) as any; setUser(decoded.user ?? null); } catch {}
-        }
+        setToken(stored ?? null);
         setIsLoading(false);
     }, []);
 
     const login = (newToken: string) => {
         setToken(newToken);
         TokenManager.setToken(newToken);
-        setIsAuthenticated(true);
         setIsLoading(false);
     };
 
     const logout = () => {
         setUser(null);
-        setIsAuthenticated(false);
-        setIsLoading(false);
         setToken(null);
         TokenManager.clearToken();
+        setIsLoading(false);
     };
 
     const setLoadingState = (loading: boolean) => {
