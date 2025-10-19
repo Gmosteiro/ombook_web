@@ -18,6 +18,7 @@ export default [
     layout(`${FEATURES}/auth/components/PrivateRoute.tsx`, [
         route("home", `${FEATURES}/common/pages/Home.tsx`), // Home privado en "/home"
         route("usuarios/alta", `${FEATURES}/users/pages/UserCreatePage.tsx`),
+        route("usuarios/baja", `${FEATURES}/users/pages/UsersDeletePage.tsx`),
     ]),
 ] satisfies RouteConfig;
 
