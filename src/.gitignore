@@ -4,3 +4,6 @@
 # React Router
 /.react-router/
 /build/
+
+# Ignore npm lockfile (we remove package-lock.json from repo)
+package-lock.json
