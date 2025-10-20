@@ -34,9 +34,7 @@ const routes: RouteConfig = [
      * @see https://reactrouter.com/en/dev/route/route#path
      */
     route("/logout", "./features/auth/components/Logout.tsx"),
-
     route("/courses", "./features/courses/pages/CoursesPage.tsx"),
-
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
 
 
