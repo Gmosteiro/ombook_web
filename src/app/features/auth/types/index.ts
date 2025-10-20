@@ -1,9 +1,21 @@
-import type { operations, components } from '../../../types/openapi';
+import type { operations, components } from '../../../../types/openapi';
 
+
+const enum UserRole {
+    ADMINISTRADOR = "ADMINISTRADOR",
+    PROFESOR = "PROFESOR",
+    ESTUDIANTE = "ESTUDIANTE"
+}
+
+export type claims = {
+    rol: UserRole;
+    orige: string;
+}
 export interface User {
-    id: number;
+    id?: number;
     email: string;
-    name: string;
+    name?: string;
+    rol: UserRole;
     // Agregar más campos según tu API
 }
 

@@ -1,4 +1,4 @@
-import React from "react";
+
 
 export const FilterBar = ({ filters, setFilters }: any) => (
   <div className="flex flex-wrap gap-3 mb-6">

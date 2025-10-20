@@ -1,7 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Course, getCoursesByRole } from "../api/coursesService";
-//import { useAuthContext } from "../../auth/context/authContext";
 
 interface CoursesContextProps {
   courses: Course[];
@@ -14,7 +13,7 @@ const CoursesContext = createContext<CoursesContextProps>({
 });
 
 export const CoursesProvider = ({ children }: { children: React.ReactNode }) => {
-  // const { user } = useAuthContext();
+
   const fakeUser = { name: "Ana Gómez", role: "Administrador" };
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);

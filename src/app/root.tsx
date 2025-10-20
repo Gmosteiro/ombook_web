@@ -6,7 +6,6 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { AuthProvider } from "../features/auth/context/AuthContext";
 import "./app.css";
 
 export const links = () => [
@@ -32,9 +31,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {/* <AuthProvider> */}
+        {children}
+        {/* </AuthProvider> */}
         <ScrollRestoration />
         <Scripts />
       </body>

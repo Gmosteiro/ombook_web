@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Course } from "../api/coursesService";
 
 export const CourseCard = ({ course }: { course: Course }) => (

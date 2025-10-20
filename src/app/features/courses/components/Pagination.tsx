@@ -1,4 +1,3 @@
-import React from "react";
 
 export const Pagination = ({ currentPage, totalPages, onPageChange }: any) => (
   <div className="flex justify-between items-center mt-6 text-sm text-gray-600">

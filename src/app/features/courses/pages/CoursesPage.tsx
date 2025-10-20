@@ -1,7 +1,6 @@
 "use client";
 //import React from "react";
-import React, { useState, useEffect } from "react";
-import { useCoursesContext } from "../context/coursesContext";
+import { useState, useEffect } from "react";
 import { useCourses } from "../hooks/useCourses";
 import { FilterBar } from "../components/FilterBar";
 import { CourseCard } from "../components/CourseCard";
@@ -11,7 +10,7 @@ import { Pagination } from "../components/Pagination";
 import { getCoursesByRole, Course } from "../api/coursesService";
 
 export const CoursesPage = () => {
-    //esto es para cuando tengamos auth
+  //esto es para cuando tengamos auth
   //const { courses, loading } = useCoursesContext();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
