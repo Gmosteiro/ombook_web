@@ -1,10 +1,64 @@
 import { useState } from "react";
-import { Form } from "react-router";
+import { Form, redirect, type MetaFunction } from "react-router";
+import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
+import { createUserSession, getUserId } from "~/services/session.server";
 
-export default function Login({ actionData }: { actionData?: { error?: string } }) {
+export const meta: MetaFunction = () => {
+    return [
+        { title: "New React Router App" },
+        { name: "description", content: "Welcome to React Router!" },
+    ];
+};
+
+export async function loader({ request }: Route.LoaderArgs) {
+    // Check if the user is already logged in
+    const userId = await getUserId(request);
+    if (userId) {
+        return redirect("/");
+    }
+    return null;
+}
+
+export async function action({ request }: Route.ActionArgs) {
+    let response: Response;
+    try {
+        const formData = await request.formData();
+        const email = formData.get("email")?.toString();
+        const password = formData.get("password")?.toString();
+
+        if (!email || !password) {
+            throw new Error("Email and password are required");
+        }
+
+        // Check the user's credentials
+        if (email !== "aaron@mail.com" || password !== "password") {
+            throw new Error("Invalid email or password");
+        }
+
+        // Create a session
+        response = await createUserSession({
+            request,
+            userId: "aaron@mail.com",
+            remember: true,
+        });
+
+        if (!response) {
+            throw new Error("An error occurred while creating the session");
+        }
+    } catch (error) {
+        if (error instanceof Error) {
+            return { error: error.message };
+        }
+
+        return { error: "An unknown error occurred" };
+    }
+
+    throw response;
+}
+
+export default function Login({ actionData }: Route.ComponentProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
     return (
         <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark font-display">
             <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8">
