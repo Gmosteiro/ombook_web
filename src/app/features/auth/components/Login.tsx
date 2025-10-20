@@ -54,25 +54,17 @@ export async function action({ request }: Route.ActionArgs) {
 
         const data: LoginResponse = await res.json();
 
-        console.log("Login successful:", data);
-
-        // Si login ok, crear sesión con el userId recibido
+        // Guardar token, rol y email en la sesión
         response = await createUserSession({
             request,
-            userId: email,
+            userId: email, // o data.sub si tu backend lo envía
             remember: true,
+            extraSessionData: {
+                token: data.token,
+                rol: data.rol,
+                exp: data.exp,
+            },
         });
-
-        // // Check the user's credentials
-        // if (email !== "aaron@mail.com" || password !== "password") {
-        //     throw new Error("Invalid email or password");
-        // }
-        // // Create a session
-        // response = await createUserSession({
-        //     request,
-        //     userId: "aaron@mail.com",
-        //     remember: true,
-        // });
 
         if (!response) {
             throw new Error("An error occurred while creating the session");

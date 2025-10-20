@@ -1,6 +1,7 @@
 // app/services/session.server.ts
-
 import { createCookieSessionStorage, redirect } from "react-router";
+
+const USER_SESSION_KEY = "userId";
 
 /** Represents a user in the system */
 type User = { id: string; username: string; password: string };
@@ -46,7 +47,6 @@ export async function logout(request: Request) {
     });
 }
 
-const USER_SESSION_KEY = "userId";
 
 /**
  * Retrieves the user ID from the session.
@@ -75,14 +75,21 @@ export async function createUserSession({
     userId,
     remember = true,
     redirectUrl,
+    extraSessionData,
 }: {
     request: Request;
     userId: string;
     remember: boolean;
     redirectUrl?: string;
+    extraSessionData?: Record<string, unknown>;
 }) {
     const session = await getUserSession(request);
     session.set(USER_SESSION_KEY, userId);
+    if (extraSessionData) {
+        Object.entries(extraSessionData).forEach(([key, value]) => {
+            session.set(key, value);
+        });
+    }
     return redirect(redirectUrl || "/", {
         headers: {
             "Set-Cookie": await sessionStorage.commitSession(session, {
