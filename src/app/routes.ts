@@ -34,6 +34,9 @@ const routes: RouteConfig = [
      * @see https://reactrouter.com/en/dev/route/route#path
      */
     route("/logout", "./features/auth/components/Logout.tsx"),
+
+
+    route("*", './features/common/pages/NotFound.tsx'),
 ];
 
 export default routes;

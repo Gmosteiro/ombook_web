@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Form, redirect, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
 import { createUserSession, getUserId } from "~/services/session.server";
+import { API_URL } from "../../common/utils/Utils";
+import type { LoginRequest, LoginResponse } from "../../auth/types";
 
 export const meta: MetaFunction = () => {
     return [
@@ -30,17 +32,47 @@ export async function action({ request }: Route.ActionArgs) {
             throw new Error("Email and password are required");
         }
 
-        // Check the user's credentials
-        if (email !== "aaron@mail.com" || password !== "password") {
-            throw new Error("Invalid email or password");
+        const reqBody: LoginRequest = {
+            correo: email,
+            contrasena: password,
+            infoCliente: {
+                origen: 'web'
+            }
+        };
+
+        const res = await fetch(`${API_URL}/auth/login`, {
+            method: "POST",
+            body: JSON.stringify(reqBody),
+            headers: { "Content-Type": "application/json" }
+        });
+
+
+        if (!res.ok) {
+            const errorMessage = await res.text();
+            throw new Error(errorMessage || "Credenciales inválidas");
         }
 
-        // Create a session
+        const data: LoginResponse = await res.json();
+
+        console.log("Login successful:", data);
+
+        // Si login ok, crear sesión con el userId recibido
         response = await createUserSession({
             request,
-            userId: "aaron@mail.com",
+            userId: email,
             remember: true,
         });
+
+        // // Check the user's credentials
+        // if (email !== "aaron@mail.com" || password !== "password") {
+        //     throw new Error("Invalid email or password");
+        // }
+        // // Create a session
+        // response = await createUserSession({
+        //     request,
+        //     userId: "aaron@mail.com",
+        //     remember: true,
+        // });
 
         if (!response) {
             throw new Error("An error occurred while creating the session");
