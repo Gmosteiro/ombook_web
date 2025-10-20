@@ -5,10 +5,12 @@ import { useCourses } from "../hooks/useCourses";
 import { FilterBar } from "../components/FilterBar";
 import { CourseCard } from "../components/CourseCard";
 import { Pagination } from "../components/Pagination";
-
-
 import { getCoursesByRole, Course } from "../api/coursesService";
+import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
+import { UserRole } from "../../auth/types";
 
+
+export const loader = requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]);
 export const CoursesPage = () => {
   //esto es para cuando tengamos auth
   //const { courses, loading } = useCoursesContext();
@@ -48,3 +50,4 @@ export const CoursesPage = () => {
     </div>
   );
 };
+

@@ -1,10 +1,8 @@
 // app/services/session.server.ts
 import { createCookieSessionStorage, redirect } from "react-router";
+import type { User, UserRole } from "~/features/auth/types";
 
 const USER_SESSION_KEY = "userId";
-
-/** Represents a user in the system */
-type User = { id: string; username: string; password: string };
 
 /**
  * Creates a cookie-based session storage.
@@ -47,7 +45,6 @@ export async function logout(request: Request) {
     });
 }
 
-
 /**
  * Retrieves the user ID from the session.
  * @param {Request} request - The incoming request.
@@ -55,10 +52,22 @@ export async function logout(request: Request) {
  */
 export async function getUserId(
     request: Request
-): Promise<User["id"] | undefined> {
+): Promise<User["email"] | undefined> {
     const session = await getUserSession(request);
     const userId = session.get(USER_SESSION_KEY);
     return userId;
+}
+
+/**
+ * Retrieves the user role from the session.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<string | undefined>} The user role if found, undefined otherwise.
+ */
+export async function getUserRole(
+    request: Request
+): Promise<UserRole | undefined> {
+    const session = await getUserSession(request);
+    return session.get("rol");
 }
 
 /**
@@ -81,7 +90,10 @@ export async function createUserSession({
     userId: string;
     remember: boolean;
     redirectUrl?: string;
-    extraSessionData?: Record<string, unknown>;
+    extraSessionData: {
+        rol: UserRole
+        [key: string]: string | any;
+    };
 }) {
     const session = await getUserSession(request);
     session.set(USER_SESSION_KEY, userId);

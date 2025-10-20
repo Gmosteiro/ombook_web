@@ -35,6 +35,10 @@ const routes: RouteConfig = [
      */
     route("/logout", "./features/auth/components/Logout.tsx"),
 
+    route("/courses", "./features/courses/pages/CoursesPage.tsx"),
+
+    route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
+
 
     route("*", './features/common/pages/NotFound.tsx'),
 ];

@@ -3,7 +3,7 @@ import { Form, redirect, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
 import { createUserSession, getUserId } from "~/services/session.server";
 import { API_URL } from "../../common/utils/Utils";
-import type { LoginRequest, LoginResponse } from "../../auth/types";
+import type { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
 
 export const meta: MetaFunction = () => {
     return [
@@ -57,11 +57,11 @@ export async function action({ request }: Route.ActionArgs) {
         // Guardar token, rol y email en la sesión
         response = await createUserSession({
             request,
-            userId: email, // o data.sub si tu backend lo envía
+            userId: email,
             remember: true,
             extraSessionData: {
                 token: data.token,
-                rol: data.rol,
+                rol: data.rol as UserRole,
                 exp: data.exp,
             },
         });
