@@ -1,18 +1,18 @@
-import { redirect } from "react-router";
-import { getUserRole } from "~/services/session.server";
-import type { UserRole } from "../../auth/types";
+import { LoaderFunctionArgs, redirect } from "react-router";
+import { getUserRole, requireValidSession } from "~/services/session.server";
+import { UserRole } from "../types";
 
-/**
- * Loader genérico para proteger rutas por rol.
- * @param allowedRoles Array de roles permitidos (ej: ["ADMINISTRADOR", "PROFESOR"])
- */
 export function requireRoleLoader(allowedRoles: UserRole[]) {
-    return async function loader({ request }: { request: Request }) {
-        const role = await getUserRole(request);
+    return async ({ request }: LoaderFunctionArgs) => {
+        // This will automatically redirect to login if session is expired
+        await requireValidSession(request);
 
-        if (!role || !allowedRoles.includes(role)) {
-            return redirect("/login");
+        const userRole = await getUserRole(request);
+
+        if (!userRole || !allowedRoles.includes(userRole)) {
+            throw redirect("/unauthorized");
         }
+
         return null;
     };
 }

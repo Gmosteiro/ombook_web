@@ -22,12 +22,60 @@ export const sessionStorage = createCookieSessionStorage({
 export const { commitSession, destroySession } = sessionStorage;
 
 /**
- * Retrieves the user session from the request.
+ * Decodes a JWT token (basic decoding, no signature verification)
+ * @param {string} token - The JWT token to decode
+ * @returns {any | null} The decoded payload or null if invalid
+ */
+function decodeJWT(token: string): any | null {
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+
+        // Decode the payload (base64url)
+        const payload = JSON.parse(
+            atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+        );
+        return payload;
+    } catch (error) {
+        console.error('Error decoding JWT:', error);
+        return null;
+    }
+}
+
+/**
+ * Validates if a JWT token is still valid (not expired)
+ * @param {string} token - The JWT token to validate
+ * @returns {boolean} True if token is valid, false if expired or invalid
+ */
+function isJWTValid(token: string): boolean {
+    const decoded = decodeJWT(token);
+    if (!decoded || !decoded.exp) return false;
+
+    // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
+    return decoded.exp * 1000 > Date.now();
+}
+
+/**
+ * Retrieves the user session from the request and validates JWT expiration.
+ * If JWT is expired, destroys the session.
  * @param {Request} request - The incoming request.
  * @returns {Promise<Session>} The user session.
  */
 const getUserSession = async (request: Request) => {
-    return await sessionStorage.getSession(request.headers.get("Cookie"));
+    const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+
+    // Check if session has a token and if it's expired
+    const token = session.get("token");
+    if (token && !isJWTValid(token)) {
+        console.log("JWT token expired, clearing session");
+        // Clear session data but don't redirect here, let the calling function handle it
+        session.unset(USER_SESSION_KEY);
+        session.unset("token");
+        session.unset("rol");
+        session.unset("exp");
+    }
+
+    return session;
 };
 
 /**
@@ -37,12 +85,31 @@ const getUserSession = async (request: Request) => {
  */
 export async function logout(request: Request) {
     console.log("logout");
-    const session = await getUserSession(request);
-    return redirect("/", {
+    const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+    return redirect("/login", {
         headers: {
             "Set-Cookie": await sessionStorage.destroySession(session),
         },
     });
+}
+
+/**
+ * Checks if the user has a valid session, redirects to login if not.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<void>} Throws redirect if session is invalid.
+ */
+export async function requireValidSession(request: Request): Promise<void> {
+    const session = await getUserSession(request);
+    const userId = session.get(USER_SESSION_KEY);
+    const token = session.get("token");
+
+    if (!userId || !token) {
+        throw redirect("/login", {
+            headers: {
+                "Set-Cookie": await sessionStorage.destroySession(session),
+            },
+        });
+    }
 }
 
 /**
@@ -54,8 +121,7 @@ export async function getUserId(
     request: Request
 ): Promise<User["email"] | undefined> {
     const session = await getUserSession(request);
-    const userId = session.get(USER_SESSION_KEY);
-    return userId;
+    return session.get(USER_SESSION_KEY);
 }
 
 /**
@@ -68,6 +134,28 @@ export async function getUserRole(
 ): Promise<UserRole | undefined> {
     const session = await getUserSession(request);
     return session.get("rol");
+}
+
+// /**
+//  * Retrieves the JWT token from the session.
+//  * @param {Request} request - The incoming request.
+//  * @returns {Promise<string | undefined>} The JWT token if found, undefined otherwise.
+//  */
+// async function getJWTToken(request: Request): Promise<string | undefined> {
+//     const session = await getUserSession(request);
+//     return session.get("token");
+// }
+
+/**
+ * Retrieves a valid JWT token from the session (checks expiration).
+ * Redirects to login if token is expired or invalid.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<string | null>} The JWT token if valid, null if not found.
+ */
+export async function getValidJWTToken(request: Request): Promise<string> {
+    await requireValidSession(request); // This will redirect if session is invalid
+    const session = await getUserSession(request);
+    return session.get("token");
 }
 
 /**
@@ -95,7 +183,7 @@ export async function createUserSession({
         [key: string]: string | any;
     };
 }) {
-    const session = await getUserSession(request);
+    const session = await sessionStorage.getSession(request.headers.get("Cookie"));
     session.set(USER_SESSION_KEY, userId);
     if (extraSessionData) {
         Object.entries(extraSessionData).forEach(([key, value]) => {

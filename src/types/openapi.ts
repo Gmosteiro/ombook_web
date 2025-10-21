@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/usuarios/alta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["altaIndividual"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/usuarios/alta/masiva": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cargaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -40,6 +72,32 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AltaUsuarioRequest: {
+            nombre: string;
+            apellido: string;
+            /** Format: email */
+            correo: string;
+            contrasena: string;
+            cedula: string;
+            /** Format: date */
+            fechaNacimiento: string;
+            /** @enum {string} */
+            rol: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+        };
+        ErrorLineaCSV: {
+            /** Format: int32 */
+            linea?: number;
+            motivo?: string;
+        };
+        ResumenCargaMasiva: {
+            /** Format: int32 */
+            total?: number;
+            /** Format: int32 */
+            correctos?: number;
+            /** Format: int32 */
+            errores?: number;
+            detalleErrores?: components["schemas"]["ErrorLineaCSV"][];
+        };
         InfoCliente: {
             origen?: string;
             ip?: string;
@@ -68,6 +126,57 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    altaIndividual: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AltaUsuarioRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    cargaMasiva: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** Format: binary */
+                    csvFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
     login: {
         parameters: {
             query?: never;

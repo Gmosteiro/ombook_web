@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { formatFileSize } from "../../common/utils/Utils";
 
 export type IndividualFormProps = {
     onSubmit: (values: any) => Promise<void> | void;
@@ -6,33 +7,31 @@ export type IndividualFormProps = {
 };
 
 export type EntityCreateProps = {
-    entityName: string; // "Usuario", "Curso", etc.
+    entityName: string;
     title?: string;
-
-    // Formulario que renderiza el alta individual.
-    // Debe llamar a onSubmit(values) con los datos recolectados.
     IndividualForm: React.ComponentType<IndividualFormProps>;
-
-    // Callbacks provistos por cada feature
     addSingle: (values: any) => Promise<void> | void;
     addMasive?: (file: File) => Promise<void> | void;
-
     bulk?: {
-        accept?: string; // default ".csv"
-        maxSizeMB?: number; // default 10
-        helpText?: string; // texto bajo el dropzone
-        templateUrl?: string; // URL para descargar plantilla
+        accept?: string;
+        maxSizeMB?: number;
+        helpText?: string;
+        templateUrl?: string;
     };
-
     labels?: {
         tabIndividual?: string;
         tabBulk?: string;
         submitBulk?: string;
         subtitle?: string;
     };
-
     className?: string;
+    // Nuevos props para estados externos
+    isLoading?: boolean;
+    error?: string;
+    success?: string;
 };
+
+
 
 const EntityCreate: React.FC<EntityCreateProps> = ({
     entityName,
@@ -43,13 +42,12 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
     bulk,
     labels,
     className,
+    isLoading = false,
+    error,
+    success,
 }) => {
     const [activeTab, setActiveTab] = useState<"individual" | "bulk">("individual");
-
-    // estados individual
     const [submittingSingle, setSubmittingSingle] = useState(false);
-
-    // estados masivo
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
     const [dragOver, setDragOver] = useState(false);
@@ -87,7 +85,17 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
         }
     };
 
-    // Masivo
+    const handleUpload = async () => {
+        if (!file || !addMasive) return;
+        try {
+            setUploading(true);
+            await addMasive(file); // el backend se encarga del CSV
+            setFile(null);
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const onFilePick = (f: File | null) => {
         if (!f) return;
         if (f.size > bulkCfg.maxSizeMB * 1024 * 1024) {
@@ -105,21 +113,23 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
         onFilePick(f ?? null);
     };
 
-    const handleUpload = async () => {
-        if (!file || !addMasive) return;
-        try {
-            setUploading(true);
-            await addMasive(file); // el backend se encarga del CSV
-            setFile(null);
-        } finally {
-            setUploading(false);
-        }
-    };
-
     return (
         <section className={`bg-white border border-gray-200 rounded-xl p-6 ${className ?? ""}`}>
             <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{l.header}</h2>
             <p className="text-gray-500 mb-5">{l.subtitle}</p>
+
+            {/* Mostrar mensajes de error y éxito */}
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <strong>Error:</strong> {error}
+                </div>
+            )}
+
+            {success && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    <strong>Éxito:</strong> {success}
+                </div>
+            )}
 
             <div className="mb-5">
                 <div className="inline-flex w-full max-w-md rounded-lg bg-gray-100 p-1">
@@ -146,7 +156,10 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
 
             {activeTab === "individual" && (
                 <div>
-                    <IndividualForm onSubmit={handleSingleSubmit} submitting={submittingSingle} />
+                    <IndividualForm
+                        onSubmit={handleSingleSubmit}
+                        submitting={submittingSingle || isLoading}
+                    />
                 </div>
             )}
 
@@ -189,7 +202,7 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
                         {file && (
                             <div className="mt-3 text-sm">
                                 Archivo seleccionado: <strong>{file.name}</strong>{" "}
-                                ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                                ({formatFileSize(file.size)})
                             </div>
                         )}
 
@@ -211,11 +224,11 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
                         <button
                             type="button"
                             onClick={handleUpload}
-                            disabled={!file || uploading}
+                            disabled={!file || uploading || isLoading}
                             className={`min-w-[200px] bg-blue-600 text-white py-2 px-4 rounded font-semibold
-                ${!file || uploading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                ${!file || uploading || isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}
                         >
-                            {uploading ? "Importando..." : l.submitBulk}
+                            {(uploading || isLoading) ? "Importando..." : l.submitBulk}
                         </button>
                     </div>
                 </div>

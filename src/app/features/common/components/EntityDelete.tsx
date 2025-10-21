@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { formatFileSize } from "../../common/utils/Utils";
+
 
 export type SearchListProps<T = any> = {
     onSelect: (item: T | null) => void;
@@ -8,33 +10,30 @@ export type SearchListProps<T = any> = {
 };
 
 export type EntityDeleteProps = {
-    entityName: string; // "Usuario", "Curso", etc.
+    entityName: string;
     title?: string;
-
-    // Lista buscable para seleccionar la entidad a borrar.
     SearchList: React.ComponentType<SearchListProps>;
-
-    // Callbacks provistos por cada feature
     deleteSingle: (entity: any) => Promise<void> | void;
     deleteMasive?: (file: File) => Promise<void> | void;
-
     bulk?: {
-        accept?: string; // default ".csv"
-        maxSizeMB?: number; // default 10
-        helpText?: string; // texto bajo el dropzone
-        templateUrl?: string; // URL para descargar plantilla
+        accept?: string;
+        maxSizeMB?: number;
+        helpText?: string;
+        templateUrl?: string;
     };
-
     labels?: {
         tabIndividual?: string;
         tabBulk?: string;
         submitBulk?: string;
         subtitle?: string;
         deleteSelected?: string;
-        confirmSingle?: (entityName: string) => string; // mensaje confirmación
+        confirmSingle?: (entityName: string) => string;
     };
-
     className?: string;
+    // Nuevos props para estados externos
+    isLoading?: boolean;
+    error?: string;
+    success?: string;
 };
 
 const EntityDelete: React.FC<EntityDeleteProps> = ({
@@ -46,6 +45,9 @@ const EntityDelete: React.FC<EntityDeleteProps> = ({
     bulk,
     labels,
     className,
+    isLoading = false,
+    error,
+    success,
 }) => {
     const [activeTab, setActiveTab] = useState<"individual" | "bulk">("individual");
 
@@ -136,6 +138,19 @@ const EntityDelete: React.FC<EntityDeleteProps> = ({
             <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{l.header}</h2>
             <p className="text-gray-500 mb-5">{l.subtitle}</p>
 
+            {/* Mostrar mensajes de error y éxito */}
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <strong>Error:</strong> {error}
+                </div>
+            )}
+
+            {success && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    <strong>Éxito:</strong> {success}
+                </div>
+            )}
+
             <div className="mb-5">
                 <div className="inline-flex w-full max-w-md rounded-lg bg-gray-100 p-1">
                     <button
@@ -161,17 +176,21 @@ const EntityDelete: React.FC<EntityDeleteProps> = ({
 
             {activeTab === "individual" && (
                 <div>
-                    <SearchList selected={selected} onSelect={setSelected} busy={deletingSingleState} />
+                    <SearchList
+                        selected={selected}
+                        onSelect={setSelected}
+                        busy={deletingSingleState || isLoading}
+                    />
 
                     <div className="flex justify-end mt-4">
                         <button
                             type="button"
                             onClick={handleDeleteSelected}
-                            disabled={!selected || deletingSingleState}
+                            disabled={!selected || deletingSingleState || isLoading}
                             className={`min-w-[220px] bg-red-600 text-white py-2 px-4 rounded font-semibold
-                ${!selected || deletingSingleState ? "opacity-60 cursor-not-allowed" : "hover:bg-red-700"}`}
+                ${!selected || deletingSingleState || isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-red-700"}`}
                         >
-                            {deletingSingleState ? "Eliminando..." : l.deleteSelected}
+                            {(deletingSingleState || isLoading) ? "Eliminando..." : l.deleteSelected}
                         </button>
                     </div>
                 </div>
@@ -216,7 +235,7 @@ const EntityDelete: React.FC<EntityDeleteProps> = ({
                         {file && (
                             <div className="mt-3 text-sm">
                                 Archivo seleccionado: <strong>{file.name}</strong>{" "}
-                                ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                                ({formatFileSize(file.size)})
                             </div>
                         )}
 
@@ -238,11 +257,11 @@ const EntityDelete: React.FC<EntityDeleteProps> = ({
                         <button
                             type="button"
                             onClick={handleUpload}
-                            disabled={!file || uploading}
+                            disabled={!file || uploading || isLoading}
                             className={`min-w-[220px] bg-red-600 text-white py-2 px-4 rounded font-semibold
-                ${!file || uploading ? "opacity-60 cursor-not-allowed" : "hover:bg-red-700"}`}
+                ${!file || uploading || isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-red-700"}`}
                         >
-                            {uploading ? "Eliminando..." : l.submitBulk}
+                            {(uploading || isLoading) ? "Eliminando..." : l.submitBulk}
                         </button>
                     </div>
                 </div>
