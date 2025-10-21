@@ -50,7 +50,10 @@ export type ImportUsersResponse = {
     success: boolean;
     message?: string;
     error?: string;
-    data?: ResumenCargaMasiva;
+    data?: {
+        correctos: number;
+        errores: number;
+    };
 };
 
 // Tipos para validación

@@ -11,25 +11,11 @@ import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<CreateUserResponse> {
-    const userId = await getUserId(request);
-    const userRole = await getUserRole(request);
-
-    if (!userId || userRole !== UserRole.ADMINISTRADOR) {
-        throw new Response("Unauthorized", { status: 401 });
-    }
-
     const formData = await request.formData();
     const intent = formData.get("intent") as string;
 
     if (intent === "createUser") {
         const jwtToken = await getValidJWTToken(request);
-        if (!jwtToken) {
-            return {
-                success: false,
-                error: "Error de autenticación. Por favor, inicia sesión nuevamente."
-            };
-        }
-
         return await createUser(formData, jwtToken);
     }
 
@@ -96,11 +82,9 @@ export default function UserCreatePage() {
     const fetcher = useFetcher<CreateUserResponse>();
     const importFetcher = useFetcher<ImportUsersResponse>();
 
-    // Crear handler específico para usuarios
     const createUsersImportHandler = createCsvImportHandler({
         allowedRoles: [UserRole.ADMINISTRADOR],
         backendEndpoint: "/usuarios/alta/masiva",
-        fileFormKey: "csvFile",
         successMessage: "Usuarios importados",
     });
 
@@ -132,9 +116,9 @@ export default function UserCreatePage() {
         }
     };
 
-    // Combinar estados
     const isLoading = fetcher.state === "submitting" || importFetcher.state === "submitting";
     const error = fetcher.data?.error || importFetcher.data?.error;
+
     const success = (fetcher.data?.success ? fetcher.data.message : undefined) ||
         (importFetcher.data?.success ? importFetcher.data.message : undefined);
 

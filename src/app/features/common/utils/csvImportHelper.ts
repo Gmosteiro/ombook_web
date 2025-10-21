@@ -3,18 +3,15 @@ import { UserRole } from "~/features/auth/types";
 export type CsvImportConfig = {
     allowedRoles: UserRole[];
     backendEndpoint: string;
-    fileFormKey?: string;
     successMessage?: string;
 };
 
-// Función para convertir File a base64
 function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => {
             const result = reader.result as string;
-            // Remover el prefijo "data:type/subtype;base64,"
             const base64 = result.split(',')[1];
             resolve(base64);
         };
@@ -30,19 +27,9 @@ export function createCsvImportHandler(config: CsvImportConfig) {
     } = config;
 
     return async (file: File) => {
-        console.log('📤 Converting file to base64:', {
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type
-        });
-
         try {
-            // Convertir archivo a base64
             const base64Content = await fileToBase64(file);
 
-            console.log('✅ File converted to base64, length:', base64Content.length);
-
-            // *** ENVIAR COMO JSON EN LUGAR DE FORMDATA ***
             const jsonPayload = {
                 allowedRoles,
                 backendEndpoint,
@@ -52,8 +39,6 @@ export function createCsvImportHandler(config: CsvImportConfig) {
                 fileType: file.type,
                 fileContent: base64Content
             };
-
-            console.log('📤 JSON payload prepared');
 
             return {
                 payload: JSON.stringify(jsonPayload),
@@ -66,6 +51,9 @@ export function createCsvImportHandler(config: CsvImportConfig) {
         }
     };
 }
+
+
+
 
 /*
 Example:
