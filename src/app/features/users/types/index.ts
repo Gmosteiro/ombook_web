@@ -26,6 +26,7 @@ export type UserFormValues = {
     cedula: string;
     fechaNacimiento: string;
     rol: UserRole;
+    confirmarContrasena: string; // Campo adicional solo para el formulario
 };
 
 // Tipo para crear usuario (igual que AltaUsuarioRequest pero con UserRole tipado)
@@ -44,6 +45,7 @@ export type CreateUserResponse = {
     success: boolean;
     message?: string;
     error?: string;
+    data?: any;
 };
 
 export type ImportUsersResponse = {
@@ -57,7 +59,9 @@ export type ImportUsersResponse = {
 };
 
 // Tipos para validación
-export type UserFormErrors = Partial<Record<keyof UserFormValues, string>>;
+export type UserFormErrors = {
+    [K in keyof UserFormValues]?: string;
+};
 
 // Tipos para las funciones helper
 export type CreateUserFunction = (data: CreateUserData) => Promise<CreateUserResponse>;

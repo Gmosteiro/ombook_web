@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, useFetcher } from "react-router";
-import { getUserId, getUserRole, getValidJWTToken } from "~/services/session.server";
+import { getValidJWTToken } from "~/services/session.server";
 import { UserRole } from "~/features/auth/types";
 import EntityCreate from "../../common/components/EntityCreate";
 import UserIndividualForm from "../components/UserForm";
