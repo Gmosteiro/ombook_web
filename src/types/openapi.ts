@@ -13,6 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Registrar un nuevo usuario individualmente */
         post: operations["altaIndividual"];
         delete?: never;
         options?: never;
@@ -30,6 +31,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["cargaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/crear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["crearCurso"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/crear/masivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["procesarCargaMasiva"];
         delete?: never;
         options?: never;
         head?: never;
@@ -68,6 +101,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/usuarios/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buscarUsuarioPorId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/usuarios/profesores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listarProfesoresResponsables"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/usuarios/listar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listarUsuarios"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -98,6 +179,56 @@ export interface components {
             errores?: number;
             detalleErrores?: components["schemas"]["ErrorLineaCSV"][];
         };
+        CursoCreateRequest: {
+            nombre: string;
+            codigo: string;
+            descripcion: string;
+            periodoAcademico: string;
+            profesoresResponsables?: components["schemas"]["ProfesorResponsable"][];
+        };
+        ProfesorResponsable: {
+            /** Format: int64 */
+            id?: number;
+            nombreCompleto?: string;
+        };
+        Curso: {
+            /** Format: int64 */
+            id?: number;
+            nombre: string;
+            codigo: string;
+            descripcion: string;
+            periodoAcademico: string;
+            /** Format: date-time */
+            fechaCreacion?: string;
+            /** @enum {string} */
+            estadoCurso?: "ACTIVO" | "INACTIVO" | "ELIMINADO";
+            /** Format: int64 */
+            idAdministrador?: number;
+            profesoresResponsables?: components["schemas"]["Usuario"][];
+        };
+        Usuario: {
+            /** Format: int64 */
+            id?: number;
+            nombre: string;
+            apellido: string;
+            cedula: string;
+            /** Format: email */
+            correo: string;
+            contrasenaHash: string;
+            /** @enum {string} */
+            estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
+            fotoPerfilUrl?: string;
+            /** Format: date */
+            fechaNacimiento?: string;
+            /** Format: date-time */
+            fechaCreacion?: string;
+            /** Format: date-time */
+            ultimoLogin?: string;
+            /** Format: int32 */
+            intentosFallidos?: number;
+            /** @enum {string} */
+            rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+        };
         InfoCliente: {
             origen?: string;
             ip?: string;
@@ -116,6 +247,27 @@ export interface components {
         };
         CerrarSesionRequest: {
             token?: string;
+        };
+        UsuarioListadoResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            apellido?: string;
+            cedula?: string;
+            correo?: string;
+            /** @enum {string} */
+            estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
+            fotoPerfilUrl?: string;
+            /** Format: date */
+            fechaNacimiento?: string;
+            /** Format: date-time */
+            fechaCreacion?: string;
+            /** Format: date-time */
+            ultimoLogin?: string;
+            /** Format: int32 */
+            intentosFallidos?: number;
+            /** @enum {string} */
+            rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
         };
     };
     responses: never;
@@ -139,8 +291,8 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Usuario creado correctamente, sin cuerpo de respuesta */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -159,7 +311,58 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    csvFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
+    crearCurso: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CursoCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Curso"];
+                };
+            };
+        };
+    };
+    procesarCargaMasiva: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
                     /** Format: binary */
                     csvFile: string;
                 };
@@ -223,6 +426,68 @@ export interface operations {
                 };
                 content: {
                     "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    buscarUsuarioPorId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    listarProfesoresResponsables: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProfesorResponsable"][];
+                };
+            };
+        };
+    };
+    listarUsuarios: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UsuarioListadoResponse"][];
                 };
             };
         };

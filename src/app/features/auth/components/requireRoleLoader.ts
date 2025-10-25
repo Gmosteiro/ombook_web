@@ -10,7 +10,7 @@ export function requireRoleLoader(allowedRoles: UserRole[]) {
         const userRole = await getUserRole(request);
 
         if (!userRole || !allowedRoles.includes(userRole)) {
-            throw redirect("/unauthorized");
+            throw redirect("/");
         }
 
         return null;

@@ -8,7 +8,7 @@ export type ErrorLineaCSV = components['schemas']['ErrorLineaCSV'];
 
 // Operaciones: Alta Individual
 export type AltaIndividualRequest = operations['altaIndividual']['requestBody']['content']['application/json'];
-export type AltaIndividualResponse = operations['altaIndividual']['responses'][200]['content']['*/*'];
+export type AltaIndividualResponse = operations['altaIndividual']['responses'][201]['content']['*/*'];
 
 // Operaciones: Carga Masiva
 export type CargaMasivaRequest =
@@ -93,3 +93,8 @@ export type UserListResponse = {
     page: number;
     pageSize: number;
 };
+
+
+export type ProfesorResponsable = components["schemas"]["ProfesorResponsable"];
+export type UsuarioListadoResponse = components["schemas"]["UsuarioListadoResponse"];
+export type Usuario = components["schemas"]["Usuario"];

@@ -11,13 +11,16 @@ const routes: RouteConfig = [
 
     // Courses
     route("/courses", "./features/courses/pages/CoursesPage.tsx"),
+    route("/courses/create", "./features/courses/pages/CourseCreatePage.tsx"),
 
     // Users
+    // route("/users", "./features/users/pages/UsersPage.tsx"),
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
 
 
     // API Routes
     route("/csv/import", "./routes/api-csv-import.ts"),
+    route("/app/users", "./routes/api.users.ts"),
 
 
     // Not Found

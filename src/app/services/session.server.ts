@@ -84,7 +84,6 @@ const getUserSession = async (request: Request) => {
  * @returns {Promise<Response>} Redirect response after logout.
  */
 export async function logout(request: Request) {
-    console.log("logout");
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
     return redirect("/login", {
         headers: {
