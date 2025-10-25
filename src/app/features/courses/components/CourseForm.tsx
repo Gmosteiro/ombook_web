@@ -17,16 +17,6 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
         loadProfesores();
     }, []);
 
-    const handleProfesorSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const profesorId = parseInt(e.target.value);
-        if (profesorId) {
-            const profesor = profesores.find(p => p.id === profesorId);
-            if (profesor && !selectedProfesores.find(p => p.id === profesorId)) {
-                setSelectedProfesores([...selectedProfesores, profesor]);
-            }
-        }
-    };
-
     const removeProfesor = (profesorId: number) => {
         setSelectedProfesores(selectedProfesores.filter(p => p.id !== profesorId));
     };
@@ -145,7 +135,7 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
             </div>
 
             {/* Profesores Responsables */}
-            <div className="space-y-2">
+            <div className="space-y-3">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Profesores Responsables
                 </label>
@@ -164,53 +154,75 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                     </div>
                 )}
 
-                {/* Select para agregar profesores */}
-                <div className="space-y-2">
-                    <select
-                        onChange={handleProfesorSelect}
-                        value=""
-                        disabled={isLoadingProfesores}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    >
-                        <option value="">
-                            {isLoadingProfesores ? "Cargando profesores..." : "Seleccione un profesor"}
-                        </option>
-                        {profesores.map((profesor) => (
-                            <option key={profesor.id} value={profesor.id}>
-                                {profesor.nombreCompleto}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Lista de profesores seleccionados */}
+                {/* Chips de profesores seleccionados */}
                 {selectedProfesores.length > 0 && (
-                    <div className="space-y-2">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Profesores seleccionados:
-                        </p>
-                        <div className="space-y-1">
-                            {selectedProfesores.map((profesor) => (
-                                <div
-                                    key={profesor.id}
-                                    className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md px-3 py-2"
+                    <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                        {selectedProfesores.map((profesor) => (
+                            <span
+                                key={profesor.id}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
+                            >
+                                {profesor.nombreCompleto}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (typeof profesor.id === "number") removeProfesor(profesor.id);
+                                    }}
+                                    className="ml-1 text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100"
                                 >
-                                    <span className="text-sm text-blue-800 dark:text-blue-300">
-                                        {profesor.nombreCompleto}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            if (typeof profesor.id === "number") removeProfesor(profesor.id);
-                                        }}
-                                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                )}
+
+                {/* Lista de profesores disponibles con checkboxes */}
+                {isLoadingProfesores ? (
+                    <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Cargando profesores...</span>
+                    </div>
+                ) : (
+                    <div className="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg">
+                        <div className="p-2 space-y-1">
+                            {profesores.map((profesor) => {
+                                const isSelected = selectedProfesores.find(p => p.id === profesor.id);
+                                return (
+                                    <label
+                                        key={profesor.id}
+                                        className={`flex items-center p-2 rounded-md cursor-pointer transition-colors ${isSelected
+                                            ? 'bg-blue-50 dark:bg-blue-900/30'
+                                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
                                     >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            ))}
+                                        <input
+                                            type="checkbox"
+                                            checked={!!isSelected}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    if (!selectedProfesores.find(p => p.id === profesor.id)) {
+                                                        setSelectedProfesores([...selectedProfesores, profesor]);
+                                                    }
+                                                } else {
+                                                    if (typeof profesor.id === "number") removeProfesor(profesor.id);
+                                                }
+                                            }}
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        />
+                                        <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                            {profesor.nombreCompleto}
+                                        </span>
+                                    </label>
+                                );
+                            })}
+                            {profesores.length === 0 && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                                    No hay profesores disponibles
+                                </p>
+                            )}
                         </div>
                     </div>
                 )}
