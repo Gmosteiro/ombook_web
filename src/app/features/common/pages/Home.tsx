@@ -1,40 +1,48 @@
-import { Link, type MetaFunction } from "react-router";
-import { getUserId } from "~/services/session.server";
+import { type MetaFunction } from "react-router";
+import { getUserId, getUserRole } from "~/services/session.server";
 import { redirect } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/common/pages/+types/Home";
-import Logout from "../../auth/components/Logout";
+import Layout from "../components/Layout";
 
 export const meta: MetaFunction = () => {
     return [
-        { title: "New React Router App" },
-        { name: "description", content: "Welcome to React Router!" },
+        { title: "Ombook - Dashboard" },
+        { name: "description", content: "Panel de control de Ombook" },
     ];
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
-    // Check if the user is already logged in
     const userId = await getUserId(request);
     if (!userId) {
         throw redirect("/login");
-    } else {
-        return { userId };
     }
+
+    const userRole = await getUserRole(request);
+
+    return {
+        userId,
+        userRole
+    };
 }
 
 export default function Index({ loaderData }: Route.ComponentProps) {
     return (
-        <div className="p-8">
-            <h1 className="text-2xl">Welcome to React Router v7 Auth</h1>
-            <div className="mt-6">
-                {loaderData?.userId ? (
-                    <div>
-                        <p className="mb-6">You are logged in {loaderData?.userId}</p>
-                        <Logout />
-                    </div>
-                ) : (
-                    <Link to="/login">Login</Link>
-                )}
+        <Layout
+            userEmail={loaderData.userId}
+            userRole={loaderData.userRole}
+            notificationCount={5} // Ejemplo: 5 notificaciones //TODO obtener el conteo real
+        >
+            <div className="p-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
+                <div className="bg-white rounded-lg shadow p-6">
+                    <p className="text-gray-600">
+                        Bienvenido a Ombook, {loaderData.userId}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-2">
+                        Rol: {loaderData.userRole}
+                    </p>
+                </div>
             </div>
-        </div>
+        </Layout>
     );
 }
