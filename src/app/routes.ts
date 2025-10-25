@@ -1,15 +1,21 @@
-import {
-    type RouteConfig,
-    route,
-    index,
-    layout,
-} from "@react-router/dev/routes";
+import type { RouteConfig } from "@react-router/dev/routes";
+import { index, route } from "@react-router/dev/routes";
 
-export default [
-    // Public landing page
-    index("./pages/Landing.tsx"), // Página pública en "/"
-    route("login", "../features/auth/components/Login.tsx"),
-    route("forgot-password", "../features/auth/components/ForgotPassword.tsx"),
+/**
+ * Define the application's route configuration using React Router v7.
+ * This uses the new file-based routing system introduced in v7.
+ * 
+ * @see https://reactrouter.com/en/dev/routers/create-browser-router
+ */
+const routes: RouteConfig = [
+    /**
+     * Define the index (home) route.
+     * This route will be matched when the path is exactly "/".
+     * The component for this route is located in "routes/home.tsx".
+     * 
+     * @see https://reactrouter.com/en/dev/route/route#index
+     */
+    index("./features/common/pages/Home.tsx"),
 
     // Private routes wrapped in a layout
     layout("../features/auth/components/PrivateRoute.tsx", [
@@ -18,4 +24,31 @@ export default [
         route("por-trabajar", "./pages/por-trabajar.tsx"), // Página por trabajar
         // Add more private routes here as needed
     ]),
+
+    /**
+     * Define the login route.
+     * This route will be matched when the path is "/login".
+     * The component for this route is located in "routes/login.tsx".
+     * 
+     * @see https://reactrouter.com/en/dev/route/route#path
+     */
+    route("/login", "./features/auth/components/Login.tsx"),
+
+    /**
+     * Define the logout route.
+     * This route will be matched when the path is "/logout".
+     * The component for this route is located in "routes/logout.tsx".
+     * 
+     * @see https://reactrouter.com/en/dev/route/route#path
+     */
+    route("/logout", "./features/auth/components/Logout.tsx"),
+
+    route("/courses", "./features/courses/pages/CoursesPage.tsx"),
+
+    route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
+
+
+    route("*", './features/common/pages/NotFound.tsx')
 ] satisfies RouteConfig;
+
+export default routes;
