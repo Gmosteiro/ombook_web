@@ -134,12 +134,26 @@ export async function action({ request }: ActionFunctionArgs) {
                 console.log(`${key}:`, value);
             }
 
+            // Parse profesores y extraer solo los IDs
+            const profesoresRaw = formData.get("profesoresResponsables") as string;
+            let profesoresResponsables: number[] = [];
+
+            if (profesoresRaw) {
+                try {
+                    const profesoresObj = JSON.parse(profesoresRaw);
+                    // Extraer solo los IDs
+                    profesoresResponsables = profesoresObj.map((p: any) => p.id);
+                } catch (e) {
+                    console.error("Error parsing profesores:", e);
+                }
+            }
+
             const courseData = {
                 nombre: formData.get("nombre") as string,
                 codigo: formData.get("codigo") as string,
                 descripcion: formData.get("descripcion") as string,
                 periodoAcademico: formData.get("periodoAcademico") as string,
-                profesoresResponsables: JSON.parse(formData.get("profesoresResponsables") as string || "[]")
+                profesoresResponsables: profesoresResponsables // Solo IDs
             };
 
             console.log("Parsed courseData:", JSON.stringify(courseData, null, 2));
@@ -162,7 +176,7 @@ export async function action({ request }: ActionFunctionArgs) {
                 method: 'POST',
                 secure: true,
                 jwtToken: jwtToken,
-                body: JSON.stringify(courseData)
+                body: courseData, // Enviar el objeto directamente, no como string
             });
 
             console.log("Response status:", response.status);
@@ -183,7 +197,21 @@ export async function action({ request }: ActionFunctionArgs) {
                 throw new Error(errorMessage);
             }
 
-            const data = await response.json();
+            // Manejar respuesta exitosa
+            let data = null;
+            const contentLength = response.headers.get('content-length');
+            if (contentLength && contentLength !== '0') {
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    console.log("Response has no JSON body");
+                    data = { message: "Course created successfully" };
+                }
+            } else {
+                // Respuesta vacía exitosa
+                data = { message: "Course created successfully" };
+            }
+
             console.log("Course created successfully:", data);
 
             return new Response(JSON.stringify({

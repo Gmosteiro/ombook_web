@@ -37,6 +37,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/matricula/baja": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["baja"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matricula/baja/masiva": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desmatriculación masiva por CSV */
+        post: operations["bajaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matricula/alta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["alta"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matricula/alta/masiva": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Matriculación masiva por CSV */
+        post: operations["altaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/eliminar/masivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["procesarEliminacionMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cursos/crear": {
         parameters: {
             query?: never;
@@ -46,6 +128,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Registrar un nuevo curso individualmente */
         post: operations["crearCurso"];
         delete?: never;
         options?: never;
@@ -108,6 +191,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Busca usuario por id, si es administrador devuelve todos los datos */
         get: operations["buscarUsuarioPorId"];
         put?: never;
         post?: never;
@@ -140,10 +224,78 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Lista todos los usuarios si es administrador */
         get: operations["listarUsuarios"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/usuarios-vinculados/{cursoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista todos los usuarios vinculados a un curso dado su id */
+        get: operations["obtenerUsuariosVinculados"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/listar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin: lista todos los cursos, Prof o Est: solo los asociados con ellos */
+        get: operations["listarCursos"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/buscar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Busca cualquier curso, si es admin muestra todos los datos */
+        get: operations["buscarCursos"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["eliminarCurso"];
         options?: never;
         head?: never;
         patch?: never;
@@ -179,17 +331,24 @@ export interface components {
             errores?: number;
             detalleErrores?: components["schemas"]["ErrorLineaCSV"][];
         };
+        DesmatricularRequest: {
+            /** Format: int64 */
+            estudianteId?: number;
+            /** Format: int64 */
+            cursoId?: number;
+        };
+        MatricularRequest: {
+            /** Format: int64 */
+            estudianteId?: number;
+            /** Format: int64 */
+            cursoId?: number;
+        };
         CursoCreateRequest: {
             nombre: string;
             codigo: string;
             descripcion: string;
             periodoAcademico: string;
-            profesoresResponsables?: components["schemas"]["ProfesorResponsable"][];
-        };
-        ProfesorResponsable: {
-            /** Format: int64 */
-            id?: number;
-            nombreCompleto?: string;
+            profesoresResponsables?: number[];
         };
         Curso: {
             /** Format: int64 */
@@ -229,24 +388,15 @@ export interface components {
             /** @enum {string} */
             rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
         };
-        InfoCliente: {
-            origen?: string;
-            ip?: string;
-            cliente?: string;
-        };
         LoginRequest: {
             correo?: string;
             contrasena?: string;
-            infoCliente?: components["schemas"]["InfoCliente"];
         };
         TokenResponse: {
             token?: string;
             /** Format: int64 */
             exp?: number;
             rol?: string;
-        };
-        CerrarSesionRequest: {
-            token?: string;
         };
         UsuarioListadoResponse: {
             /** Format: int64 */
@@ -268,6 +418,34 @@ export interface components {
             intentosFallidos?: number;
             /** @enum {string} */
             rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+        };
+        UsuarioVinculadoResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            apellido?: string;
+            correo?: string;
+            rol?: string;
+        };
+        CursoListadoResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            codigo?: string;
+            descripcion?: string;
+            periodoAcademico?: string;
+            /** @enum {string} */
+            estadoCurso?: "ACTIVO" | "INACTIVO" | "ELIMINADO";
+            /** Format: date-time */
+            fechaCreacion?: string;
+            docentesAsignados?: components["schemas"]["DocenteResumen"][];
+        };
+        DocenteResumen: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            apellido?: string;
+            correo?: string;
         };
     };
     responses: never;
@@ -329,6 +507,143 @@ export interface operations {
             };
         };
     };
+    baja: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesmatricularRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    bajaMasiva: {
+        parameters: {
+            query: {
+                cursoId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    csvFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Carga procesada correctamente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
+    alta: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MatricularRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    altaMasiva: {
+        parameters: {
+            query: {
+                cursoId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    csvFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Carga procesada correctamente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
+    procesarEliminacionMasiva: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    csvFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
     crearCurso: {
         parameters: {
             query?: never;
@@ -342,8 +657,8 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Curso creado correctamente, sin cuerpo de respuesta */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -413,11 +728,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["CerrarSesionRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -467,7 +778,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ProfesorResponsable"][];
+                    "*/*": components["schemas"]["UsuarioListadoResponse"][];
                 };
             };
         };
@@ -489,6 +800,90 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["UsuarioListadoResponse"][];
                 };
+            };
+        };
+    };
+    obtenerUsuariosVinculados: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UsuarioVinculadoResponse"][];
+                };
+            };
+        };
+    };
+    listarCursos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CursoListadoResponse"][];
+                };
+            };
+        };
+    };
+    buscarCursos: {
+        parameters: {
+            query: {
+                id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    eliminarCurso: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
