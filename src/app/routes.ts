@@ -17,11 +17,10 @@ const routes: RouteConfig = [
     // route("/users", "./features/users/pages/UsersPage.tsx"),
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
 
-
     // API Routes
     route("/csv/import", "./routes/api-csv-import.ts"),
     route("/app/users", "./routes/api.users.ts"),
-
+    route("/app/courses", "./routes/api.courses.ts"), // Nueva ruta
 
     // Not Found
     route("*", './features/common/pages/NotFound.tsx'),
