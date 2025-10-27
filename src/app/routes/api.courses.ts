@@ -127,6 +127,13 @@ export async function action({ request }: ActionFunctionArgs) {
         try {
             const jwtToken = await getValidJWTToken(request);
 
+            // Log todos los datos del formData
+            console.log("=== CREATE COURSE DEBUG ===");
+            console.log("FormData entries:");
+            for (const [key, value] of formData.entries()) {
+                console.log(`${key}:`, value);
+            }
+
             const courseData = {
                 nombre: formData.get("nombre") as string,
                 codigo: formData.get("codigo") as string,
@@ -135,6 +142,22 @@ export async function action({ request }: ActionFunctionArgs) {
                 profesoresResponsables: JSON.parse(formData.get("profesoresResponsables") as string || "[]")
             };
 
+            console.log("Parsed courseData:", JSON.stringify(courseData, null, 2));
+
+            // Validar datos requeridos
+            if (!courseData.nombre || !courseData.codigo || !courseData.descripcion) {
+                console.log("Validation failed: Missing required fields");
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "Nombre, código y descripción son campos requeridos",
+                }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            console.log("Sending request to /cursos/crear with:", JSON.stringify(courseData, null, 2));
+
             const response = await apiFetch("/cursos/crear", {
                 method: 'POST',
                 secure: true,
@@ -142,11 +165,26 @@ export async function action({ request }: ActionFunctionArgs) {
                 body: JSON.stringify(courseData)
             });
 
+            console.log("Response status:", response.status);
+            console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
             if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
+                // Intentar leer el cuerpo de la respuesta para más detalles
+                let errorBody;
+                try {
+                    errorBody = await response.text();
+                    console.log("Error response body:", errorBody);
+                } catch (e) {
+                    console.log("Could not read error response body");
+                }
+
+                const errorMessage = `Error ${response.status}: ${response.statusText}. Body: ${errorBody || 'No body'}`;
+                console.error("Error creating course:", errorMessage);
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
+            console.log("Course created successfully:", data);
 
             return new Response(JSON.stringify({
                 success: true,
@@ -158,7 +196,7 @@ export async function action({ request }: ActionFunctionArgs) {
             console.error("Error creating course:", error);
             return new Response(JSON.stringify({
                 success: false,
-                error: "Error al crear el curso",
+                error: error instanceof Error ? error.message : "Error al crear el curso",
             }), {
                 status: 500,
                 headers: { "Content-Type": "application/json" }

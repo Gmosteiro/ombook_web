@@ -14,8 +14,19 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
 
     // Cargar profesores al montar el componente
     useEffect(() => {
+        console.log("CourseForm: Loading profesores on mount");
         loadProfesores();
     }, []);
+
+    // Debug: Mostrar estado de profesores
+    useEffect(() => {
+        console.log("CourseForm: Profesores state changed:", {
+            profesores,
+            isLoadingProfesores,
+            profesoresError,
+            count: profesores?.length || 0
+        });
+    }, [profesores, isLoadingProfesores, profesoresError]);
 
     const removeProfesor = (profesorId: number) => {
         setSelectedProfesores(selectedProfesores.filter(p => p.id !== profesorId));
@@ -25,9 +36,17 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
 
+        console.log("=== COURSE FORM SUBMIT ===");
+        console.log("Form data entries:");
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+
         const year = formData.get("year") as string;
         const semester = formData.get("semester") as string;
         const periodoAcademico = year && semester ? `${year}/${semester}` : "";
+
+        console.log("Selected profesores:", selectedProfesores);
 
         const courseData: CreateCourseData = {
             nombre: formData.get("nombre") as string,
@@ -37,43 +56,51 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
             profesoresResponsables: selectedProfesores,
         };
 
+        console.log("Course data to submit:", JSON.stringify(courseData, null, 2));
+
+        // Validar que los campos requeridos estén presentes
+        if (!courseData.nombre || !courseData.codigo || !courseData.descripcion) {
+            alert("Por favor, complete todos los campos requeridos");
+            return;
+        }
+
         onSubmit(courseData);
+
+        // Reset form
         e.currentTarget.reset();
         setSelectedProfesores([]);
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Nombre del curso */}
-                <div className="space-y-2">
-                    <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Nombre del Curso *
-                    </label>
-                    <input
-                        type="text"
-                        id="nombre"
-                        name="nombre"
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        placeholder="Ingrese el nombre del curso"
-                    />
-                </div>
+            {/* Nombre del Curso */}
+            <div className="space-y-2">
+                <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Nombre del Curso *
+                </label>
+                <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="Ingrese el nombre del curso"
+                />
+            </div>
 
-                {/* Código del curso */}
-                <div className="space-y-2">
-                    <label htmlFor="codigo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Código del Curso *
-                    </label>
-                    <input
-                        type="text"
-                        id="codigo"
-                        name="codigo"
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        placeholder="Ej: MAT101"
-                    />
-                </div>
+            {/* Código del Curso */}
+            <div className="space-y-2">
+                <label htmlFor="codigo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Código del Curso *
+                </label>
+                <input
+                    type="text"
+                    id="codigo"
+                    name="codigo"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="Ej: MAT101"
+                />
             </div>
 
             {/* Descripción */}
@@ -84,40 +111,36 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                 <textarea
                     id="descripcion"
                     name="descripcion"
-                    rows={3}
                     required
+                    rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="Describe el contenido y objetivos del curso"
+                    placeholder="Describa el contenido y objetivos del curso"
                 />
             </div>
 
             {/* Período Académico */}
-            <div className="space-y-2">
+            <div className="space-y-3">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Período Académico *
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                    {/* Año */}
-                    <div className="space-y-1">
-                        <label htmlFor="year" className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                    <div>
+                        <label htmlFor="year" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Año
                         </label>
                         <input
                             type="number"
                             id="year"
                             name="year"
-                            required
                             min="2020"
                             max="2030"
                             defaultValue={new Date().getFullYear()}
+                            required
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="2024"
                         />
                     </div>
-
-                    {/* Semestre */}
-                    <div className="space-y-1">
-                        <label htmlFor="semester" className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                    <div>
+                        <label htmlFor="semester" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Semestre
                         </label>
                         <select
@@ -127,8 +150,8 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
                             <option value="">Seleccione</option>
-                            <option value="1">Impar</option>
-                            <option value="2">Par</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
                         </select>
                     </div>
                 </div>
@@ -146,7 +169,10 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                         <p className="text-sm text-red-600 dark:text-red-400">{profesoresError}</p>
                         <button
                             type="button"
-                            onClick={loadProfesores}
+                            onClick={() => {
+                                console.log("CourseForm: Retrying profesores load");
+                                loadProfesores();
+                            }}
                             className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline"
                         >
                             Reintentar
@@ -188,37 +214,38 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                 ) : (
                     <div className="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg">
                         <div className="p-2 space-y-1">
-                            {profesores.map((profesor) => {
-                                const isSelected = selectedProfesores.find(p => p.id === profesor.id);
-                                return (
-                                    <label
-                                        key={profesor.id}
-                                        className={`flex items-center p-2 rounded-md cursor-pointer transition-colors ${isSelected
-                                            ? 'bg-blue-50 dark:bg-blue-900/30'
-                                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                            }`}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={!!isSelected}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    if (!selectedProfesores.find(p => p.id === profesor.id)) {
-                                                        setSelectedProfesores([...selectedProfesores, profesor]);
+                            {profesores && profesores.length > 0 ? (
+                                profesores.map((profesor) => {
+                                    const isSelected = selectedProfesores.find(p => p.id === profesor.id);
+                                    return (
+                                        <label
+                                            key={profesor.id}
+                                            className={`flex items-center p-2 rounded-md cursor-pointer transition-colors ${isSelected
+                                                ? 'bg-blue-50 dark:bg-blue-900/30'
+                                                : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={!!isSelected}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        if (!selectedProfesores.find(p => p.id === profesor.id)) {
+                                                            setSelectedProfesores([...selectedProfesores, profesor]);
+                                                        }
+                                                    } else {
+                                                        if (typeof profesor.id === "number") removeProfesor(profesor.id);
                                                     }
-                                                } else {
-                                                    if (typeof profesor.id === "number") removeProfesor(profesor.id);
-                                                }
-                                            }}
-                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                        />
-                                        <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                                            {profesor.nombreCompleto}
-                                        </span>
-                                    </label>
-                                );
-                            })}
-                            {profesores.length === 0 && (
+                                                }}
+                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                            />
+                                            <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                                {profesor.nombreCompleto}
+                                            </span>
+                                        </label>
+                                    );
+                                })
+                            ) : (
                                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
                                     No hay profesores disponibles
                                 </p>

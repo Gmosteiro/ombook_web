@@ -12,6 +12,7 @@ export async function action({ request }: ActionFunctionArgs) {
             const queryType = formData.get("queryType") as string;
             const userId = formData.get("userId") as string;
 
+
             let endpoint: string;
 
             switch (queryType) {
@@ -43,17 +44,20 @@ export async function action({ request }: ActionFunctionArgs) {
                     });
             }
 
+
             const response = await apiFetch(endpoint, {
                 method: 'GET',
                 secure: true,
                 jwtToken: jwtToken,
             });
 
+
             if (!response.ok) {
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
+            // console.log("API: Data received:", data);
 
             return new Response(JSON.stringify({
                 success: true,
@@ -62,10 +66,10 @@ export async function action({ request }: ActionFunctionArgs) {
                 headers: { "Content-Type": "application/json" }
             });
         } catch (error) {
-            console.error("Error loading users:", error);
+            console.error("API: Error loading users:", error);
             return new Response(JSON.stringify({
                 success: false,
-                error: "Error al cargar usuarios",
+                error: error instanceof Error ? error.message : "Error al cargar usuarios",
             }), {
                 status: 500,
                 headers: { "Content-Type": "application/json" }
