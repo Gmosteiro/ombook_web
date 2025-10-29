@@ -32,14 +32,12 @@ export interface ImportCoursesResponse {
     message?: string;
     error?: string;
     data?: {
-        total?: number;
-        correctos?: number;
-        errores?: number;
-        detalleErrores?: Array<{
-            linea?: number;
-            motivo?: string;
-        }>;
+        total: number;
+        correctos: number;
+        errores: number;
+        detalleErrores?: Array<{ linea: number; motivo: string }>;
     };
+    errorDetails?: Array<{ linea: number; motivo: string }>;
 }
 
 // Tipo base para un curso (basado en la API)

@@ -12,6 +12,7 @@ const routes: RouteConfig = [
     // Courses
     route("/courses", "./features/courses/pages/CoursesPage.tsx"),
     route("/courses/create", "./features/courses/pages/CourseCreatePage.tsx"),
+    route("/courses/delete-bulk", "./features/courses/pages/CourseDeletePage.tsx"), // Nueva ruta
 
     // Users
     // route("/users", "./features/users/pages/UsersPage.tsx"),

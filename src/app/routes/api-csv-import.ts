@@ -48,6 +48,13 @@ export async function action({ request }: ActionFunctionArgs) {
         const backendFormData = new FormData();
         backendFormData.append('csvFile', reconstructedFile, fileName);
 
+        console.log('Submitting CSV Import to backend:', {
+            backendEndpoint,
+            fileName,
+            fileType,
+            fileSize: reconstructedFile.size
+        });
+
         const response = await fetch(`${API_URL}${backendEndpoint}`, {
             method: 'POST',
             headers: {
@@ -55,6 +62,10 @@ export async function action({ request }: ActionFunctionArgs) {
             },
             body: backendFormData,
         });
+
+        console.log('CSV Import Response Status:', response.status);
+        const responseBody = await response.clone().text();
+        console.log('CSV Import Response Body:', responseBody);
 
         if (!response.ok) {
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
@@ -81,10 +92,16 @@ export async function action({ request }: ActionFunctionArgs) {
 
         try {
             const responseData = await response.json();
+
+            // Construir mensaje con detalles de errores
+            let message = `${responseData.errores === 0 ? successMessage : 'Import con Errores'}: `;
+
             return Response.json({
-                success: true,
-                message: `${successMessage}: ${responseData.correctos} correctos, ${responseData.errores} errores`,
-                data: responseData
+                success: responseData.errores === 0, // Solo es éxito si no hay errores
+                message: message,
+                data: responseData,
+                // Incluir detalles separadamente para el frontend
+                errorDetails: responseData.detalleErrores || []
             });
         } catch {
             return Response.json({

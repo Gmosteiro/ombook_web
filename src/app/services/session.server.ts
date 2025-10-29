@@ -67,7 +67,6 @@ const getUserSession = async (request: Request) => {
     // Check if session has a token and if it's expired
     const token = session.get("token");
     if (token && !isJWTValid(token)) {
-        console.log("JWT token expired, clearing session");
         // Clear session data but don't redirect here, let the calling function handle it
         session.unset(USER_SESSION_KEY);
         session.unset("token");

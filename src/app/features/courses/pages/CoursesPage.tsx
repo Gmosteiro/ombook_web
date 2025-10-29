@@ -131,6 +131,13 @@ export default function CoursesPage() {
         >
           Crear Curso
         </button>
+
+        <button
+          onClick={() => window.location.href = '/courses/delete-bulk'}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+        >
+          Eliminar Masivo
+        </button>
       </div>
 
       <FilterBar filters={filters} setFilters={setFilters} />

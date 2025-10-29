@@ -72,7 +72,7 @@ export default function CourseDeletePage() {
 
     const createCoursesDeleteHandler = createCsvImportHandler({
         allowedRoles: [UserRole.ADMINISTRADOR],
-        backendEndpoint: "/cursos/baja/masiva",
+        backendEndpoint: "/cursos/eliminar/masivo",
         successMessage: "Cursos eliminados",
     });
 

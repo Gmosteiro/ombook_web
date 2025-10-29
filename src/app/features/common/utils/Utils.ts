@@ -25,9 +25,3 @@ export const formatFileSize = (bytes: number): string => {
     return `${size.toFixed(decimals)} ${sizes[i]}`;
 };
 
-// Helper para logs solo en desarrollo
-export const devLog = (...args: any[]) => {
-    if (import.meta.env.DEV) {
-        console.log(...args);
-    }
-};

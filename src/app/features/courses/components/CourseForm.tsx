@@ -14,19 +14,8 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
 
     // Cargar profesores al montar el componente
     useEffect(() => {
-        console.log("CourseForm: Loading profesores on mount");
         loadProfesores();
     }, []);
-
-    // Debug: Mostrar estado de profesores
-    useEffect(() => {
-        console.log("CourseForm: Profesores state changed:", {
-            profesores,
-            isLoadingProfesores,
-            profesoresError,
-            count: profesores?.length || 0
-        });
-    }, [profesores, isLoadingProfesores, profesoresError]);
 
     const removeProfesor = (profesorId: number) => {
         setSelectedProfesores(selectedProfesores.filter(p => p.id !== profesorId));
@@ -36,17 +25,9 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
 
-        console.log("=== COURSE FORM SUBMIT ===");
-        console.log("Form data entries:");
-        for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
-
         const year = formData.get("year") as string;
         const semester = formData.get("semester") as string;
         const periodoAcademico = year && semester ? `${year}/${semester}` : "";
-
-        console.log("Selected profesores:", selectedProfesores);
 
         const courseData: CreateCourseData = {
             nombre: formData.get("nombre") as string,
@@ -55,8 +36,6 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
             periodoAcademico: periodoAcademico,
             profesoresResponsables: selectedProfesores,
         };
-
-        console.log("Course data to submit:", JSON.stringify(courseData, null, 2));
 
         // Validar que los campos requeridos estén presentes
         if (!courseData.nombre || !courseData.codigo || !courseData.descripcion) {
@@ -170,7 +149,6 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                         <button
                             type="button"
                             onClick={() => {
-                                console.log("CourseForm: Retrying profesores load");
                                 loadProfesores();
                             }}
                             className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline"

@@ -3,6 +3,39 @@ import { getValidJWTToken } from "~/services/session.server";
 import { apiFetch } from "~/features/auth/utils/methods";
 
 export async function action({ request }: ActionFunctionArgs) {
+    const contentType = request.headers.get("content-type");
+
+    // Manejar requests JSON (para imports masivos)
+    if (contentType?.includes("application/json")) {
+        try {
+            const requestBody = await request.json();
+            const { backendEndpoint } = requestBody;
+
+            if (backendEndpoint === "/cursos/eliminar/masivo") {
+                return await handleMassiveDeletion(request, requestBody);
+            }
+
+            // Otros endpoints JSON aquí...
+            return new Response(JSON.stringify({
+                success: false,
+                error: "Endpoint no reconocido",
+            }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
+            });
+
+        } catch (error) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: "Error procesando request JSON",
+            }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+    }
+
+    // Manejar requests FormData (para operaciones individuales)
     const formData = await request.formData();
     const intent = formData.get("intent") as string;
 
@@ -38,7 +71,6 @@ export async function action({ request }: ActionFunctionArgs) {
                 headers: { "Content-Type": "application/json" }
             });
         } catch (error) {
-            console.error("Error deleting course:", error);
             return new Response(JSON.stringify({
                 success: false,
                 error: "Error al eliminar el curso",
@@ -59,7 +91,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
             switch (queryType) {
                 case 'listar':
-                    // Asumiendo que existe este endpoint similar a /usuarios/listar
                     endpoint = "/cursos/listar";
                     break;
                 case 'byId':
@@ -91,7 +122,6 @@ export async function action({ request }: ActionFunctionArgs) {
             });
 
             if (!response.ok) {
-                // Si no existe el endpoint /cursos/listar, devolver array vacío por ahora
                 if (response.status === 404 && queryType === 'listar') {
                     return new Response(JSON.stringify({
                         success: true,
@@ -112,7 +142,6 @@ export async function action({ request }: ActionFunctionArgs) {
                 headers: { "Content-Type": "application/json" }
             });
         } catch (error) {
-            console.error("Error loading courses:", error);
             return new Response(JSON.stringify({
                 success: false,
                 error: "Error al cargar cursos",
@@ -127,13 +156,6 @@ export async function action({ request }: ActionFunctionArgs) {
         try {
             const jwtToken = await getValidJWTToken(request);
 
-            // Log todos los datos del formData
-            console.log("=== CREATE COURSE DEBUG ===");
-            console.log("FormData entries:");
-            for (const [key, value] of formData.entries()) {
-                console.log(`${key}:`, value);
-            }
-
             // Parse profesores y extraer solo los IDs
             const profesoresRaw = formData.get("profesoresResponsables") as string;
             let profesoresResponsables: number[] = [];
@@ -141,11 +163,8 @@ export async function action({ request }: ActionFunctionArgs) {
             if (profesoresRaw) {
                 try {
                     const profesoresObj = JSON.parse(profesoresRaw);
-                    // Extraer solo los IDs
                     profesoresResponsables = profesoresObj.map((p: any) => p.id);
-                } catch (e) {
-                    console.error("Error parsing profesores:", e);
-                }
+                } catch (e) { }
             }
 
             const courseData = {
@@ -153,14 +172,10 @@ export async function action({ request }: ActionFunctionArgs) {
                 codigo: formData.get("codigo") as string,
                 descripcion: formData.get("descripcion") as string,
                 periodoAcademico: formData.get("periodoAcademico") as string,
-                profesoresResponsables: profesoresResponsables // Solo IDs
+                profesoresResponsables: profesoresResponsables
             };
 
-            console.log("Parsed courseData:", JSON.stringify(courseData, null, 2));
-
-            // Validar datos requeridos
             if (!courseData.nombre || !courseData.codigo || !courseData.descripcion) {
-                console.log("Validation failed: Missing required fields");
                 return new Response(JSON.stringify({
                     success: false,
                     error: "Nombre, código y descripción son campos requeridos",
@@ -170,49 +185,33 @@ export async function action({ request }: ActionFunctionArgs) {
                 });
             }
 
-            console.log("Sending request to /cursos/crear with:", JSON.stringify(courseData, null, 2));
-
             const response = await apiFetch("/cursos/crear", {
                 method: 'POST',
                 secure: true,
                 jwtToken: jwtToken,
-                body: courseData, // Enviar el objeto directamente, no como string
+                body: courseData,
             });
 
-            console.log("Response status:", response.status);
-            console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-
             if (!response.ok) {
-                // Intentar leer el cuerpo de la respuesta para más detalles
                 let errorBody;
                 try {
                     errorBody = await response.text();
-                    console.log("Error response body:", errorBody);
-                } catch (e) {
-                    console.log("Could not read error response body");
-                }
-
+                } catch (e) { }
                 const errorMessage = `Error ${response.status}: ${response.statusText}. Body: ${errorBody || 'No body'}`;
-                console.error("Error creating course:", errorMessage);
                 throw new Error(errorMessage);
             }
 
-            // Manejar respuesta exitosa
             let data = null;
             const contentLength = response.headers.get('content-length');
             if (contentLength && contentLength !== '0') {
                 try {
                     data = await response.json();
                 } catch (e) {
-                    console.log("Response has no JSON body");
                     data = { message: "Course created successfully" };
                 }
             } else {
-                // Respuesta vacía exitosa
                 data = { message: "Course created successfully" };
             }
-
-            console.log("Course created successfully:", data);
 
             return new Response(JSON.stringify({
                 success: true,
@@ -221,10 +220,71 @@ export async function action({ request }: ActionFunctionArgs) {
                 headers: { "Content-Type": "application/json" }
             });
         } catch (error) {
-            console.error("Error creating course:", error);
             return new Response(JSON.stringify({
                 success: false,
                 error: error instanceof Error ? error.message : "Error al crear el curso",
+            }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+    }
+
+    if (intent === "deleteMassive") {
+        try {
+            const jwtToken = await getValidJWTToken(request);
+
+            const requestBody = await request.json();
+            const { backendEndpoint, fileContent, fileName } = requestBody;
+
+            const fileBuffer = Buffer.from(fileContent, 'base64');
+            const formData = new FormData();
+            const blob = new Blob([fileBuffer], { type: 'text/csv' });
+            formData.append('csvFile', blob, fileName);
+
+            const response = await fetch(`${process.env.API_URL}${backendEndpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwtToken}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                let errorBody;
+                try {
+                    errorBody = await response.text();
+                } catch (e) { }
+                const errorMessage = `Error ${response.status}: ${response.statusText}. Body: ${errorBody || 'No body'}`;
+                throw new Error(errorMessage);
+            }
+
+            let data = null;
+            const contentLength = response.headers.get('content-length');
+            if (contentLength && contentLength !== '0') {
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    data = { correctos: 0, errores: 0, total: 0 };
+                }
+            } else {
+                data = { correctos: 0, errores: 0, total: 0 };
+            }
+
+            const message = `Cursos eliminados: ${data.correctos || 0} correctos, ${data.errores || 0} errores`;
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: message,
+                data: data,
+            }), {
+                headers: { "Content-Type": "application/json" }
+            });
+
+        } catch (error) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: error instanceof Error ? error.message : "Error al eliminar cursos masivamente",
             }), {
                 status: 500,
                 headers: { "Content-Type": "application/json" }
@@ -239,4 +299,63 @@ export async function action({ request }: ActionFunctionArgs) {
         status: 400,
         headers: { "Content-Type": "application/json" }
     });
+}
+
+async function handleMassiveDeletion(request: Request, requestBody: any) {
+    try {
+        const jwtToken = await getValidJWTToken(request);
+        const { backendEndpoint, fileContent, fileName } = requestBody;
+
+        const fileBuffer = Buffer.from(fileContent, 'base64');
+        const formData = new FormData();
+        const blob = new Blob([fileBuffer], { type: 'text/csv' });
+        formData.append('csvFile', blob, fileName);
+
+        const response = await apiFetch(`${backendEndpoint}`, {
+            method: 'POST',
+            secure: true,
+            jwtToken: jwtToken,
+            body: formData,
+        });
+
+        if (!response.ok) {
+            let errorBody;
+            try {
+                errorBody = await response.text();
+            } catch (e) { }
+            const errorMessage = `Error ${response.status}: ${response.statusText}. Body: ${errorBody || 'No body'}`;
+            throw new Error(errorMessage);
+        }
+
+        let data = null;
+        const contentLength = response.headers.get('content-length');
+        if (contentLength && contentLength !== '0') {
+            try {
+                data = await response.json();
+            } catch (e) {
+                data = { correctos: 0, errores: 0, total: 0 };
+            }
+        } else {
+            data = { correctos: 0, errores: 0, total: 0 };
+        }
+
+        const message = `Cursos eliminados: ${data.correctos || 0} correctos, ${data.errores || 0} errores`;
+
+        return new Response(JSON.stringify({
+            success: true,
+            message: message,
+            data: data,
+        }), {
+            headers: { "Content-Type": "application/json" }
+        });
+
+    } catch (error) {
+        return new Response(JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : "Error al eliminar cursos masivamente",
+        }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
 }
