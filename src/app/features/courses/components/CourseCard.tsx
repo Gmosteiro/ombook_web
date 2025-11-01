@@ -84,7 +84,8 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
           </p>
 
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-            {course.descripcion}
+            <span className="font-medium">Descripcion:</span> {course.descripcion}
+
           </p>
 
           {/* Mostrar error si hay */}
