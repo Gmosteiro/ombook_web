@@ -56,9 +56,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           userRole={userRole}
           notificationCount={notificationCount}
         />
-        {children}
-        <ScrollRestoration />
-        <Scripts />
+        <div className="bg-gray-50 min-h-screen">
+          {children}
+          <ScrollRestoration />
+          <Scripts />
+        </div>
       </body>
     </html>
   );
