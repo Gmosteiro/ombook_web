@@ -13,6 +13,7 @@ export const loader = requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFES
 export interface Filters {
   search: string;
   status: string;
+  teacher: string;
 }
 
 export default function CoursesPage() {
@@ -21,6 +22,7 @@ export default function CoursesPage() {
   const [filters, setFilters] = useState<Filters>({
     search: '',
     status: '',
+    teacher: '',
   });
   const [page, setPage] = useState(1);
   const coursesPerPage = 9;
