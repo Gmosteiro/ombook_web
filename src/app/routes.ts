@@ -15,8 +15,9 @@ const routes: RouteConfig = [
     route("/courses/delete-bulk", "./features/courses/pages/CourseDeletePage.tsx"), // Nueva ruta
 
     // Users
-    // route("/users", "./features/users/pages/UsersPage.tsx"),
+    route("/users", "./features/users/pages/UsersPage.tsx"),
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
+    route("/users/delete", "./features/users/pages/UsersDeletePage.tsx"),
 
     // API Routes
     route("/csv/import", "./routes/api-csv-import.ts"),
