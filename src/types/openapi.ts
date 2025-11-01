@@ -184,6 +184,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dispositivos/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["registrarToken"];
+        delete: operations["desactivarToken"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dispositivos/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["testPush"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/usuarios/{id}": {
         parameters: {
             query?: never;
@@ -398,6 +430,10 @@ export interface components {
             exp?: number;
             rol?: string;
         };
+        RegistrarTokenRequest: {
+            token?: string;
+            plataforma?: string;
+        };
         UsuarioListadoResponse: {
             /** Format: int64 */
             id?: number;
@@ -446,6 +482,9 @@ export interface components {
             nombre?: string;
             apellido?: string;
             correo?: string;
+        };
+        DesactivarTokenRequest: {
+            token?: string;
         };
     };
     responses: never;
@@ -725,6 +764,74 @@ export interface operations {
             header?: {
                 Authorization?: string;
             };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    registrarToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistrarTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    desactivarToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesactivarTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    testPush: {
+        parameters: {
+            query?: never;
+            header?: never;
             path?: never;
             cookie?: never;
         };

@@ -19,9 +19,9 @@ export interface User {
 }
 
 // Schemas
-export type InfoCliente = components['schemas']['InfoCliente'];
+// export type InfoCliente = components['schemas']['InfoCliente'];
 export type TokenResponse = components['schemas']['TokenResponse'];
-export type CerrarSesionRequest = components['schemas']['CerrarSesionRequest'];
+// export type CerrarSesionRequest = components['schemas']['CerrarSesionRequest'];
 
 // Operaciones: Login
 export type LoginRequest = operations['login']['requestBody']['content']['application/json'];

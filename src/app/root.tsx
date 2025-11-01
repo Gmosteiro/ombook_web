@@ -5,8 +5,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
 import "./app.css";
+import Navbar from "./features/common/components/Navbar";
+import { getUserId, getUserRole } from "./services/session.server";
+import { User } from "./features/auth/types";
+
 
 export const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -21,7 +26,22 @@ export const links = () => [
   },
 ];
 
+// Loader para pasar datos de sesión al layout
+export async function loader({ request }: { request: Request }) {
+  const userEmail = await getUserId(request);
+  const userRole = await getUserRole(request);
+  // Si tienes notificaciones, obtén el count aquí. Si no, pon 0.
+  const notificationCount = 0;
+  return { userEmail, userRole, notificationCount };
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { userEmail, userRole, notificationCount } = useLoaderData() as {
+    userEmail: string;
+    userRole: User['rol']
+    notificationCount: number;
+  };
+
   return (
     <html lang="en">
       <head>
@@ -31,9 +51,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {/* <AuthProvider> */}
+        <Navbar
+          userEmail={userEmail}
+          userRole={userRole}
+          notificationCount={notificationCount}
+        />
         {children}
-        {/* </AuthProvider> */}
         <ScrollRestoration />
         <Scripts />
       </body>

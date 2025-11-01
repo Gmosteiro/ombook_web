@@ -12,6 +12,7 @@ pnpm-debug.log*
 # Next.js (si usas Next.js)
 .next/
 out/
+.env
 
 # Build outputs
 build/

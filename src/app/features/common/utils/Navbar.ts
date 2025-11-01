@@ -13,7 +13,6 @@ export const getNavbarLinks = (role: UserRole | undefined): Links[] | [] => {
                 return [
                     { to: "/users", label: "Gestión de Usuarios" },
                     { to: "/courses", label: "Gestión de Cursos" },
-                    { to: "/settings", label: "configuracion" },
                 ];
             case UserRole.PROFESOR:
                 return [

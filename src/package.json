@@ -9,7 +9,7 @@
     "typecheck": "react-router typegen && tsc",
     "test": "jest",
     "test:watch": "jest --watch",
-    "gen:types": "dotenv -e .env -- sh -c 'openapi-typescript \"$API_URL/v3/api-docs\" -o types/openapi.ts'"
+    "gen:types": "dotenv -e .env -- sh -c 'openapi-typescript \"$VITE_API_URL/v3/api-docs\" -o types/openapi.ts'"
   },
   "dependencies": {
     "@react-router/node": "^7.7.1",
