@@ -31,6 +31,9 @@ export type LoginHeaders = operations['login']['parameters']['header'];
 // Operaciones: Cerrar sesión
 export type CerrarSesionOK = operations['cerrarSesion']['responses'][200]['content']['*/*'];
 export type CerrarSesionHeaders = operations['cerrarSesion']['parameters']['header'];
+export type CerrarSesionRequest = {
+    token: string;
+};
 
 // Mantén el nombre que ya usabas, pero alineado al schema generado
 export type LoginResponse = TokenResponse;
