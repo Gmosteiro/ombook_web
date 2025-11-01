@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
@@ -82,6 +82,25 @@ export default function UsersPage() {
   const startIndex = (page - 1) * usersPerPage;
   const paginated = filteredUsers.slice(startIndex, startIndex + usersPerPage);
 
+  // Estado y referencia para el menú de acciones
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar el menú si se hace click fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
+        setActionsOpen(false);
+      }
+    }
+    if (actionsOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [actionsOpen]);
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -116,33 +135,50 @@ export default function UsersPage() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Gestión de Usuarios</h1>
-        <div className="space-x-4">
-          <Link
-            to="/users/create"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+        <div className="relative" ref={actionsRef}>
+          <button
+            onClick={() => setActionsOpen((open) => !open)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
           >
-            Crear Usuario
-          </Link>
-          <Link
-            to="/users/delete"
-            className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            Acciones {/*TODO Mover a componente reutilizable, y pointer*/}
+          </button>
+          <div
+            className={`absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 transition ${actionsOpen ? "block" : "hidden"
+              }`}
           >
-            Eliminar Usuarios
-          </Link>
+            <button
+              onClick={() => {
+                window.location.href = '/users/create';
+                setActionsOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
+            >
+              Crear Usuario
+            </button>
+            <button
+              onClick={() => {
+                window.location.href = '/users/delete';
+                setActionsOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
+            >
+              Eliminar Usuarios
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
         <input
           type="text"
           placeholder="Buscar por nombre, email o cédula..."
-          className="flex-1 border rounded-xl p-2 px-4"
+          className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
         />
         <select
-          className="border rounded-xl p-2"
+          className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
           value={filters.rol}
           onChange={(e) => setFilters({ ...filters, rol: e.target.value })}
         >
@@ -152,7 +188,7 @@ export default function UsersPage() {
           <option value="ESTUDIANTE">Estudiante</option>
         </select>
         <select
-          className="border rounded-xl p-2"
+          className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
           value={filters.estado}
           onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
         >
@@ -195,34 +231,34 @@ export default function UsersPage() {
       ) : (
         <>
           {/* Tabla de usuarios */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nombre
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Apellido
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Correo Electrónico
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+              <tbody className="divide-y divide-gray-200">
                 {paginated.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {user.nombre}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {user.apellido}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {user.correo}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -240,22 +276,20 @@ export default function UsersPage() {
           </div>
 
           {/* Paginación */}
-          <div className="flex justify-center mt-6">
-            <div className="flex space-x-2">
+          <div className="flex justify-between items-center mt-8 text-sm text-gray-600">
+            <p>Mostrando página {page} de {totalPages}</p>
+            <div className="flex gap-2">
               <button
+                className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 font-medium shadow-sm transition hover:bg-blue-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 onClick={() => setPage(page - 1)}
                 disabled={page === 1}
-                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Anterior
               </button>
-              <span className="px-3 py-2 text-gray-700 dark:text-gray-300">
-                Página {page} de {totalPages}
-              </span>
               <button
+                className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 font-medium shadow-sm transition hover:bg-blue-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 onClick={() => setPage(page + 1)}
                 disabled={page === totalPages}
-                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Siguiente
               </button>
