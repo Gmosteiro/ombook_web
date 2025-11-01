@@ -67,7 +67,6 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                 />
             </div>
 
-            {/* Código del Curso */}
             <div className="space-y-2">
                 <label htmlFor="codigo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Código del Curso *

@@ -11,14 +11,14 @@ export const useCoursesApi = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const deleteCourse = async (courseId: string): Promise<boolean> => {
+    const deleteCourse = async (courseId: number): Promise<boolean> => {
         setIsLoading(true);
         setError(null);
 
         try {
             const formData = new FormData();
             formData.append('intent', 'deleteCourse');
-            formData.append('courseId', courseId);
+            formData.append('courseId', courseId.toString());
 
             const response = await fetch('/app/courses', {
                 method: 'POST',

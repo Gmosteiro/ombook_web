@@ -1,22 +1,9 @@
 import { useState, useEffect } from "react";
 import { useCoursesApi } from "../hooks/useCoursesApi";
-
-interface Course {
-    id: string;
-    nombre: string;
-    codigo: string;
-    descripcion: string;
-    periodoAcademico: string;
-    fechaCreacion?: string;
-    estadoCurso?: string;
-    profesoresResponsables?: Array<{
-        id?: number;
-        nombreCompleto?: string;
-    }>;
-}
+import { Course } from "../types/types";
 
 interface CourseSearchListProps {
-    onSelect: (courseId: string) => void;
+    onSelect: (courseId: number) => void;
     isLoading?: boolean;
 }
 
@@ -24,7 +11,7 @@ export default function CourseSearchList({ onSelect, isLoading }: CourseSearchLi
     const [courses, setCourses] = useState<Course[]>([]);
     const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+    const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
 
     const { loadCourses, isLoading: isLoadingCourses, error } = useCoursesApi();
 
@@ -56,8 +43,12 @@ export default function CourseSearchList({ onSelect, isLoading }: CourseSearchLi
     }, [searchTerm, courses]);
 
     const handleCourseSelect = (course: Course) => {
-        setSelectedCourseId(course.id);
-        onSelect(course.id);
+
+        if (course && course.id) {
+
+            setSelectedCourseId(course.id);
+            onSelect(course.id);
+        }
     };
 
     const formatDate = (dateString?: string) => {
@@ -127,8 +118,8 @@ export default function CourseSearchList({ onSelect, isLoading }: CourseSearchLi
                                     key={course.id}
                                     onClick={() => !isLoading && handleCourseSelect(course)}
                                     className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedCourseId === course.id
-                                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                                            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                                         } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
                                     <div className="flex justify-between items-start">
@@ -149,16 +140,16 @@ export default function CourseSearchList({ onSelect, isLoading }: CourseSearchLi
                                                 )}
                                                 {course.estadoCurso && (
                                                     <span className={`px-2 py-1 rounded-full ${course.estadoCurso === 'ACTIVO'
-                                                            ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                                                            : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                                                        ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                                                        : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
                                                         }`}>
                                                         {course.estadoCurso}
                                                     </span>
                                                 )}
                                             </div>
-                                            {course.profesoresResponsables && course.profesoresResponsables.length > 0 && (
+                                            {course.docentesAsignados && (
                                                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                                    Profesores: {course.profesoresResponsables.map(p => p.nombreCompleto).join(', ')}
+                                                    Profesores: {course.docentesAsignados.map(p => p.nombre).join(', ')}
                                                 </p>
                                             )}
                                         </div>

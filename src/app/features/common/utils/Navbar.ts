@@ -11,8 +11,9 @@ export const getNavbarLinks = (role: UserRole | undefined): Links[] | [] => {
         switch (role) {
             case UserRole.ADMINISTRADOR:
                 return [
-                    { to: "/users", label: "Gestión de Usuarios" },
-                    { to: "/courses", label: "Gestión de Cursos" },
+                    { to: "/users", label: "Usuarios" },
+                    { to: "/courses", label: "Cursos" },
+                    { to: "/configuration", label: "Configuración" },
                 ];
             case UserRole.PROFESOR:
                 return [

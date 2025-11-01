@@ -4,26 +4,15 @@ import { CourseCard } from "../components/CourseCard";
 import { Pagination } from "../components/Pagination";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
+import { Course } from "../types/types";
 import { useCoursesApi } from "../hooks/useCoursesApi";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]);
 
-interface Course {
-  id: string;
-  title: string;
-  code: string;
-  description: string;
-  teacher: string;
-  period: string;
-  status: string;
-  image: string;
-  createdAt?: string;
-}
 
-interface Filters {
+export interface Filters {
   search: string;
   status: string;
-  period: string;
 }
 
 export default function CoursesPage() {
@@ -32,7 +21,6 @@ export default function CoursesPage() {
   const [filters, setFilters] = useState<Filters>({
     search: '',
     status: '',
-    period: ''
   });
   const [page, setPage] = useState(1);
   const coursesPerPage = 9;
@@ -42,21 +30,9 @@ export default function CoursesPage() {
   // Cargar cursos al montar el componente
   useEffect(() => {
     const fetchCourses = async () => {
-      const data = await loadCourses('listar');
-      if (data) {
-        // Mapear los datos del API al formato que espera el componente
-        const mappedCourses = data.map((curso: any) => ({
-          id: curso.id?.toString() || '',
-          title: curso.nombre || '',
-          code: curso.codigo || '',
-          description: curso.descripcion || '',
-          teacher: curso.profesoresResponsables?.map((p: any) => p.nombreCompleto).join(', ') || 'Sin profesores',
-          period: curso.periodoAcademico || '',
-          status: curso.estadoCurso || 'ACTIVO',
-          image: '/api/placeholder/300/200', // Placeholder mientras no tengamos imágenes
-          createdAt: curso.fechaCreacion
-        }));
-        setCourses(mappedCourses);
+      const cursos = await loadCourses('listar');
+      if (cursos) {
+        setCourses(cursos);
       }
     };
 
@@ -65,16 +41,20 @@ export default function CoursesPage() {
 
   // Filtrar cursos cuando cambien los filtros o los cursos
   useEffect(() => {
+
+    if (filters.search.trim() === '' && filters.status === '') {
+      setFilteredCourses(courses);
+      return;
+    }
+
     let filtered = courses.filter(course => {
       const matchesSearch = !filters.search ||
-        course.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        course.code.toLowerCase().includes(filters.search.toLowerCase()) ||
-        course.teacher.toLowerCase().includes(filters.search.toLowerCase());
+        course.nombre.toLowerCase().includes(filters.search.toLowerCase()) ||
+        course.codigo.toLowerCase().includes(filters.search.toLowerCase())
 
-      const matchesStatus = !filters.status || course.status === filters.status;
-      const matchesPeriod = !filters.period || course.period === filters.period;
+      const matchesStatus = !filters.status || course.estadoCurso === filters.status;
 
-      return matchesSearch && matchesStatus && matchesPeriod;
+      return matchesSearch && matchesStatus;
     });
 
     setFilteredCourses(filtered);
@@ -82,13 +62,14 @@ export default function CoursesPage() {
   }, [courses, filters]);
 
   // Función para eliminar curso de la lista local
-  const handleCourseDeleted = (courseId: string) => {
+  const handleCourseDeleted = (courseId: number) => {
     setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
   };
 
   // Calcular paginación
   const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
   const startIndex = (page - 1) * coursesPerPage;
+
   const paginated = filteredCourses.slice(startIndex, startIndex + coursesPerPage);
 
   if (loading) {

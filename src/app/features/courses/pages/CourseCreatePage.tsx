@@ -61,9 +61,6 @@ export default function CourseCreatePage() {
     // Determinar si hay errores de importación para mostrar diferente
     const hasImportErrors = importFetcher.data && !importFetcher.data.success && importFetcher.data.errorDetails;
 
-    if (hasImportErrors) {
-        debugger
-    }
     return (
         <div className="max-w-3xl mx-auto">
             {/* Mostrar errores detallados de importación */}

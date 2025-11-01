@@ -35,10 +35,10 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0 }: N
             <div className="flex items-center justify-between">
                 {/* Logo */}
                 <Link to="/" className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                    {/* <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
                         <span className="text-white font-bold text-sm">📖</span>
-                    </div>
-                    <span className="text-xl font-semibold text-gray-900">Ombook</span>
+                    </div> */}
+                    <span className="text-2xl font-semibold text-blue-700 ">Ombook</span>
                 </Link>
 
                 {/* Si no está logeado, no mostrar nada más */}

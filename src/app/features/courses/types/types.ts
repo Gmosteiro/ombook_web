@@ -1,17 +1,22 @@
-// Tipos basados en la API OpenAPI
-export interface CreateCourseData {
-    nombre: string;
-    codigo: string;
-    descripcion: string;
-    periodoAcademico: string;
-    profesoresResponsables?: ProfesorResponsable[];
-}
+import type { components } from "../../../../types/openapi";
 
-export interface ProfesorResponsable {
-    id?: number;
-    nombreCompleto?: string;
-}
+// Utilidad para hacer campos obligatorios
+type RequiredCourseFields = "id" | "nombre" | "codigo" | "descripcion" | "periodoAcademico";
+type CourseOpenApi = components["schemas"]["CursoListadoResponse"];
 
+// Tipo base para un curso (usa el generado por OpenAPI)
+export type Course = Omit<CourseOpenApi, RequiredCourseFields> & {
+    [K in RequiredCourseFields]: NonNullable<CourseOpenApi[K]>;
+};
+
+// Para crear un curso (usa el generado por OpenAPI)
+export type CreateCourseData = components["schemas"]["CursoCreateRequest"];
+
+// Para usuario/profesor (usa el generado por OpenAPI)
+export type Usuario = components["schemas"]["Usuario"];
+export type ProfesorResponsable = components["schemas"]["DocenteResumen"];
+
+// Respuesta de creación de curso (auxiliar)
 export interface CreateCourseResponse {
     success: boolean;
     message?: string;
@@ -19,60 +24,24 @@ export interface CreateCourseResponse {
     data?: Course;
 }
 
-// Tipos para eliminar curso (no está en la API, mantengo el existente)
+// Respuesta de eliminación de curso (auxiliar)
 export interface DeleteCourseResponse {
     success: boolean;
     message?: string;
     error?: string;
 }
 
-// Tipos para importación masiva de cursos
+// Respuesta de importación masiva (auxiliar)
 export interface ImportCoursesResponse {
     success: boolean;
     message?: string;
     error?: string;
-    data?: {
-        total: number;
-        correctos: number;
-        errores: number;
-        detalleErrores?: Array<{ linea: number; motivo: string }>;
-    };
+    data?: components["schemas"]["ResumenCargaMasiva"];
     errorDetails?: Array<{ linea: number; motivo: string }>;
 }
 
-// Tipo base para un curso (basado en la API)
-export interface Course {
-    id?: number;
-    nombre: string;
-    codigo: string;
-    descripcion: string;
-    periodoAcademico: string;
-    fechaCreacion?: string;
-    estadoCurso?: "ACTIVO" | "INACTIVO" | "ELIMINADO";
-    idAdministrador?: number;
-    profesoresResponsables?: Usuario[];
-}
-
-export interface Usuario {
-    id?: number;
-    nombre: string;
-    apellido: string;
-    cedula: string;
-    correo: string;
-    contrasenaHash: string;
-    estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
-    fotoPerfilUrl?: string;
-    fechaNacimiento?: string;
-    fechaCreacion?: string;
-    ultimoLogin?: string;
-    intentosFallidos?: number;
-    rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
-}
-
-// Tipos para actualizar curso
-export interface UpdateCourseData extends Partial<CreateCourseData> {
-    id: number;
-}
+// Para actualizar curso (puedes usar Partial si necesitas)
+export type UpdateCourseData = Partial<CreateCourseData> & { id: number };
 
 export interface UpdateCourseResponse {
     success: boolean;
