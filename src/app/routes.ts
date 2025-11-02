@@ -13,13 +13,15 @@ const routes: RouteConfig = [
     route("/courses", "./features/courses/pages/CoursesPage.tsx"),
     route("/courses/create", "./features/courses/pages/CourseCreatePage.tsx"),
     route("/courses/delete-bulk", "./features/courses/pages/CourseDeletePage.tsx"),
-        // Detalle del curso
-    route("/courses/:id", "./features/courses/pages/CourseDetail.Page.tsx"),
-    route("/courses/:id/general", "./features/courses/components/CourseGeneral.tsx"),
-    route("/courses/:id/materials", "./features/courses/components/CourseMaterials.tsx"),
-    route("/courses/:id/forums", "./features/courses/components/CourseForums.tsx"),
-    route("/courses/:id/announcements", "./features/courses/components/CourseAnnouncements.tsx"),
-    route("/courses/:id/students", "./features/courses/components/CourseStudents.tsx"),
+
+    // Course Detail
+    route("/courses/:id", "./features/courses/pages/CourseDetail.Page.tsx", [
+        route("general", "./features/courses/components/CourseGeneral.tsx"),
+        route("materials", "./features/courses/components/CourseMaterials.tsx"),
+        route("forums", "./features/courses/components/CourseForums.tsx"),
+        route("announcements", "./features/courses/components/CourseAnnouncements.tsx"),
+        route("students", "./features/courses/components/CourseStudents.tsx"),
+    ]),
 
     // Users
     route("/users", "./features/users/pages/UsersPage.tsx"),
