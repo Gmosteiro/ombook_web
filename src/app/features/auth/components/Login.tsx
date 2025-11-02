@@ -13,13 +13,12 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
-    // Check if the user is already logged in
     const userId = await getUserId(request);
     if (userId) {
         return redirect("/");
     }
     return null;
-}
+};
 
 export async function action({ request }: Route.ActionArgs) {
     let response: Response;
@@ -35,9 +34,6 @@ export async function action({ request }: Route.ActionArgs) {
         const reqBody: LoginRequest = {
             correo: email,
             contrasena: password,
-            infoCliente: {
-                origen: 'web'
-            }
         };
 
         const res = await fetch(`${API_URL}/auth/login`, {
@@ -78,11 +74,20 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     throw response;
-}
+};
 
 export default function Login({ actionData }: Route.ComponentProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    let error = actionData?.error;
+    if (typeof error === "string") {
+        try {
+            const parsed = JSON.parse(error);
+            error = parsed.message || error;
+        } catch { }
+    }
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark font-display">
             <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8">
@@ -91,7 +96,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
                     <p className="text-slate-600 dark:text-slate-400">Bienvenido de nuevo a tu cuenta.</p>
                 </div>
                 <Form method="post" className="space-y-6 px-2">
-                    {actionData?.error && <div className="text-red-500 text-sm mb-4">{actionData.error}</div>}
+                    {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
                     <div className="space-y-2">
                         <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">Correo electrónico</label>
                         <input
@@ -133,4 +138,4 @@ export default function Login({ actionData }: Route.ComponentProps) {
             </div>
         </div>
     );
-}
+};

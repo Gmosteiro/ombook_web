@@ -6,7 +6,9 @@ type Links = {
 
 export const getNavbarLinks = (role: UserRole | undefined): Links[] | [] => {
     try {
-        if (!role) throw new Error("Role is undefined");
+        if (!role) {
+            return [];
+        }
 
         switch (role) {
             case UserRole.ADMINISTRADOR:
