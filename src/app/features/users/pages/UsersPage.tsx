@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
 import { useUsers } from "../hooks/useUsers";
@@ -36,6 +36,7 @@ export default function UsersPage() {
   const usersPerPage = 15;
 
   const { users: loadedUsers, isLoading: loading, error, loadUsers } = useUsers();
+  const navigate = useNavigate();
 
   // Cargar usuarios al montar el componente
   useEffect(() => {
@@ -138,8 +139,8 @@ export default function UsersPage() {
         <h1 className="text-2xl font-semibold">Gestión de Usuarios</h1>
         <UserActionsMenu
           options={[
-            { label: "Crear Usuario", onClick: () => { window.location.href = '/users/create'; } },
-            { label: "Eliminar Usuarios", onClick: () => { window.location.href = '/users/delete'; } }
+            { label: "Crear Usuario", onClick: () => navigate('/users/create') },
+            { label: "Eliminar Usuarios", onClick: () => navigate('/users/delete') }
           ]}
         />
       </div>
