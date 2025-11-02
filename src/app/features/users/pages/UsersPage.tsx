@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
 import { useUsers } from "../hooks/useUsers";
+import UserActionsMenu from "../../common/components/UserActionsMenu";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
 
@@ -135,37 +136,12 @@ export default function UsersPage() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Gestión de Usuarios</h1>
-        <div className="relative" ref={actionsRef}>
-          <button
-            onClick={() => setActionsOpen((open) => !open)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-          >
-            Acciones {/*TODO Mover a componente reutilizable, y pointer*/}
-          </button>
-          <div
-            className={`absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 transition ${actionsOpen ? "block" : "hidden"
-              }`}
-          >
-            <button
-              onClick={() => {
-                window.location.href = '/users/create';
-                setActionsOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
-            >
-              Crear Usuario
-            </button>
-            <button
-              onClick={() => {
-                window.location.href = '/users/delete';
-                setActionsOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
-            >
-              Eliminar Usuarios
-            </button>
-          </div>
-        </div>
+        <UserActionsMenu
+          options={[
+            { label: "Crear Usuario", onClick: () => { window.location.href = '/users/create'; } },
+            { label: "Eliminar Usuarios", onClick: () => { window.location.href = '/users/delete'; } }
+          ]}
+        />
       </div>
 
       {/* Filtros */}

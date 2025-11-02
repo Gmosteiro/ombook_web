@@ -6,6 +6,7 @@ import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
 import { Course } from "../types/types";
 import { useCoursesApi } from "../hooks/useCoursesApi";
+import UserActionsMenu from "../../common/components/UserActionsMenu";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]);
 
@@ -201,6 +202,12 @@ export default function CoursesPage() {
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
+      <UserActionsMenu
+        options={[
+          { label: "Crear Curso", onClick: () => { window.location.href = '/courses/create'; } },
+          { label: "Eliminar Masivo", onClick: () => { window.location.href = '/courses/delete-bulk'; } }
+        ]}
+      />
     </div>
   );
 }

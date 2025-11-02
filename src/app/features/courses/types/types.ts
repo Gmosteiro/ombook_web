@@ -16,6 +16,8 @@ export type CreateCourseData = components["schemas"]["CursoCreateRequest"];
 export type Usuario = components["schemas"]["Usuario"];
 export type ProfesorResponsable = components["schemas"]["DocenteResumen"];
 
+export type UsuarioVinculado = components["schemas"]["UsuarioVinculadoResponse"];
+
 // Respuesta de creación de curso (auxiliar)
 export interface CreateCourseResponse {
     success: boolean;
