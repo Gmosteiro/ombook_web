@@ -4,7 +4,12 @@ import { Course } from "../types/types";
 type Ctx = { course: Course };
 
 export default function CourseGeneral() {
-  const { course } = useOutletContext<Ctx>();
+  const context = useOutletContext<Ctx>();
+  const course = context?.course;
+
+  if (!course) {
+    return <div className="text-center text-gray-500">Cargando información del curso...</div>;
+  }
 
   return (
     <div>
