@@ -2,6 +2,7 @@ import { useState } from "react";
 import ConfirmationDialog from "../../common/components/ui/ConfirmationDialog";
 import { useCoursesApi } from "../hooks/useCoursesApi";
 import { Course } from "../types/types";
+import { useNavigate } from "react-router";
 
 interface CourseCardProps {
   course: Course;
@@ -11,6 +12,7 @@ interface CourseCardProps {
 export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { deleteCourse, isLoading: isDeleting, error } = useCoursesApi();
+  const navigate = useNavigate();
 
   const handleDelete = async () => {
     const success = await deleteCourse(course.id);
@@ -97,8 +99,8 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
 
           <div className="flex gap-2">
             <button
-              className="flex-1 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              onClick={() => console.log("Ver curso", course.id)}
+              className="flex-1 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm"
+              onClick={() => navigate(`/courses/${course.id}/general`)}
             >
               Ver Detalles
             </button>
