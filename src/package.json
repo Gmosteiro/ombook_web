@@ -12,6 +12,7 @@
     "gen:types": "dotenv -e .env -- sh -c 'openapi-typescript \"$VITE_API_URL/v3/api-docs\" -o types/openapi.ts'"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@react-router/node": "^7.7.1",
     "@react-router/serve": "^7.7.1",
     "isbot": "^5.1.27",

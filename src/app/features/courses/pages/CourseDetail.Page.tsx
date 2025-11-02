@@ -20,7 +20,6 @@ export default function CourseDetailPage() {
 
     const fetchCourse = async () => {
       try {
-        // intento a API real
         const res = await fetch(`${API_URL}/courses/${id}`);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
@@ -29,7 +28,6 @@ export default function CourseDetailPage() {
         setCourse(data);
       } catch (err) {
         console.warn("Error al obtener curso desde API, usando mock. Detalle:", err);
-        // Fallback: mock local para desarrollo / pruebas
         const mock: Course = {
           id: id,
           nombre: `Curso ${id}`,
@@ -38,7 +36,6 @@ export default function CourseDetailPage() {
           periodoAcademico: "2025 - 1",
           estadoCurso: "ACTIVO",
           docentesAsignados: [{ id: "d1", nombre: "Dra. Ejemplo" }],
-          // añade otros campos que tu type Course requiera...
         } as Course;
         setCourse(mock);
       } finally {
@@ -62,11 +59,33 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <CourseSidebar course={course} />
-      <main className="flex-1 p-6">
-        <CourseContentLayout course={course} />
-      </main>
+    <div className="min-h-screen bg-[#f6f7f9]">
+      {/* Banner ocupa todo el ancho */}
+      <div className="w-full h-56 bg-gray-200 flex items-end justify-start relative">
+        <img
+          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"
+          alt="Banner curso"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: "center" }}
+        />
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="relative z-10 p-10">
+          <h1 className="text-5xl font-bold text-white drop-shadow-lg">
+            {course.nombre || "Curso"}
+          </h1>
+        </div>
+      </div>
+      {/* Contenido principal con sidebar */}
+      <div className="flex flex-row px-8 py-10">
+        <CourseSidebar course={course} />
+        <main className="flex-1 flex flex-col">
+          <div className="ml-8 mr-8 ">
+            <div className="bg-white rounded-xl shadow p-8">
+              <CourseContentLayout course={course} />
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
