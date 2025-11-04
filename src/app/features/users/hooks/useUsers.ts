@@ -90,7 +90,7 @@ export const useEstudiantes = () => {
         if (!users || !Array.isArray(users)) return [];
         // Tipado correcto:
         return (users as EstudianteListadoResponse[]).map((usuario, idx) => ({
-            id: usuario.id,
+            id: usuario.id ?? Math.floor(Math.random() * 1000000), // Fallback en caso de que no haya ID //TODO
             nombre: usuario.nombre ?? "",
             apellido: usuario.apellido ?? "",
             correo: usuario.correo ?? "",
