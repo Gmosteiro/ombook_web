@@ -1,4 +1,4 @@
-import { useLoaderData, useOutletContext, useSearchParams } from "react-router";
+import { useLoaderData, useOutletContext, useSearchParams, useNavigate } from "react-router";
 import { Course, UsuarioVinculado } from "../types/types";
 import { apiFetch } from "../../auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
@@ -35,6 +35,8 @@ export default function CourseStudents() {
   const context = useOutletContext<Ctx>();
   const course = context?.course;
   const users = useLoaderData() as UsuarioVinculado[];
+  const navigate = useNavigate();
+
 
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
@@ -56,8 +58,7 @@ export default function CourseStudents() {
     {
       label: "Matricular usuarios",
       onClick: () => {
-        // Aquí puedes abrir un modal, navegar o lo que necesites
-        alert("Matricular usuarios");
+        navigate(`/courses/${course.id}/enroll`);
       },
     },
     {

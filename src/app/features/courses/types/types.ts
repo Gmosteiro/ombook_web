@@ -26,6 +26,20 @@ export interface CreateCourseResponse {
     data?: Course;
 }
 
+export type EnrollMasivaUserData = {
+    csvFile: File;
+    cursoId: number;
+};
+
+export type EnrollUserData = {
+    estudianteId: number;
+    cursoId: number;
+};
+
+export type EnrollUserResponse = {
+    [key: string]: string;
+};
+
 // Respuesta de eliminación de curso (auxiliar)
 export interface DeleteCourseResponse {
     success: boolean;

@@ -21,6 +21,7 @@ const routes: RouteConfig = [
         route("forums", "./features/courses/components/CourseForums.tsx"),
         route("announcements", "./features/courses/components/CourseAnnouncements.tsx"),
         route("students", "./features/courses/components/CourseStudents.tsx"),
+        route("enroll", "./features/courses/pages/CourseEnrollPage.tsx"),
     ]),
 
     // Users

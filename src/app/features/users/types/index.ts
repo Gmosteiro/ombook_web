@@ -29,6 +29,10 @@ export type UserFormValues = {
     confirmarContrasena: string; // Campo adicional solo para el formulario
 };
 
+
+
+
+
 // Tipo para crear usuario (igual que AltaUsuarioRequest pero con UserRole tipado)
 export type CreateUserData = {
     nombre: string;

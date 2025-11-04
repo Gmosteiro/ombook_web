@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/anuncios/{anuncioId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["actualizar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/usuarios/alta": {
         parameters: {
             query?: never;
@@ -31,6 +47,23 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["cargaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/paginas/crear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Crea una nueva página temática para un curso (solo profesor responsable) */
+        post: operations["crearPagina"];
         delete?: never;
         options?: never;
         head?: never;
@@ -97,6 +130,56 @@ export interface paths {
         put?: never;
         /** Matriculación masiva por CSV */
         post: operations["altaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dispositivos/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["registrarToken"];
+        delete: operations["desactivarToken"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dispositivos/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["testPush"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/recursos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista recursos */
+        get: operations["listar"];
+        put?: never;
+        /** Sube un archivo al curso */
+        post: operations["subir"];
         delete?: never;
         options?: never;
         head?: never;
@@ -184,32 +267,16 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/dispositivos/token": {
+    "/anuncios/cursos/{cursoId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["listarPorCurso"];
         put?: never;
-        post: operations["registrarToken"];
-        delete: operations["desactivarToken"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/dispositivos/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["testPush"];
+        post: operations["crear"];
         delete?: never;
         options?: never;
         head?: never;
@@ -258,6 +325,56 @@ export interface paths {
         };
         /** Lista todos los usuarios si es administrador */
         get: operations["listarUsuarios"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/usuarios/estudiantes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listarEstudiantes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/paginas/listar/{cursoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista todas las páginas visibles de un curso según el rol del usuario */
+        get: operations["listarPaginas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/recursos/{recursoId}/descargar-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Genera URL firmada para descarga */
+        get: operations["descargarUrl"];
         put?: never;
         post?: never;
         delete?: never;
@@ -333,10 +450,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cursos/{cursoId}/recursos/{recursoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Elimina un recurso del curso */
+        delete: operations["eliminar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/anuncios/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["eliminar_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AnuncioUpdateRequest: {
+            titulo?: string;
+            contenido?: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+        };
         AltaUsuarioRequest: {
             nombre: string;
             apellido: string;
@@ -363,6 +519,26 @@ export interface components {
             errores?: number;
             detalleErrores?: components["schemas"]["ErrorLineaCSV"][];
         };
+        PaginaCreacionRequest: {
+            /** Format: int64 */
+            cursoId?: number;
+            titulo?: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+        };
+        PaginaResponse: {
+            /** Format: int64 */
+            id?: number;
+            titulo?: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+            /** Format: date-time */
+            fechaCreacion?: string;
+            /** Format: int64 */
+            cursoId?: number;
+            /** Format: int64 */
+            creadorId?: number;
+        };
         DesmatricularRequest: {
             /** Format: int64 */
             estudianteId?: number;
@@ -374,6 +550,35 @@ export interface components {
             estudianteId?: number;
             /** Format: int64 */
             cursoId?: number;
+        };
+        RegistrarTokenRequest: {
+            token?: string;
+            plataforma?: string;
+        };
+        RecursoSubidaForm: {
+            /** @enum {string} */
+            ownerRecurso: "PAGINA" | "TAREA" | "ENTREGA";
+            /** Format: int64 */
+            ownerId: number;
+            nombre: string;
+            /** Format: binary */
+            archivo: string;
+        };
+        RecursoSubidaResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombreOriginal?: string;
+            /** @enum {string} */
+            ownerRecurso?: "PAGINA" | "TAREA" | "ENTREGA";
+            /** Format: int64 */
+            ownerId?: number;
+            contentType?: string;
+            /** Format: int64 */
+            sizeBytes?: number;
+            /** Format: date-time */
+            fechaSubida?: string;
+            /** Format: int64 */
+            subidoPorUsuarioId?: number;
         };
         CursoCreateRequest: {
             nombre: string;
@@ -430,9 +635,18 @@ export interface components {
             exp?: number;
             rol?: string;
         };
-        RegistrarTokenRequest: {
-            token?: string;
-            plataforma?: string;
+        AnuncioCreateRequest: {
+            titulo: string;
+            contenido: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+        };
+        AnuncioResponse: {
+            /** Format: int64 */
+            id?: number;
+            titulo?: string;
+            contenido?: string;
+            fechaCreacion?: string;
         };
         UsuarioListadoResponse: {
             /** Format: int64 */
@@ -454,6 +668,33 @@ export interface components {
             intentosFallidos?: number;
             /** @enum {string} */
             rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+        };
+        EstudianteListadoResponse: {
+            nombre?: string;
+            apellido?: string;
+            cedula?: string;
+            correo?: string;
+        };
+        RecursoListadoResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombreOriginal?: string;
+            /** @enum {string} */
+            ownerRecurso?: "PAGINA" | "TAREA" | "ENTREGA";
+            /** Format: int64 */
+            ownerId?: number;
+            contentType?: string;
+            /** Format: int64 */
+            sizeBytes?: number;
+            /** Format: date-time */
+            fechaSubida?: string;
+            /** Format: int64 */
+            subidoPorUsuarioId?: number;
+        };
+        RecursoDescargaResponse: {
+            url?: string;
+            /** Format: int64 */
+            expiraEnSegundos?: number;
         };
         UsuarioVinculadoResponse: {
             /** Format: int64 */
@@ -495,6 +736,30 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    actualizar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                anuncioId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnuncioUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     altaIndividual: {
         parameters: {
             query?: never;
@@ -542,6 +807,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
+    crearPagina: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaginaCreacionRequest"];
+            };
+        };
+        responses: {
+            /** @description Página creada correctamente */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaResponse"];
                 };
             };
         };
@@ -652,6 +941,125 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
+    registrarToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistrarTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    desactivarToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesactivarTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    testPush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    listar: {
+        parameters: {
+            query?: {
+                ownerRecurso?: "PAGINA" | "TAREA" | "ENTREGA";
+                ownerId?: number;
+            };
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecursoListadoResponse"][];
+                };
+            };
+        };
+    };
+    subir: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["RecursoSubidaForm"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecursoSubidaResponse"];
                 };
             };
         };
@@ -780,59 +1188,13 @@ export interface operations {
             };
         };
     };
-    registrarToken: {
+    listarPorCurso: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegistrarTokenRequest"];
+            path: {
+                cursoId: number;
             };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": Record<string, never>;
-                };
-            };
-        };
-    };
-    desactivarToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DesactivarTokenRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": Record<string, never>;
-                };
-            };
-        };
-    };
-    testPush: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -843,7 +1205,33 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": Record<string, never>;
+                    "*/*": components["schemas"]["AnuncioResponse"][];
+                };
+            };
+        };
+    };
+    crear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnuncioCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AnuncioResponse"];
                 };
             };
         };
@@ -906,6 +1294,71 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UsuarioListadoResponse"][];
+                };
+            };
+        };
+    };
+    listarEstudiantes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EstudianteListadoResponse"][];
+                };
+            };
+        };
+    };
+    listarPaginas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaResponse"][];
+                };
+            };
+        };
+    };
+    descargarUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                recursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecursoDescargaResponse"];
                 };
             };
         };
@@ -975,6 +1428,47 @@ export interface operations {
         };
     };
     eliminarCurso: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    eliminar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                recursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    eliminar_1: {
         parameters: {
             query?: never;
             header?: never;

@@ -19,6 +19,9 @@ export async function action({ request }: ActionFunctionArgs) {
                 case 'profesores':
                     endpoint = "/usuarios/profesores";
                     break;
+                case 'estudiantes':
+                    endpoint = "/usuarios/estudiantes"; //TODO cambiar cuando tengamos el endpoint correcto
+                    break;
                 case 'listar':
                     endpoint = "/usuarios/listar";
                     break;

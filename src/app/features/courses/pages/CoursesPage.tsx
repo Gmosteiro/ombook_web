@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { FilterBar } from "../components/FilterBar";
 import { CourseCard } from "../components/CourseCard";
 import { Pagination } from "../components/Pagination";
@@ -7,9 +7,9 @@ import { UserRole } from "../../auth/types";
 import { Course } from "../types/types";
 import { useCoursesApi } from "../hooks/useCoursesApi";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
+import { useNavigate } from "react-router";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]);
-
 
 export interface Filters {
   search: string;
@@ -29,6 +29,7 @@ export default function CoursesPage() {
   const coursesPerPage = 9;
 
   const { loadCourses, isLoading: loading, error } = useCoursesApi();
+  const navigate = useNavigate();
 
   // Cargar cursos al montar el componente
   useEffect(() => {
@@ -72,27 +73,7 @@ export default function CoursesPage() {
   // Calcular paginación
   const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
   const startIndex = (page - 1) * coursesPerPage;
-
   const paginated = filteredCourses.slice(startIndex, startIndex + coursesPerPage);
-
-  // Estado para el menú de acciones
-  const [actionsOpen, setActionsOpen] = useState(false);
-  const actionsRef = useRef<HTMLDivElement>(null);
-
-  // Cerrar el menú si se hace click fuera
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
-        setActionsOpen(false);
-      }
-    }
-    if (actionsOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [actionsOpen]);
 
   if (loading) {
     return (
@@ -128,37 +109,12 @@ export default function CoursesPage() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Cursos</h1>
-        <div className="relative" ref={actionsRef}>
-          <button
-            onClick={() => setActionsOpen((open) => !open)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-          >
-            Acciones
-          </button>
-          <div
-            className={`absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 transition ${actionsOpen ? "block" : "hidden"
-              }`}
-          >
-            <button
-              onClick={() => {
-                window.location.href = '/courses/create';
-                setActionsOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
-            >
-              Crear Curso
-            </button>
-            <button
-              onClick={() => {
-                window.location.href = '/courses/delete-bulk';
-                setActionsOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
-            >
-              Eliminar Masivo
-            </button>
-          </div>
-        </div>
+        <UserActionsMenu
+          options={[
+            { label: "Crear Curso", onClick: () => navigate('/courses/create') },
+            { label: "Eliminar Masivo", onClick: () => navigate('/courses/delete-bulk') }
+          ]}
+        />
       </div>
 
       <FilterBar filters={filters} setFilters={setFilters} />
@@ -202,12 +158,7 @@ export default function CoursesPage() {
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
-      <UserActionsMenu
-        options={[
-          { label: "Crear Curso", onClick: () => { window.location.href = '/courses/create'; } },
-          { label: "Eliminar Masivo", onClick: () => { window.location.href = '/courses/delete-bulk'; } }
-        ]}
-      />
+
     </div>
   );
 }
