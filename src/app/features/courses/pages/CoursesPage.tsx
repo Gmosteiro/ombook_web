@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { FilterBar } from "../components/FilterBar";
-import { CourseCard } from "../components/CourseCard";
-import { Pagination } from "../components/Pagination";
+import { FilterBar } from "../components/general/FilterBar";
+import { CourseCard } from "../components/general/CourseCard";
+import { Pagination } from "../components/general/Pagination";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
 import { Course } from "../types/types";

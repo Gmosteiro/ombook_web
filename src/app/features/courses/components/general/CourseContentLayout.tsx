@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { Course } from "../types/types";
+import { Course } from "../../types/types";
 
 interface Props {
   course: Course;

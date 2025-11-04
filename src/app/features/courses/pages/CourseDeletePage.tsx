@@ -2,7 +2,7 @@ import { ActionFunctionArgs, useFetcher } from "react-router";
 import { getValidJWTToken } from "~/services/session.server";
 import { UserRole } from "~/features/auth/types";
 import EntityDelete from "../../common/components/EntityDelete";
-import CourseSearchList from "../components/CourseSearchList";
+import CourseSearchList from "../components/general/CourseSearchList";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { API_URL } from "../../common/utils/Utils";
 import { DeleteCourseResponse } from "../types/types";

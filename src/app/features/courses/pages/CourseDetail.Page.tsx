@@ -1,6 +1,6 @@
 import { useLoaderData } from "react-router";
 import CourseSidebar from "../components/CourseSidebar";
-import CourseContentLayout from "../components/CourseContentLayout";
+import CourseContentLayout from "../components/general/CourseContentLayout";
 import { Course } from "../types/types";
 import { apiFetch } from "../../auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";

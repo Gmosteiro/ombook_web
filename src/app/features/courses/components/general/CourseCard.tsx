@@ -1,7 +1,7 @@
 import { useState } from "react";
-import ConfirmationDialog from "../../common/components/ui/ConfirmationDialog";
-import { useCoursesApi } from "../hooks/useCoursesApi";
-import { Course } from "../types/types";
+import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
+import { useCoursesApi } from "../../hooks/useCoursesApi";
+import { Course } from "../../types/types";
 import { useNavigate } from "react-router";
 
 interface CourseCardProps {

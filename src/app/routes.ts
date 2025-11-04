@@ -16,12 +16,14 @@ const routes: RouteConfig = [
 
     // Course Detail
     route("/courses/:id", "./features/courses/pages/CourseDetail.Page.tsx", [
-        route("general", "./features/courses/components/CourseGeneral.tsx"),
+        route("general", "./features/courses/components/general/CourseGeneral.tsx"),
         route("materials", "./features/courses/components/CourseMaterials.tsx"),
         route("forums", "./features/courses/components/CourseForums.tsx"),
         route("announcements", "./features/courses/components/CourseAnnouncements.tsx"),
         route("students", "./features/courses/components/CourseStudents.tsx"),
         route("enroll", "./features/courses/pages/CourseEnrollPage.tsx"),
+        route("unenroll", "./features/courses/pages/CourseUnenrollPage.tsx"),
+
     ]),
 
     // Users

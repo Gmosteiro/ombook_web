@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useCoursesApi } from "../hooks/useCoursesApi";
-import { Course } from "../types/types";
+import { useCoursesApi } from "../../hooks/useCoursesApi";
+import { Course } from "../../types/types";
 
 interface CourseSearchListProps {
     onSelect: (courseId: number) => void;

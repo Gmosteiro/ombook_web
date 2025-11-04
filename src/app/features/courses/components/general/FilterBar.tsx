@@ -1,4 +1,4 @@
-import { Filters } from "../pages/CoursesPage";
+import { Filters } from "../../pages/CoursesPage";
 
 interface FilterBarProps {
   filters: Filters;

@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router";
-import { Course } from "../types/types";
+import { Course } from "../../types/types";
 
 type Ctx = { course: Course };
 
