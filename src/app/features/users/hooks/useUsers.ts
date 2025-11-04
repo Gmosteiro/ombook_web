@@ -1,13 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useFetcher } from "react-router";
-import { ProfesorResponsable, UsuarioListadoResponse, Usuario } from "../types";
-import type { components } from "/Users/gaston/Documents/Personal Workspace/ombook_web/src/types/openapi";
-
-type EstudianteListadoResponse = components["schemas"]["EstudianteListadoResponse"];
+import { ProfesorResponsable, UsuarioListadoResponse, EstudianteListadoResponse, Usuario } from "../types";
 
 interface UsersApiResponse {
     success: boolean;
-    data?: ProfesorResponsable[] | UsuarioListadoResponse[] | Usuario | EstudianteListadoResponse[];
+    data?: ProfesorResponsable[] | UsuarioListadoResponse[] | Usuario;
     error?: string;
 }
 
@@ -18,9 +15,7 @@ export type UserQueryType =
     | { type: 'byId', id: number };
 
 export const useUsers = () => {
-    const [users, setUsers] = useState<
-        ProfesorResponsable[] | UsuarioListadoResponse[] | Usuario | EstudianteListadoResponse[] | null
-    >(null);
+    const [users, setUsers] = useState<ProfesorResponsable[] | UsuarioListadoResponse[] | Usuario | null>(null);
     const [error, setError] = useState<string | null>(null);
     const fetcher = useFetcher<UsersApiResponse>();
 
@@ -60,6 +55,30 @@ export const useUsers = () => {
     };
 };
 
+export const useProfesores = () => {
+    const { users, isLoading, error, loadUsers } = useUsers();
+
+    const loadProfesores = () => {
+        loadUsers({ type: 'profesores' });
+    };
+
+    const profesores = useMemo(() => {
+        if (!users || !Array.isArray(users)) return [];
+
+        return (users as any[]).map(usuario => ({
+            id: usuario.id,
+            nombreCompleto: `${usuario.nombre} ${usuario.apellido}`
+        }));
+    }, [users]);
+
+    return {
+        profesores,
+        isLoading,
+        error,
+        loadProfesores,
+    };
+};
+
 export const useEstudiantes = () => {
     const { users, isLoading, error, loadUsers } = useUsers();
 
@@ -71,7 +90,7 @@ export const useEstudiantes = () => {
         if (!users || !Array.isArray(users)) return [];
         // Tipado correcto:
         return (users as EstudianteListadoResponse[]).map((usuario, idx) => ({
-            id: usuario.cedula ?? usuario.correo ?? idx, // Si no hay id, usa cedula/correo/idx
+            id: usuario.id,
             nombre: usuario.nombre ?? "",
             apellido: usuario.apellido ?? "",
             correo: usuario.correo ?? "",

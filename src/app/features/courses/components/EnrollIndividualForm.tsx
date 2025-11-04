@@ -20,10 +20,6 @@ const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitt
             onSubmit({ usuarioId: selected.id });
         }
     };
-    if (estudiantes.length > 0) {
-        debugger
-    }
-
     return (
         <>
             <form onSubmit={handleSearch} className="mb-4">

@@ -99,6 +99,8 @@ export type UserListResponse = {
 };
 
 
-export type ProfesorResponsable = components["schemas"]["ProfesorResponsable"];
+export type ProfesorResponsable = components["schemas"]["UsuarioListadoResponse"];
 export type UsuarioListadoResponse = components["schemas"]["UsuarioListadoResponse"];
 export type Usuario = components["schemas"]["Usuario"];
+
+export type EstudianteListadoResponse = components["schemas"]["EstudianteListadoResponse"];

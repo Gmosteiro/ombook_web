@@ -1,47 +1,37 @@
-import { ActionFunctionArgs, } from "react-router";
+import { ActionFunctionArgs, useOutletContext, useFetcher } from "react-router";
 import { UserRole } from "~/features/auth/types";
-import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
-import { EnrollUserResponse } from "../types/types";
+import { EnrollUserResponse, EnrollMasivaUserData, Course } from "../types/types";
 import EntityCreate from "../../common/components/EntityCreate";
 import EnrollIndividualForm from "../components/EnrollIndividualForm";
-import { useOutletContext } from "react-router";
-import { Course } from "../types/types";
-import { useFetcher } from "react-router";
 import { apiFetch } from "~/features/auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
+import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
+import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 
 export const loader = requireRoleLoader([UserRole.PROFESOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
     const formData = await request.formData();
-    const intent = formData.get("intent") as string;
+    const usuarioId = formData.get("usuarioId") as string;
+    const cursoId = formData.get("cursoId") as string;
 
-    if (intent === "enrollUser") {
+    const response = await apiFetch("/matricula/alta", {
+        method: "POST",
+        body: JSON.stringify({
+            estudianteId: Number(usuarioId),
+            cursoId: Number(cursoId)
+        }),
+        secure: true,
+        jwtToken: await getValidJWTToken(request)
+    })
 
-        const usuarioId = formData.get("usuarioId") as string;
-        const cursoId = formData.get("cursoId") as string;
-        console.log("Enroll user", { usuarioId, cursoId });
-        const response = await apiFetch("/matricula/alta", {
-            method: "POST",
-            body: JSON.stringify({
-                estudianteId: Number(usuarioId),
-                cursoId: Number(cursoId)
-            }),
-            secure: true,
-            jwtToken: await getValidJWTToken(request)
-        })
-
-        if (response.ok) {
-            return { success: "true" };
-        } else {
-            const errorData = await response.json();
-            console.log("Error enrolling user:", errorData);
-            return { success: "false", error: errorData.message || "Error al matricular usuario" };
-        }
-
+    if (response.ok) {
+        return { success: "true" };
+    } else {
+        const errorData = await response.json();
+        console.log("Error enrolling user:", errorData);
+        return { success: "false", error: errorData.message || "Error al matricular usuario" };
     }
-
-    return { success: "false", error: "Intent no reconocido" };
 }
 
 type Ctx = { course: Course };
@@ -50,20 +40,37 @@ export default function UserEnrollPage() {
     const context = useOutletContext<Ctx>();
     const course = context?.course;
     const fetcher = useFetcher<EnrollUserResponse>();
+    const importFetcher = useFetcher<EnrollMasivaUserData>();
+
+
+    const enrollUserImportHandler = createCsvImportHandler({
+        allowedRoles: [UserRole.PROFESOR],
+        backendEndpoint: "/matricula/alta/masiva",
+        successMessage: "Estudiantes Matriculados Correctamente",
+    });
 
     const handleEnrollUser = (data: { usuarioId: number }) => {
         if (!course?.id) return;
 
         const formData = new FormData();
-        formData.append("intent", "enrollUser");
         formData.append("usuarioId", data.usuarioId.toString());
         formData.append("cursoId", course.id.toString());
 
         fetcher.submit(formData, { method: "POST" });
     };
 
-    const handleImportUsers = async (data: any) => {
+    const handleImportUsers = async (file: File) => {
+        try {
+            const { payload, action } = await enrollUserImportHandler(file);
 
+            importFetcher.submit(payload, {
+                method: "POST",
+                action,
+                encType: "application/json"
+            });
+        } catch (error) {
+            console.error('Error preparing import:', error);
+        }
     };
 
     const isLoading = fetcher.state === "submitting";
