@@ -42,10 +42,9 @@ export default function UserEnrollPage() {
     const fetcher = useFetcher<EnrollUserResponse>();
     const importFetcher = useFetcher<EnrollMasivaUserData>();
 
-
     const enrollUserImportHandler = createCsvImportHandler({
         allowedRoles: [UserRole.PROFESOR],
-        backendEndpoint: "/matricula/alta/masiva",
+        backendEndpoint: `/matricula/alta/masiva?cursoId=${course.id}`,
         successMessage: "Estudiantes Matriculados Correctamente",
     });
 
@@ -72,10 +71,11 @@ export default function UserEnrollPage() {
             console.error('Error preparing import:', error);
         }
     };
+    const importResult: any = importFetcher.data;
 
     const isLoading = fetcher.state === "submitting";
-    const error = fetcher.data?.error || "";
-    const success = fetcher.data?.success === "true" ? "Usuario matriculado correctamente" : "";
+    const error = importResult && !importResult.success ? importResult.error || "Error al matricular usuarios" : "";
+    const success = importResult && importResult.success ? "Usuario matriculado correctamente" : "";
 
     return (
         <div className="max-w-3xl mx-auto">
