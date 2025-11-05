@@ -33,7 +33,7 @@ export default function UsersPage() {
     estado: ''
   });
   const [page, setPage] = useState(1);
-  const usersPerPage = 15;
+  const usersPerPage = 10;
 
   const { users: loadedUsers, isLoading: loading, error, loadUsers } = useUsers();
   const navigate = useNavigate();
