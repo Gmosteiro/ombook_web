@@ -10,7 +10,6 @@ export default function CourseGeneral() {
   if (!course) {
     return <div className="text-center text-gray-500">Cargando información del curso...</div>;
   }
-
   return (
     <div>
       <h1 className="text-2xl font-semibold mb-4">Información General</h1>

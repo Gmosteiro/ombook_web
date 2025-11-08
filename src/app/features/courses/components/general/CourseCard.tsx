@@ -48,7 +48,6 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
     return images[Math.floor(Math.random() * images.length)];
   }
 
-
   return (
     <>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
