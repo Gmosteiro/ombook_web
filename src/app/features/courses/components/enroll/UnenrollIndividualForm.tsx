@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import type { IndividualFormProps } from "../../common/components/EntityCreate";
-import type { UsuarioVinculado } from "../types/types";
+import type { IndividualFormProps } from "../../../common/components/EntityCreate";
+import type { UsuarioVinculado } from "../../types/types";
 import { useEstudiantes } from "~/features/users/hooks/useUsers";
 
-const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitting }) => {
+const UnenrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitting }) => {
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<UsuarioVinculado | null>(null);
-    const { estudiantes, error, loadEstudiantes } = useEstudiantes();
+
+    const { estudiantes, error, loadEstudiantes } = useEstudiantes(); //TODO: cambiar a endpoint de estudiantes dentro de curso
 
     // Buscar estudiantes al enviar el formulario
     const handleSearch = (e: React.FormEvent) => {
@@ -20,6 +21,7 @@ const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitt
             onSubmit({ usuarioId: selected.id });
         }
     };
+
     return (
         <>
             <form onSubmit={handleSearch} className="mb-4">
@@ -75,11 +77,11 @@ const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitt
                     className={`min-w-[200px] bg-blue-600 text-white py-2 px-4 rounded font-semibold
                         ${submitting || !selected ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}
                 >
-                    {submitting ? "Matriculando..." : "Matricular usuario"}
+                    {submitting ? "Desmatriculando..." : "Desmatricular usuario"}
                 </button>
             </div>
         </>
     );
 };
 
-export default EnrollIndividualForm;
+export default UnenrollIndividualForm;

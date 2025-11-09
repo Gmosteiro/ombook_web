@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { CreateCourseData } from "../types/types";
-import { useProfesores } from "../../users/hooks/useUsers";
-import { ProfesorResponsable } from "../../users/types";
+import { CreateCourseData } from "../../types/types";
+import { useProfesores } from "../../../users/hooks/useUsers";
+import { ProfesorResponsable } from "../../../users/types";
 
 interface CourseFormProps {
     onSubmit: (data: CreateCourseData) => void;

@@ -2,7 +2,7 @@ import { ActionFunctionArgs, useOutletContext, useFetcher } from "react-router";
 import { UserRole } from "~/features/auth/types";
 import { EnrollUserResponse, EnrollMasivaUserData, Course } from "../types/types";
 import EntityCreate from "../../common/components/EntityCreate";
-import EnrollIndividualForm from "../components/enroll/EnrollIndividualForm";
+import UnenrollIndividualForm from "../components/enroll/UnenrollIndividualForm";
 import { apiFetch } from "~/features/auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
@@ -15,7 +15,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<EnrollUse
     const usuarioId = formData.get("usuarioId") as string;
     const cursoId = formData.get("cursoId") as string;
 
-    const response = await apiFetch("/matricula/alta", {
+    const response = await apiFetch("/matricula/baja", {
         method: "POST",
         body: JSON.stringify({
             estudianteId: Number(usuarioId),
@@ -29,8 +29,8 @@ export async function action({ request }: ActionFunctionArgs): Promise<EnrollUse
         return { success: "true" };
     } else {
         const errorData = await response.json();
-        console.log("Error enrolling user:", errorData);
-        return { success: "false", error: errorData.message || "Error al matricular usuario" };
+        console.log("Error un-enrolling user:", errorData);
+        return { success: "false", error: errorData.message || "Error al desmatricular usuario" };
     }
 }
 
@@ -42,13 +42,13 @@ export default function UserEnrollPage() {
     const fetcher = useFetcher<EnrollUserResponse>();
     const importFetcher = useFetcher<EnrollMasivaUserData>();
 
-    const enrollUserImportHandler = createCsvImportHandler({
+    const unEnrollUserImportHandler = createCsvImportHandler({
         allowedRoles: [UserRole.PROFESOR],
-        backendEndpoint: `/matricula/alta/masiva?cursoId=${course.id}`,
-        successMessage: "Estudiantes Matriculados Correctamente",
+        backendEndpoint: `/matricula/baja/masiva?cursoId=${course.id}`,
+        successMessage: "Estudiantes Desmatriculados Correctamente",
     });
 
-    const handleEnrollUser = (data: { usuarioId: number }) => {
+    const handleUnenrollUser = (data: { usuarioId: number }) => {
         if (!course?.id) return;
 
         const formData = new FormData();
@@ -60,7 +60,7 @@ export default function UserEnrollPage() {
 
     const handleImportUsers = async (file: File) => {
         try {
-            const { payload, action } = await enrollUserImportHandler(file);
+            const { payload, action } = await unEnrollUserImportHandler(file);
 
             importFetcher.submit(payload, {
                 method: "POST",
@@ -74,19 +74,19 @@ export default function UserEnrollPage() {
     const importResult: any = importFetcher.data;
 
     const isLoading = fetcher.state === "submitting";
-    const error = importResult && !importResult.success ? importResult.error || "Error al matricular usuarios" : "";
-    const success = importResult && importResult.success ? "Usuario matriculado correctamente" : "";
+    const error = importResult && !importResult.success ? importResult.error || "Error al desmatricular usuarios" : "";
+    const success = importResult && importResult.success ? "Usuario desmatriculado correctamente" : "";
 
     return (
         <div className="max-w-3xl mx-auto">
             <EntityCreate
                 entityName="Usuario"
-                title="Matricular a un usuario"
-                IndividualForm={EnrollIndividualForm}
-                addSingle={handleEnrollUser}
+                title="Desmatricular a un usuario"
+                IndividualForm={UnenrollIndividualForm}
+                addSingle={handleUnenrollUser}
                 addMasive={handleImportUsers}
                 bulk={{ accept: ".csv", templateUrl: "/plantillas/matricular.csv" }}
-                labels={{ submitBulk: "Matricular Usuarios" }}
+                labels={{ submitBulk: "Desmatricular Usuarios" }}
                 isLoading={isLoading}
                 error={error}
                 success={success}

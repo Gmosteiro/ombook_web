@@ -64,8 +64,7 @@ export default function CourseStudents() {
     {
       label: "Desmatricular usuarios",
       onClick: () => {
-        // Aquí puedes abrir un modal, navegar o lo que necesites
-        alert("Desmatricular usuarios");
+        navigate(`/courses/${course.id}/unenroll`);
       },
     },
   ];

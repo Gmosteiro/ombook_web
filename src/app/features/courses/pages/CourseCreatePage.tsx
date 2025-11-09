@@ -1,7 +1,7 @@
 import { useFetcher } from "react-router";
 import { UserRole } from "~/features/auth/types";
 import EntityCreate from "../../common/components/EntityCreate";
-import CourseIndividualForm from "../components/CourseForm";
+import CourseIndividualForm from "../components/general/CourseForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { CreateCourseData, ImportCoursesResponse } from "../types/types";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
