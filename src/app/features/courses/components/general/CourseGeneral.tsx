@@ -1,11 +1,11 @@
 import { useOutletContext, useNavigate, useLoaderData, LoaderFunctionArgs } from "react-router";
 import { useState } from "react";
-import { Course, CreatePaginaRequest, PaginaTematica as PaginaTematicaType } from "../types/types";
-import { PaginaTematica } from "./PaginaTematica";
+import { Course, CreatePaginaRequest, PaginaTematica as PaginaTematicaType } from "../../types/types";
+import { PaginaTematica } from "../PaginaTematica";
 import { getValidJWTToken, getUserRole } from "~/services/session.server";
-import { apiFetch } from "../../auth/utils/methods";
-import { usePaginasTematicas } from "../hooks/usePaginasTematicas";
-import type { UserRole } from "../../auth/types";
+import { apiFetch } from "../../../auth/utils/methods";
+import { usePaginasTematicas } from "../../hooks/usePaginasTematicas";
+
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const { id } = params;
