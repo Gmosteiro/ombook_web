@@ -35,14 +35,14 @@ export async function getUsers(
     }
     const url = "/usuarios" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
-    console.log("Fetching users with:", {
-        q: params?.q,
-        rol: params?.rol,
-        estado: params?.estado,
-        page: params?.page,
-        size: params?.size,
-        sort: params?.sort,
-    })
+    // console.log("Fetching users with:", {
+    //     q: params?.q,
+    //     rol: params?.rol,
+    //     estado: params?.estado,
+    //     page: params?.page,
+    //     size: params?.size,
+    //     sort: params?.sort,
+    // })
 
     const response = await apiFetch(url, {
         method: "GET",
@@ -54,7 +54,7 @@ export async function getUsers(
 
     const data = await response.json() as PaginatorResponseUsuarioListaResponse;
 
-    console.log("Fetched users data:", data);
+    // console.log("Fetched users data:", data);
 
     return data
 }

@@ -1,109 +1,62 @@
-import { useState, useEffect } from "react";
+import { useNavigate, useLoaderData, useSearchParams } from "react-router";
+import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
+import { UserRole } from "../../auth/types";
+import { getCursos, PaginatorResponseCursoListadoResponse, CourseStatus, CursoListadoResponse } from "../../../routes/api.courses";
+import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { FilterBar } from "../components/general/FilterBar";
 import { CourseCard } from "../components/general/CourseCard";
 import { Pagination } from "../components/general/Pagination";
-import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
-import { UserRole } from "../../auth/types";
-import { Course } from "../types/types";
-import { useCoursesApi } from "../hooks/useCoursesApi";
-import UserActionsMenu from "../../common/components/UserActionsMenu";
-import { useNavigate } from "react-router";
 
-export const loader = requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]);
+export const loader = async (args: any) => {
+  await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
 
-export interface Filters {
-  search: string;
-  status: string;
-  teacher: string;
-}
+  const url = new URL(args.request.url);
+  const q = url.searchParams.get("search") || undefined;
+  const estado = url.searchParams.get("status") as CourseStatus || undefined;
+  const page = url.searchParams.get("page") ? Number(url.searchParams.get("page")) : 0;
+  const size = url.searchParams.get("size") ? Number(url.searchParams.get("size")) : 9;
+
+  const cursos = await getCursos(args.request, { q, estado, page, size });
+
+  return {
+    cursos,
+    filters: { search: q || "", status: estado || "" },
+    page: page,
+    size: size,
+  };
+};
 
 export default function CoursesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [filters, setFilters] = useState<Filters>({
-    search: '',
-    status: '',
-    teacher: '',
-  });
-  const [page, setPage] = useState(1);
-  const coursesPerPage = 9;
-
-  const { loadCourses, isLoading: loading, error } = useCoursesApi();
+  const { cursos, filters, page /*, size*/ } = useLoaderData() as {
+    cursos: PaginatorResponseCursoListadoResponse;
+    filters: { search: string; status: string };
+    page: number;
+    size: number;
+  };
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Cargar cursos al montar el componente
-  useEffect(() => {
-    const fetchCourses = async () => {
-      const cursos = await loadCourses('listar');
-      if (cursos) {
-        setCourses(cursos);
-      }
-    };
-
-    fetchCourses();
-  }, []);
-
-  // Filtrar cursos cuando cambien los filtros o los cursos
-  useEffect(() => {
-
-    if (filters.search.trim() === '' && filters.status === '') {
-      setFilteredCourses(courses);
-      return;
+  // Handlers para filtros
+  const handleFilterChange = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
     }
-
-    let filtered = courses.filter(course => {
-      const matchesSearch = !filters.search ||
-        course.nombre.toLowerCase().includes(filters.search.toLowerCase()) ||
-        course.codigo.toLowerCase().includes(filters.search.toLowerCase())
-
-      const matchesStatus = !filters.status || course.estadoCurso === filters.status;
-
-      return matchesSearch && matchesStatus;
-    });
-
-    setFilteredCourses(filtered);
-    setPage(1); // Reset page when filters change
-  }, [courses, filters]);
-
-  // Función para eliminar curso de la lista local
-  const handleCourseDeleted = (courseId: number) => {
-    setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+    params.set("page", "0");
+    setSearchParams(params);
   };
 
-  // Calcular paginación
-  const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
-  const startIndex = (page - 1) * coursesPerPage;
-  const paginated = filteredCourses.slice(startIndex, startIndex + coursesPerPage);
+  // Handler para paginación
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", newPage.toString());
+    setSearchParams(params);
+  };
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Cargando cursos...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md p-4">
-          <h3 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">
-            Error al cargar cursos
-          </h3>
-          <p className="text-red-600 dark:text-red-400">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const allCourses: CursoListadoResponse[] = cursos.content ?? [];
+  const totalPages = cursos.totalPages || 1;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -117,9 +70,15 @@ export default function CoursesPage() {
         />
       </div>
 
-      <FilterBar filters={filters} setFilters={setFilters} />
+      <FilterBar
+        filters={filters}
+        setFilters={(newFilters) => {
+          handleFilterChange("search", newFilters.search);
+          handleFilterChange("status", newFilters.status);
+        }}
+      />
 
-      {filteredCourses.length === 0 ? (
+      {allCourses.length === 0 ? (
         <div className="text-center text-gray-500 mt-12">
           <div className="mb-4">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,14 +89,14 @@ export default function CoursesPage() {
             No se encontraron cursos
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            {courses.length === 0
+            {cursos.totalElements === 0
               ? 'Aún no hay cursos creados en el sistema.'
               : 'No se encontraron cursos con los criterios seleccionados.'
             }
           </p>
-          {courses.length === 0 && (
+          {cursos.totalElements === 0 && (
             <button
-              onClick={() => window.location.href = '/courses/create'}
+              onClick={() => navigate('/courses/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
             >
               Crear primer curso
@@ -147,18 +106,17 @@ export default function CoursesPage() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginated.map((course) => (
+            {allCourses.map((course) => (
               <CourseCard
                 key={course.id}
                 course={course}
-                onDeleted={() => handleCourseDeleted(course.id)}
+                onDeleted={() => { /* Opcional: recargar o actualizar */ }}
               />
             ))}
           </div>
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination currentPage={page + 1} totalPages={totalPages} onPageChange={handlePageChange} />
         </>
       )}
-
     </div>
   );
 }

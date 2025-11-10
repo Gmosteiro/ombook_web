@@ -1,11 +1,11 @@
 import { useState } from "react";
 import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
 import { useCoursesApi } from "../../hooks/useCoursesApi";
-import { Course } from "../../types/types";
 import { useNavigate } from "react-router";
+import { CursoListadoResponse } from "../../../../routes/api.courses";
 
 interface CourseCardProps {
-  course: Course;
+  course: CursoListadoResponse;
   onDeleted?: () => void;
 }
 
@@ -15,6 +15,10 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
   const navigate = useNavigate();
 
   const handleDelete = async () => {
+    if (!course.id) {
+      return
+    }
+
     const success = await deleteCourse(course.id);
 
     if (success) {

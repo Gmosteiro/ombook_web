@@ -11,6 +11,8 @@ export const useCoursesApi = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    console.warn('Use of useCourseApi is deprecated')
+
     const deleteCourse = async (courseId: number): Promise<boolean> => {
         setIsLoading(true);
         setError(null);
