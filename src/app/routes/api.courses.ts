@@ -5,6 +5,8 @@ import type { components } from "../../types/openapi";
 // Tipos OpenAPI
 export type CursoListadoResponse = components["schemas"]["CursoListadoResponse"];
 export type PaginatorResponseCursoListadoResponse = components["schemas"]["PaginatorResponseCursoListadoResponse"];
+export type CursoCreateRequest = components["schemas"]["CursoCreateRequest"];
+export type Curso = components["schemas"]["Curso"];
 
 export const enum CourseStatus {
     ACTIVO = "ACTIVO",
@@ -67,6 +69,43 @@ export async function listarCursos(request: Request): Promise<CursoListadoRespon
     if (!response.ok) throw new Error("Error al listar cursos");
 
     return await response.json() as CursoListadoResponse[];
+}
+
+/**
+ * Elimina un curso por su ID.
+ * @param request Request original (para JWT)
+ * @param id ID del curso a eliminar
+ * @returns true si fue exitoso, lanza error si falla
+ */
+export async function deleteCurso(request: Request, id: number): Promise<boolean> {
+    const url = `/cursos/${id}`;
+    const response = await apiFetch(url, {
+        method: "DELETE",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
+    });
+
+    if (!response.ok) throw new Error("Error al eliminar el curso");
+    return true;
+}
+
+/**
+ * Crea un curso individualmente.
+ * @param request Request original (para JWT)
+ * @param data Datos del curso a crear
+ * @returns El curso creado
+ */
+export async function crearCurso(request: Request, data: CursoCreateRequest): Promise<Curso> {
+    const response = await apiFetch("/cursos", {
+        method: "POST",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) throw new Error("Error al crear el curso");
+
+    return await response.json() as Curso;
 }
 
 

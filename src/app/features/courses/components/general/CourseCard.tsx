@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
-import { useCoursesApi } from "../../hooks/useCoursesApi";
-import { useNavigate } from "react-router";
+import { useNavigate, useFetcher } from "react-router-dom";
 import { CursoListadoResponse } from "../../../../routes/api.courses";
 
 interface CourseCardProps {
@@ -11,23 +10,29 @@ interface CourseCardProps {
 
 export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { deleteCourse, isLoading: isDeleting, error } = useCoursesApi();
+  const fetcher = useFetcher();
+  const isDeleting = fetcher.state === "submitting";
+  const error = fetcher.data?.error;
   const navigate = useNavigate();
 
-  const handleDelete = async () => {
-    if (!course.id) {
-      return
-    }
+  const handleDelete = () => {
+    fetcher.submit(
+      (() => {
+        const formData = new FormData();
+        formData.append("courseId", String(course.id));
+        return formData;
+      })(),
+      { method: "post", action: "/courses" }
+    );
+  };
 
-    const success = await deleteCourse(course.id);
-
-    if (success) {
+  // Efecto para cerrar el diálogo y notificar al padre si fue exitoso
+  useEffect(() => {
+    if (fetcher.data?.success) {
       setShowDeleteDialog(false);
       onDeleted?.();
-    } else {
-      console.error("Error al eliminar el curso:", error);
     }
-  };
+  }, [fetcher.data, onDeleted]);
 
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
@@ -93,7 +98,6 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
 
           </p>
 
-          {/* Mostrar error si hay */}
           {error && (
             <div className="mb-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-2 rounded">
               {error}

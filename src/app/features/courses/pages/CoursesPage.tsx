@@ -1,11 +1,14 @@
 import { useNavigate, useLoaderData, useSearchParams } from "react-router";
+import { useRevalidator } from "react-router-dom"; // Agrega este import
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
 import { getCursos, PaginatorResponseCursoListadoResponse, CourseStatus, CursoListadoResponse } from "../../../routes/api.courses";
+import { getProfesores, UsuarioListadoResponse } from "../../../routes/api.users";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
-import { FilterBar } from "../components/general/FilterBar";
+import { FilterBar, Filters } from "../components/general/FilterBar";
 import { CourseCard } from "../components/general/CourseCard";
 import { Pagination } from "../components/general/Pagination";
+import { deleteCurso } from "../../../routes/api.courses";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
@@ -13,28 +16,46 @@ export const loader = async (args: any) => {
   const url = new URL(args.request.url);
   const q = url.searchParams.get("search") || undefined;
   const estado = url.searchParams.get("status") as CourseStatus || undefined;
+  const teacher = url.searchParams.get("teacher") || undefined;
   const page = url.searchParams.get("page") ? Number(url.searchParams.get("page")) : 0;
   const size = url.searchParams.get("size") ? Number(url.searchParams.get("size")) : 9;
 
-  const cursos = await getCursos(args.request, { q, estado, page, size });
+  const cursos = await getCursos(args.request, { q, estado, profesorId: teacher ? Number(teacher) : undefined, page, size });
+  const profesores = await getProfesores(args.request);
 
   return {
     cursos,
-    filters: { search: q || "", status: estado || "" },
-    page: page,
-    size: size,
+    profesores,
+    filters: { search: q || "", status: estado || "", teacher: teacher || "" },
+    page,
+    size,
   };
 };
 
+export const action = async ({ request }: { request: Request }) => {
+  const formData = await request.formData();
+  const courseId = formData.get("courseId");
+  if (!courseId) return null;
+
+  try {
+    await deleteCurso(request, Number(courseId));
+    return { success: true };
+  } catch (e: any) {
+    return { error: e.message || "Error al eliminar el curso" };
+  }
+};
+
 export default function CoursesPage() {
-  const { cursos, filters, page /*, size*/ } = useLoaderData() as {
+  const { cursos, profesores, filters, page } = useLoaderData() as {
     cursos: PaginatorResponseCursoListadoResponse;
-    filters: { search: string; status: string };
+    profesores: UsuarioListadoResponse[];
+    filters: Filters;
     page: number;
     size: number;
   };
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const revalidator = useRevalidator(); // Agrega este hook
 
   // Handlers para filtros
   const handleFilterChange = (key: string, value: string) => {
@@ -75,7 +96,9 @@ export default function CoursesPage() {
         setFilters={(newFilters) => {
           handleFilterChange("search", newFilters.search);
           handleFilterChange("status", newFilters.status);
+          handleFilterChange("teacher", newFilters.teacher || "");
         }}
+        teachers={profesores}
       />
 
       {allCourses.length === 0 ? (
@@ -110,7 +133,7 @@ export default function CoursesPage() {
               <CourseCard
                 key={course.id}
                 course={course}
-                onDeleted={() => { /* Opcional: recargar o actualizar */ }}
+                onDeleted={() => revalidator.revalidate()} // Recarga la lista al eliminar
               />
             ))}
           </div>
