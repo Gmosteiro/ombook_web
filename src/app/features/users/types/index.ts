@@ -1,6 +1,7 @@
 import type { operations, components } from '../../../../types/openapi';
 import { UserRole } from '../../auth/types';
 
+
 // Schemas de usuarios
 export type AltaUsuarioRequest = components['schemas']['AltaUsuarioRequest'];
 export type ResumenCargaMasiva = components['schemas']['ResumenCargaMasiva'];
@@ -8,7 +9,10 @@ export type ErrorLineaCSV = components['schemas']['ErrorLineaCSV'];
 
 // Operaciones: Alta Individual
 export type AltaIndividualRequest = operations['altaIndividual']['requestBody']['content']['application/json'];
-export type AltaIndividualResponse = operations['altaIndividual']['responses'][201]['content']['*/*'];
+export type AltaIndividualResponse =
+    operations['altaIndividual']['responses'][201]['content'] extends Record<string, infer T>
+    ? T
+    : never;
 
 // Operaciones: Carga Masiva
 export type CargaMasivaRequest =
@@ -28,10 +32,6 @@ export type UserFormValues = {
     rol: UserRole;
     confirmarContrasena: string; // Campo adicional solo para el formulario
 };
-
-
-
-
 
 // Tipo para crear usuario (igual que AltaUsuarioRequest pero con UserRole tipado)
 export type CreateUserData = {
@@ -71,18 +71,6 @@ export type UserFormErrors = {
 export type CreateUserFunction = (data: CreateUserData) => Promise<CreateUserResponse>;
 export type ImportUsersFunction = (file: File) => Promise<ImportUsersResponse>;
 
-// Interfaz para el usuario completo (si necesitas extender)
-export interface User {
-    id?: number;
-    nombre: string;
-    apellido: string;
-    correo: string;
-    cedula: string;
-    fechaNacimiento: string;
-    rol: UserRole;
-    createdAt?: string;
-    updatedAt?: string;
-}
 
 // Tipos para filtros y búsquedas (para futuras funcionalidades)
 export type UserFilters = {
@@ -90,17 +78,3 @@ export type UserFilters = {
     nombre?: string;
     correo?: string;
 };
-
-export type UserListResponse = {
-    users: User[];
-    total: number;
-    page: number;
-    pageSize: number;
-};
-
-
-export type ProfesorResponsable = components["schemas"]["UsuarioListadoResponse"];
-export type UsuarioListadoResponse = components["schemas"]["UsuarioListadoResponse"];
-export type Usuario = components["schemas"]["Usuario"];
-
-export type EstudianteListadoResponse = components["schemas"]["EstudianteListadoResponse"];

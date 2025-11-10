@@ -13,7 +13,7 @@ type Props = {
 const UsersSearchList: React.FC<Props> = ({ selected, onSelect, busy, className }) => {
     const fetchUsers: CommonSearchListProps<User>["fetch"] = async (q) => {
         // TODO: reemplazar por tu client/API
-        // ej: return api.users.search({ q });
+        // ej: return api.users.search({ q }); //TODO
         const all = [
             { id: "1", name: "Alice" },
             { id: "2", name: "Bob" },

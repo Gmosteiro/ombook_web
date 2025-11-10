@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/anuncios/{anuncioId}": {
+    "/cursos/{cursoId}/anuncios/{anuncioId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,20 +14,20 @@ export interface paths {
         get?: never;
         put: operations["actualizar"];
         post?: never;
-        delete?: never;
+        delete: operations["eliminar"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/usuarios/alta": {
+    "/usuarios": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["listar"];
         put?: never;
         /** Registrar un nuevo usuario individualmente */
         post: operations["altaIndividual"];
@@ -37,7 +37,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/usuarios/alta/masiva": {
+    "/usuarios/importaciones-alta": {
         parameters: {
             query?: never;
             header?: never;
@@ -46,90 +46,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Alta masiva de usuarios por CSV */
         post: operations["cargaMasiva"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/paginas/crear": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Crea una nueva página temática para un curso (solo profesor responsable) */
-        post: operations["crearPagina"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/matricula/baja": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["baja"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/matricula/baja/masiva": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Desmatriculación masiva por CSV */
-        post: operations["bajaMasiva"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/matricula/alta": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["alta"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/matricula/alta/masiva": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Matriculación masiva por CSV */
-        post: operations["altaMasiva"];
         delete?: never;
         options?: never;
         head?: never;
@@ -168,48 +86,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cursos/{cursoId}/recursos": {
+    "/cursos": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Lista recursos */
-        get: operations["listar"];
-        put?: never;
-        /** Sube un archivo al curso */
-        post: operations["subir"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/cursos/eliminar/masivo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["procesarEliminacionMasiva"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/cursos/crear": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
+        /** Lista cursos con filtros y paginado. Admin: todos (puede filtrar por profesor). Prof/Est: solo sus cursos. */
+        get: operations["listar_1"];
         put?: never;
         /** Registrar un nuevo curso individualmente */
         post: operations["crearCurso"];
@@ -219,7 +104,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cursos/crear/masivo": {
+    "/cursos/{cursoId}/tareas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista todas las tareas visibles de un curso según el rol del usuario */
+        get: operations["listarTareas"];
+        put?: never;
+        /** Crea una nueva tarea para un curso (solo profesor responsable) */
+        post: operations["crearTarea"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/recursos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista recursos */
+        get: operations["listar_2"];
+        put?: never;
+        /** Sube un archivo al curso */
+        post: operations["subir"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/paginas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista todas las páginas visibles de un curso según el rol del usuario */
+        get: operations["listarPaginas"];
+        put?: never;
+        /** Crea una nueva página temática para un curso (solo profesor responsable) */
+        post: operations["crearPagina"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/matriculas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["alta"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/matriculas/importaciones-baja": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desmatriculación masiva por CSV */
+        post: operations["bajaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/matriculas/importaciones-alta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Matriculación masiva por CSV */
+        post: operations["altaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/anuncios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listarPorCurso"];
+        put?: never;
+        post: operations["crear"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/importaciones": {
         parameters: {
             query?: never;
             header?: never;
@@ -229,6 +234,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["procesarCargaMasiva"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/eliminaciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["procesarEliminacionMasiva"];
         delete?: never;
         options?: never;
         head?: never;
@@ -261,22 +282,6 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["cerrarSesion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/anuncios/cursos/{cursoId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["listarPorCurso"];
-        put?: never;
-        post: operations["crear"];
         delete?: never;
         options?: never;
         head?: never;
@@ -316,23 +321,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/usuarios/listar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Lista todos los usuarios si es administrador */
-        get: operations["listarUsuarios"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/usuarios/estudiantes": {
         parameters: {
             query?: never;
@@ -349,15 +337,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/paginas/listar/{cursoId}": {
+    "/cursos/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Lista todas las páginas visibles de un curso según el rol del usuario */
-        get: operations["listarPaginas"];
+        /** Busca cualquier curso, si es admin muestra todos los datos */
+        get: operations["buscarCursos"];
+        put?: never;
+        post?: never;
+        delete: operations["eliminarCurso"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/usuarios-vinculados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista los usuarios vinculados a un curso, con filtros y paginación */
+        get: operations["listarUsuariosVinculados"];
         put?: never;
         post?: never;
         delete?: never;
@@ -383,23 +388,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cursos/usuarios-vinculados/{cursoId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Lista todos los usuarios vinculados a un curso dado su id */
-        get: operations["obtenerUsuariosVinculados"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/cursos/listar": {
         parameters: {
             query?: never;
@@ -417,39 +405,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cursos/buscar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Busca cualquier curso, si es admin muestra todos los datos */
-        get: operations["buscarCursos"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/cursos/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["eliminarCurso"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/cursos/{cursoId}/recursos/{recursoId}": {
         parameters: {
             query?: never;
@@ -461,13 +416,13 @@ export interface paths {
         put?: never;
         post?: never;
         /** Elimina un recurso del curso */
-        delete: operations["eliminar"];
+        delete: operations["eliminar_1"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/anuncios/{id}": {
+    "/cursos/{cursoId}/matriculas/{estudianteId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -477,7 +432,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["eliminar_1"];
+        delete: operations["baja"];
         options?: never;
         head?: never;
         patch?: never;
@@ -519,66 +474,9 @@ export interface components {
             errores?: number;
             detalleErrores?: components["schemas"]["ErrorLineaCSV"][];
         };
-        PaginaCreacionRequest: {
-            /** Format: int64 */
-            cursoId?: number;
-            titulo?: string;
-            /** Format: date-time */
-            fechaProgramada?: string;
-        };
-        PaginaResponse: {
-            /** Format: int64 */
-            id?: number;
-            titulo?: string;
-            /** Format: date-time */
-            fechaProgramada?: string;
-            /** Format: date-time */
-            fechaCreacion?: string;
-            /** Format: int64 */
-            cursoId?: number;
-            /** Format: int64 */
-            creadorId?: number;
-        };
-        DesmatricularRequest: {
-            /** Format: int64 */
-            estudianteId?: number;
-            /** Format: int64 */
-            cursoId?: number;
-        };
-        MatricularRequest: {
-            /** Format: int64 */
-            estudianteId?: number;
-            /** Format: int64 */
-            cursoId?: number;
-        };
         RegistrarTokenRequest: {
             token?: string;
             plataforma?: string;
-        };
-        RecursoSubidaForm: {
-            /** @enum {string} */
-            ownerRecurso: "PAGINA" | "TAREA" | "ENTREGA";
-            /** Format: int64 */
-            ownerId: number;
-            nombre: string;
-            /** Format: binary */
-            archivo: string;
-        };
-        RecursoSubidaResponse: {
-            /** Format: int64 */
-            id?: number;
-            nombreOriginal?: string;
-            /** @enum {string} */
-            ownerRecurso?: "PAGINA" | "TAREA" | "ENTREGA";
-            /** Format: int64 */
-            ownerId?: number;
-            contentType?: string;
-            /** Format: int64 */
-            sizeBytes?: number;
-            /** Format: date-time */
-            fechaSubida?: string;
-            /** Format: int64 */
-            subidoPorUsuarioId?: number;
         };
         CursoCreateRequest: {
             nombre: string;
@@ -625,15 +523,78 @@ export interface components {
             /** @enum {string} */
             rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
         };
-        LoginRequest: {
-            correo?: string;
-            contrasena?: string;
-        };
-        TokenResponse: {
-            token?: string;
+        TareaCreacionRequest: {
             /** Format: int64 */
-            exp?: number;
-            rol?: string;
+            creador?: number;
+            titulo?: string;
+            descripcion?: string;
+            /** Format: date-time */
+            fechaInicio?: string;
+            /** Format: date-time */
+            fechaFin?: string;
+            /** @enum {string} */
+            visibilidad?: "PUBLICADA" | "PROGRAMADA" | "FINALIZADA";
+        };
+        TareaResponse: {
+            /** Format: int64 */
+            id?: number;
+            titulo?: string;
+            descripcion?: string;
+            /** Format: date-time */
+            fechaInicio?: string;
+            /** Format: date-time */
+            fechaFin?: string;
+            /** @enum {string} */
+            visibilidad?: "PUBLICADA" | "PROGRAMADA" | "FINALIZADA";
+            /** Format: date-time */
+            fechaCreacion?: string;
+            /** Format: int64 */
+            cursoId?: number;
+            /** Format: int64 */
+            creador?: number;
+        };
+        RecursoSubidaForm: {
+            /** @enum {string} */
+            ownerRecurso: "PAGINA" | "TAREA" | "ENTREGA";
+            /** Format: int64 */
+            ownerId: number;
+            nombre: string;
+            /** Format: binary */
+            archivo: string;
+        };
+        RecursoSubidaResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombreOriginal?: string;
+            /** @enum {string} */
+            ownerRecurso?: "PAGINA" | "TAREA" | "ENTREGA";
+            /** Format: int64 */
+            ownerId?: number;
+            contentType?: string;
+            /** Format: int64 */
+            sizeBytes?: number;
+            /** Format: date-time */
+            fechaSubida?: string;
+            /** Format: int64 */
+            subidoPorUsuarioId?: number;
+        };
+        PaginaCreacionRequest: {
+            titulo?: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+        };
+        PaginaResponse: {
+            /** Format: int64 */
+            id?: number;
+            titulo?: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+            /** Format: date-time */
+            fechaCreacion?: string;
+            /** Format: int64 */
+            cursoId?: number;
+            /** Format: int64 */
+            creadorId?: number;
         };
         AnuncioCreateRequest: {
             titulo: string;
@@ -647,6 +608,44 @@ export interface components {
             titulo?: string;
             contenido?: string;
             fechaCreacion?: string;
+            nombreCreador?: string;
+            apellidoCreador?: string;
+            fotoPerfilUrl?: string;
+        };
+        LoginRequest: {
+            correo?: string;
+            contrasena?: string;
+        };
+        TokenResponse: {
+            token?: string;
+            /** Format: int64 */
+            exp?: number;
+            rol?: string;
+        };
+        PaginatorResponseUsuarioListaResponse: {
+            content?: components["schemas"]["UsuarioListaResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        UsuarioListaResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            apellido?: string;
+            correo?: string;
+            cedula?: string;
+            /** @enum {string} */
+            rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+            /** @enum {string} */
+            estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
         };
         UsuarioListadoResponse: {
             /** Format: int64 */
@@ -670,10 +669,73 @@ export interface components {
             rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
         };
         EstudianteListadoResponse: {
+            /** Format: int64 */
+            estudianteId?: number;
             nombre?: string;
             apellido?: string;
             cedula?: string;
             correo?: string;
+        };
+        Pageable: {
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            sort?: string[];
+        };
+        CursoListadoResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            codigo?: string;
+            descripcion?: string;
+            periodoAcademico?: string;
+            /** @enum {string} */
+            estadoCurso?: "ACTIVO" | "INACTIVO" | "ELIMINADO";
+            /** Format: date-time */
+            fechaCreacion?: string;
+            docentesAsignados?: components["schemas"]["DocenteResumen"][];
+        };
+        DocenteResumen: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            apellido?: string;
+            correo?: string;
+        };
+        PaginatorResponseCursoListadoResponse: {
+            content?: components["schemas"]["CursoListadoResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        PaginatorResponseUsuarioVinculadoResponse: {
+            content?: components["schemas"]["UsuarioVinculadoResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        UsuarioVinculadoResponse: {
+            /** Format: int64 */
+            id?: number;
+            nombre?: string;
+            apellido?: string;
+            correo?: string;
+            rol?: string;
         };
         RecursoListadoResponse: {
             /** Format: int64 */
@@ -695,34 +757,6 @@ export interface components {
             url?: string;
             /** Format: int64 */
             expiraEnSegundos?: number;
-        };
-        UsuarioVinculadoResponse: {
-            /** Format: int64 */
-            id?: number;
-            nombre?: string;
-            apellido?: string;
-            correo?: string;
-            rol?: string;
-        };
-        CursoListadoResponse: {
-            /** Format: int64 */
-            id?: number;
-            nombre?: string;
-            codigo?: string;
-            descripcion?: string;
-            periodoAcademico?: string;
-            /** @enum {string} */
-            estadoCurso?: "ACTIVO" | "INACTIVO" | "ELIMINADO";
-            /** Format: date-time */
-            fechaCreacion?: string;
-            docentesAsignados?: components["schemas"]["DocenteResumen"][];
-        };
-        DocenteResumen: {
-            /** Format: int64 */
-            id?: number;
-            nombre?: string;
-            apellido?: string;
-            correo?: string;
         };
         DesactivarTokenRequest: {
             token?: string;
@@ -760,6 +794,56 @@ export interface operations {
             };
         };
     };
+    eliminar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                anuncioId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listar: {
+        parameters: {
+            query?: {
+                q?: string;
+                rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+                estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatorResponseUsuarioListaResponse"];
+                };
+            };
+        };
+    };
     altaIndividual: {
         parameters: {
             query?: never;
@@ -778,9 +862,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "*/*": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -801,140 +883,6 @@ export interface operations {
         };
         responses: {
             /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ResumenCargaMasiva"];
-                };
-            };
-        };
-    };
-    crearPagina: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PaginaCreacionRequest"];
-            };
-        };
-        responses: {
-            /** @description Página creada correctamente */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginaResponse"];
-                };
-            };
-        };
-    };
-    baja: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DesmatricularRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
-    };
-    bajaMasiva: {
-        parameters: {
-            query: {
-                cursoId: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    csvFile: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Carga procesada correctamente */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ResumenCargaMasiva"];
-                };
-            };
-        };
-    };
-    alta: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MatricularRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
-    };
-    altaMasiva: {
-        parameters: {
-            query: {
-                cursoId: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    csvFile: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Carga procesada correctamente */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1013,7 +961,104 @@ export interface operations {
             };
         };
     };
-    listar: {
+    listar_1: {
+        parameters: {
+            query: {
+                q?: string;
+                estado?: "ACTIVO" | "INACTIVO" | "ELIMINADO";
+                profesorId?: number;
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatorResponseCursoListadoResponse"];
+                };
+            };
+        };
+    };
+    crearCurso: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CursoCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Curso creado correctamente, sin cuerpo de respuesta */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Curso"];
+                };
+            };
+        };
+    };
+    listarTareas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TareaResponse"][];
+                };
+            };
+        };
+    };
+    crearTarea: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TareaCreacionRequest"];
+            };
+        };
+        responses: {
+            /** @description Tarea creada correctamente */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TareaResponse"];
+                };
+            };
+        };
+    };
+    listar_2: {
         parameters: {
             query?: {
                 ownerRecurso?: "PAGINA" | "TAREA" | "ENTREGA";
@@ -1064,7 +1109,187 @@ export interface operations {
             };
         };
     };
-    procesarEliminacionMasiva: {
+    listarPaginas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaResponse"][];
+                };
+            };
+        };
+    };
+    crearPagina: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaginaCreacionRequest"];
+            };
+        };
+        responses: {
+            /** @description Página creada correctamente */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaResponse"];
+                };
+            };
+        };
+    };
+    alta: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": number;
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    bajaMasiva: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    csvFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Desmatriculacion masiva procesada correctamente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
+    altaMasiva: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    csvFile: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Matriculacion masiva procesada correctamente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
+                };
+            };
+        };
+    };
+    listarPorCurso: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AnuncioResponse"][];
+                };
+            };
+        };
+    };
+    crear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnuncioCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AnuncioResponse"];
+                };
+            };
+        };
+    };
+    procesarCargaMasiva: {
         parameters: {
             query?: never;
             header?: never;
@@ -1091,31 +1316,7 @@ export interface operations {
             };
         };
     };
-    crearCurso: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CursoCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Curso creado correctamente, sin cuerpo de respuesta */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["Curso"];
-                };
-            };
-        };
-    };
-    procesarCargaMasiva: {
+    procesarEliminacionMasiva: {
         parameters: {
             query?: never;
             header?: never;
@@ -1188,54 +1389,6 @@ export interface operations {
             };
         };
     };
-    listarPorCurso: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cursoId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AnuncioResponse"][];
-                };
-            };
-        };
-    };
-    crear: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cursoId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AnuncioCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AnuncioResponse"];
-                };
-            };
-        };
-    };
     buscarUsuarioPorId: {
         parameters: {
             query?: never;
@@ -1278,26 +1431,6 @@ export interface operations {
             };
         };
     };
-    listarUsuarios: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["UsuarioListadoResponse"][];
-                };
-            };
-        };
-    };
     listarEstudiantes: {
         parameters: {
             query?: never;
@@ -1314,93 +1447,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["EstudianteListadoResponse"][];
-                };
-            };
-        };
-    };
-    listarPaginas: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cursoId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginaResponse"][];
-                };
-            };
-        };
-    };
-    descargarUrl: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cursoId: number;
-                recursoId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["RecursoDescargaResponse"];
-                };
-            };
-        };
-    };
-    obtenerUsuariosVinculados: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                cursoId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["UsuarioVinculadoResponse"][];
-                };
-            };
-        };
-    };
-    listarCursos: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["CursoListadoResponse"][];
                 };
             };
         };
@@ -1447,7 +1493,76 @@ export interface operations {
             };
         };
     };
-    eliminar: {
+    listarUsuariosVinculados: {
+        parameters: {
+            query: {
+                q?: string;
+                rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatorResponseUsuarioVinculadoResponse"];
+                };
+            };
+        };
+    };
+    descargarUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                recursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecursoDescargaResponse"];
+                };
+            };
+        };
+    };
+    listarCursos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CursoListadoResponse"][];
+                };
+            };
+        };
+    };
+    eliminar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1468,12 +1583,13 @@ export interface operations {
             };
         };
     };
-    eliminar_1: {
+    baja: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                id: number;
+                cursoId: number;
+                estudianteId: number;
             };
             cookie?: never;
         };

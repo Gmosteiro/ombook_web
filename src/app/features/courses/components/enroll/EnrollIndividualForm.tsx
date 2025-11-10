@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import type { IndividualFormProps } from "../../../common/components/EntityCreate";
 import type { UsuarioVinculado } from "../../types/types";
-import { useEstudiantes } from "~/features/users/hooks/useUsers";
 
 const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitting }) => {
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<UsuarioVinculado | null>(null);
-    const { estudiantes, error, loadEstudiantes } = useEstudiantes();
+    // const { estudiantes, error, loadEstudiantes } = useEstudiantes();
 
     // Buscar estudiantes al enviar el formulario
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        loadEstudiantes(); //TODO agregar filtro de búsqueda
+        // loadEstudiantes(); //TODO agregar filtro de búsqueda
     };
 
     // Confirmar matrícula
@@ -44,10 +43,10 @@ const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitt
                         Buscar
                     </button>
                 </div>
-                {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+                {/* {error && <p className="text-red-500 text-xs mt-1">{error}</p>} */}
             </form>
 
-            {estudiantes.length > 0 && (
+            {/* {estudiantes.length > 0 && (
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Selecciona un usuario para matricular
@@ -65,7 +64,7 @@ const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitt
                         ))}
                     </ul>
                 </div>
-            )}
+            )} */}
 
             <div className="flex justify-end">
                 <button

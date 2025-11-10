@@ -1,90 +1,78 @@
-import { ActionFunctionArgs } from "react-router";
 import { getValidJWTToken } from "~/services/session.server";
 import { apiFetch } from "~/features/auth/utils/methods";
+import type { components } from "../../types/openapi";
+import { UserRole, UserStatus } from "~/features/auth/types";
 
-export async function action({ request }: ActionFunctionArgs) {
-    const formData = await request.formData();
-    const intent = formData.get("intent") as string;
+// Tipos OpenAPI
+export type UsuarioListadoResponse = components["schemas"]["UsuarioListadoResponse"];
+export type PaginatorResponseUsuarioListaResponse = components["schemas"]["PaginatorResponseUsuarioListaResponse"];
+export type UsuarioListaResponse = components["schemas"]["UsuarioListaResponse"];
 
-    if (intent === "loadUsers") {
-        try {
-            const jwtToken = await getValidJWTToken(request);
-            const queryType = formData.get("queryType") as string;
-            const userId = formData.get("userId") as string;
+type UserFilters = {
+    q?: string;
+    estado?: UserStatus;
+    page?: number;
+    size?: number;
+    sort?: string[];
+    rol?: UserRole;
+};
+type UserGetterParams = Omit<UserFilters, 'rol'>;
 
-
-            let endpoint: string;
-
-            switch (queryType) {
-                case 'profesores':
-                    endpoint = "/usuarios/profesores";
-                    break;
-                case 'estudiantes':
-                    endpoint = "/usuarios/estudiantes"; //TODO cambiar cuando tengamos el endpoint correcto
-                    break;
-                case 'listar':
-                    endpoint = "/usuarios/listar";
-                    break;
-                case 'byId':
-                    if (!userId) {
-                        return new Response(JSON.stringify({
-                            success: false,
-                            error: "ID de usuario requerido",
-                        }), {
-                            status: 400,
-                            headers: { "Content-Type": "application/json" }
-                        });
-                    }
-                    endpoint = `/usuarios/${userId}`;
-                    break;
-                default:
-                    return new Response(JSON.stringify({
-                        success: false,
-                        error: "Tipo de consulta no válido",
-                    }), {
-                        status: 400,
-                        headers: { "Content-Type": "application/json" }
-                    });
-            }
-
-
-            const response = await apiFetch(endpoint, {
-                method: 'GET',
-                secure: true,
-                jwtToken: jwtToken,
-            });
-
-
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            // console.log("API: Data received:", data);
-
-            return new Response(JSON.stringify({
-                success: true,
-                data: data,
-            }), {
-                headers: { "Content-Type": "application/json" }
-            });
-        } catch (error) {
-            console.error("API: Error loading users:", error);
-            return new Response(JSON.stringify({
-                success: false,
-                error: error instanceof Error ? error.message : "Error al cargar usuarios",
-            }), {
-                status: 500,
-                headers: { "Content-Type": "application/json" }
-            });
-        }
+// Obtener todos los usuarios (con filtros opcionales)
+export async function getUsers(
+    request: Request,
+    params?: UserFilters
+): Promise<PaginatorResponseUsuarioListaResponse> {
+    // Construir query params manualmente
+    const searchParams = new URLSearchParams();
+    if (params) {
+        if (params.q) searchParams.append("q", params.q);
+        if (params.rol) searchParams.append("rol", params.rol);
+        if (params.estado) searchParams.append("estado", params.estado);
+        if (params.page !== undefined) searchParams.append("page", params.page.toString());
+        if (params.size !== undefined) searchParams.append("size", params.size.toString());
+        if (params.sort) params.sort.forEach(s => searchParams.append("sort", s));
     }
+    const url = "/usuarios" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
-    return new Response(JSON.stringify({
-        success: false,
-        error: "Intent no reconocido",
-    }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" }
+    console.log("Fetching users with:", {
+        q: params?.q,
+        rol: params?.rol,
+        estado: params?.estado,
+        page: params?.page,
+        size: params?.size,
+        sort: params?.sort,
+    })
+
+    const response = await apiFetch(url, {
+        method: "GET",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
     });
+
+    if (!response.ok) throw new Error("Error al obtener usuarios");
+
+    const data = await response.json() as PaginatorResponseUsuarioListaResponse;
+
+    console.log("Fetched users data:", data);
+
+    return data
+}
+
+// Obtener solo profesores usando filtro + otros filtros opcionales
+export async function getProfesores(
+    request: Request,
+    params?: UserGetterParams
+): Promise<UsuarioListadoResponse[]> {
+    const paginator = await getUsers(request, { ...params, rol: UserRole.PROFESOR });
+    return paginator.content ?? [];
+}
+
+// Obtener solo estudiantes usando filtro + otros filtros opcionales
+export async function getEstudiantes(
+    request: Request,
+    params?: UserGetterParams
+): Promise<UsuarioListadoResponse[]> {
+    const paginator = await getUsers(request, { ...params, rol: UserRole.ESTUDIANTE });
+    return paginator.content ?? [];
 }

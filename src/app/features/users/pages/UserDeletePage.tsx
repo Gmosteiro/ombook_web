@@ -1,57 +1,40 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { useState } from "react";
+import { Link, useLoaderData } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
-import { UserRole } from "../../auth/types";
-import { useUsers } from "../hooks/useUsers";
+import { UserRole, User } from "../../auth/types";
+import { apiFetch } from "~/features/auth/utils/methods";
+import { getValidJWTToken } from "~/services/session.server";
 
-export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
+export const loader = async (args: any) => {
+  await requireRoleLoader([UserRole.ADMINISTRADOR])(args);
 
-interface User {
-  id: string;
-  nombre: string;
-  apellido: string;
-  correo: string;
-  cedula: string;
-  rol: string;
-  estado: string;
-  fechaCreacion?: string;
-}
+  const response = await apiFetch('/usuarios', {
+    method: 'GET',
+    secure: true,
+    jwtToken: await getValidJWTToken(args.request),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  const users: User[] = await response.json();
+
+  return { users };
+};
 
 export default function UserDeletePage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const { users } = useLoaderData() as { users: User[] };
+  debugger
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const { users: loadedUsers, isLoading: loading, error, loadUsers } = useUsers();
-
-  // Cargar usuarios al montar el componente
-  useEffect(() => {
-    loadUsers({ type: 'listar' });
-  }, []);
-
-  // Mapear usuarios cuando se cargan
-  useEffect(() => {
-    if (loadedUsers && Array.isArray(loadedUsers)) {
-      const mappedUsers = (loadedUsers as any[]).map((usuario: any) => ({
-        id: usuario.id?.toString() || '',
-        nombre: usuario.nombre || '',
-        apellido: usuario.apellido || '',
-        correo: usuario.correo || '',
-        cedula: usuario.cedula || '',
-        rol: usuario.rol || '',
-        estado: usuario.estado || 'ACTIVO',
-        fechaCreacion: usuario.fechaCreacion
-      }));
-      setUsers(mappedUsers);
-    }
-  }, [loadedUsers]);
 
   // Filtrar usuarios por búsqueda
   const filteredUsers = users.filter(user => {
     const fullName = `${user.nombre} ${user.apellido}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase()) ||
-           user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           user.cedula.toLowerCase().includes(searchTerm.toLowerCase());
+      user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.cedula.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   const handleSelectUser = (userId: string) => {
@@ -75,36 +58,6 @@ export default function UserDeletePage() {
     console.log('Eliminar usuarios:', selectedUsers);
     alert(`Eliminar ${selectedUsers.length} usuarios seleccionados`);
   };
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Cargando usuarios...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md p-4">
-          <h3 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">
-            Error al cargar usuarios
-          </h3>
-          <p className="text-red-600 dark:text-red-400">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -229,11 +182,10 @@ export default function UserDeletePage() {
                       {user.rol}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        user.estado === 'ACTIVO'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                      }`}>
+                      <span className={`px-2 py-1 text-xs rounded-full ${user.estado === 'ACTIVO'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                        }`}>
                         {user.estado}
                       </span>
                     </td>
