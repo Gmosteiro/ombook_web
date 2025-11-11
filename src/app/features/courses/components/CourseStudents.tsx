@@ -1,30 +1,26 @@
 import { useLoaderData, useOutletContext, useSearchParams, useNavigate } from "react-router";
-import { Course, UsuarioVinculado } from "../types/types";
-import { apiFetch } from "../../auth/utils/methods";
-import { getValidJWTToken } from "~/services/session.server";
+import { Course } from "../types/types";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
+import { getUsuariosVinculadosByCurso, UsuarioListaResponse } from "../../../routes/api.users";
+import { UserRole } from "../../auth/types";
+import { useState, useEffect } from "react";
 
 type Ctx = { course: Course };
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
   const { id } = params;
   const url = new URL(request.url);
-  const search = url.searchParams.get("search") || "";
+  const q = url.searchParams.get("search") || "";
   const rol = url.searchParams.get("rol") || "";
+  // Puedes agregar page, size, sort si lo necesitas
 
   try {
-    const query = new URLSearchParams();
-    if (search) query.append("search", search);
-    if (rol) query.append("rol", rol);
-
-    const res = await apiFetch(`/cursos/usuarios-vinculados/${id}?${query.toString()}`, {
-      method: 'GET',
-      secure: true,
-      jwtToken: await getValidJWTToken(request)
+    const paginator = await getUsuariosVinculadosByCurso(request, Number(id), {
+      q,
+      rol: rol as UserRole,
+      // page, size, sort...
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const users: UsuarioVinculado[] = await res.json();
-    return users;
+    return paginator.content ?? [];
   } catch (err) {
     console.error("Error fetching users:", err);
     return [];
@@ -34,17 +30,42 @@ export async function loader({ params, request }: { params: { id: string }, requ
 export default function CourseStudents() {
   const context = useOutletContext<Ctx>();
   const course = context?.course;
-  const users = useLoaderData() as UsuarioVinculado[];
+
+  console.log("Curso: ", JSON.stringify(course));
+
+
+  const users = useLoaderData() as UsuarioListaResponse[];
   const navigate = useNavigate();
 
 
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
   const rol = searchParams.get("rol") || "";
+  const [searchInput, setSearchInput] = useState(search);
+
+  // Sincroniza el input con la URL si cambia desde afuera
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
   // Cuando cambian los filtros, actualiza la URL (lo que dispara el loader)
   function handleFilterChange(field: string, value: string) {
+    if (field === "search") {
+      setSearchInput(value); // Siempre actualiza el input
+      if (value === "" || value.length > 3) {
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+          params.set(field, value);
+        } else {
+          params.delete(field);
+        }
+        setSearchParams(params);
+      }
+      return;
+    }
+
     const params = new URLSearchParams(searchParams);
+
     if (value) {
       params.set(field, value);
     } else {
@@ -86,7 +107,7 @@ export default function CourseStudents() {
           type="text"
           placeholder="Buscar por nombre o correo..."
           className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
-          value={search}
+          value={searchInput}
           onChange={e => handleFilterChange("search", e.target.value)}
         />
         <select
