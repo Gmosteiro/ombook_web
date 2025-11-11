@@ -4,9 +4,9 @@ import type { components } from "../../types/openapi";
 import { UserRole, UserStatus } from "~/features/auth/types";
 
 // Tipos OpenAPI
-export type UsuarioListadoResponse = components["schemas"]["UsuarioListadoResponse"];
-export type PaginatorResponseUsuarioListaResponse = components["schemas"]["PaginatorResponseUsuarioListaResponse"];
 export type UsuarioListaResponse = components["schemas"]["UsuarioListaResponse"];
+export type PaginatorResponseUsuarioListaResponse = components["schemas"]["PaginatorResponseUsuarioListaResponse"];
+export type AltaUsuarioRequest = components["schemas"]["AltaUsuarioRequest"];
 
 type UserFilters = {
     q?: string;
@@ -35,14 +35,6 @@ export async function getUsers(
     }
     const url = "/usuarios" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
-    // console.log("Fetching users with:", {
-    //     q: params?.q,
-    //     rol: params?.rol,
-    //     estado: params?.estado,
-    //     page: params?.page,
-    //     size: params?.size,
-    //     sort: params?.sort,
-    // })
 
     const response = await apiFetch(url, {
         method: "GET",
@@ -54,8 +46,6 @@ export async function getUsers(
 
     const data = await response.json() as PaginatorResponseUsuarioListaResponse;
 
-    // console.log("Fetched users data:", data);
-
     return data
 }
 
@@ -63,7 +53,7 @@ export async function getUsers(
 export async function getProfesores(
     request: Request,
     params?: UserGetterParams
-): Promise<UsuarioListadoResponse[]> {
+): Promise<UsuarioListaResponse[]> {
     const paginator = await getUsers(request, { ...params, rol: UserRole.PROFESOR });
     return paginator.content ?? [];
 }
@@ -72,7 +62,27 @@ export async function getProfesores(
 export async function getEstudiantes(
     request: Request,
     params?: UserGetterParams
-): Promise<UsuarioListadoResponse[]> {
+): Promise<UsuarioListaResponse[]> {
     const paginator = await getUsers(request, { ...params, rol: UserRole.ESTUDIANTE });
     return paginator.content ?? [];
+}
+
+
+
+/**
+ * Crea un usuario individualmente.
+ * @param request Request original (para JWT)
+ * @param data Datos del usuario a crear
+ * @returns void (no hay cuerpo de respuesta)
+ */
+export async function crearUsuario(request: Request, data: AltaUsuarioRequest): Promise<void> {
+
+    const response = await apiFetch("/usuarios", {
+        method: "POST",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
+        body: JSON.stringify(data)
+    });
+
+    if (response.status !== 201) throw new Error("Error al crear el usuario");
 }

@@ -9,6 +9,7 @@ import { FilterBar, Filters } from "../components/general/FilterBar";
 import { CourseCard } from "../components/general/CourseCard";
 import { Pagination } from "../components/general/Pagination";
 import { deleteCurso } from "../../../routes/api.courses";
+import { getUserRole } from "../../../services/session.server"; // Importa la función
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
@@ -20,12 +21,24 @@ export const loader = async (args: any) => {
   const page = url.searchParams.get("page") ? Number(url.searchParams.get("page")) : 0;
   const size = url.searchParams.get("size") ? Number(url.searchParams.get("size")) : 9;
 
+  const userRole = await getUserRole(args.request);
+
+  let profesores: UsuarioListadoResponse[] = [];
+  let showTeacherFilter = true;
+
+  if (userRole === UserRole.ADMINISTRADOR) {
+    profesores = await getProfesores(args.request);
+    showTeacherFilter = true;
+  } else {
+    showTeacherFilter = false;
+  }
+
   const cursos = await getCursos(args.request, { q, estado, profesorId: teacher ? Number(teacher) : undefined, page, size });
-  const profesores = await getProfesores(args.request);
 
   return {
     cursos,
     profesores,
+    showTeacherFilter,
     filters: { search: q || "", status: estado || "", teacher: teacher || "" },
     page,
     size,
@@ -46,12 +59,13 @@ export const action = async ({ request }: { request: Request }) => {
 };
 
 export default function CoursesPage() {
-  const { cursos, profesores, filters, page } = useLoaderData() as {
+  const { cursos, profesores, filters, page, showTeacherFilter } = useLoaderData() as {
     cursos: PaginatorResponseCursoListadoResponse;
     profesores: UsuarioListadoResponse[];
     filters: Filters;
     page: number;
     size: number;
+    showTeacherFilter: boolean;
   };
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -99,6 +113,7 @@ export default function CoursesPage() {
           handleFilterChange("teacher", newFilters.teacher || "");
         }}
         teachers={profesores}
+        showTeacherFilter={showTeacherFilter} // Pasa la prop para mostrar/ocultar el filtro de profesores
       />
 
       {allCourses.length === 0 ? (

@@ -9,9 +9,10 @@ interface FilterBarProps {
   filters: Filters;
   setFilters: (filters: Filters) => void;
   teachers: UsuarioListadoResponse[];
+  showTeacherFilter?: boolean;
 }
 
-export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, teachers }) => (
+export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, teachers, showTeacherFilter = true }) => (
   <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
     <div className="relative flex-1 min-w-[220px]">
       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -39,18 +40,20 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, teach
       <option value="INACTIVO">Inactivo</option>
       <option value="ELIMINADO">Eliminado</option>
     </select>
-    <select
-      className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
-      value={filters.teacher || ""}
-      onChange={(e) => setFilters({ ...filters, teacher: e.target.value })}
-    >
-      <option value="">Filtrar por docente</option>
-      {teachers.map((prof) => (
-        <option key={prof.id} value={prof.id}>
-          {prof.nombre} {prof.apellido}
-        </option>
-      ))}
-    </select>
+    {showTeacherFilter && (
+      <select
+        className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+        value={filters.teacher || ""}
+        onChange={(e) => setFilters({ ...filters, teacher: e.target.value })}
+      >
+        <option value="">Filtrar por docente</option>
+        {teachers.map((prof) => (
+          <option key={prof.id} value={prof.id}>
+            {prof.nombre} {prof.apellido}
+          </option>
+        ))}
+      </select>
+    )}
   </div>
 );
 

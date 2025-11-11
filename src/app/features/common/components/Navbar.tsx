@@ -110,7 +110,7 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0 }: N
                             >
                                 <div className="py-1">
                                     <Link
-                                        to="/perfil"
+                                        to="/profile"
                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                         onClick={() => setIsUserMenuOpen(false)}
                                     >

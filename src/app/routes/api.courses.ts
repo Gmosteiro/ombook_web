@@ -39,11 +39,6 @@ export async function getCursos(
     }
     const url = "/cursos" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
-    console.log('Fetching courses with', {
-        url,
-        params
-    });
-
     const response = await apiFetch(url, {
         method: "GET",
         secure: true,
@@ -53,8 +48,6 @@ export async function getCursos(
     if (!response.ok) throw new Error("Error al obtener cursos");
 
     const res = await response.json() as PaginatorResponseCursoListadoResponse;
-
-    console.log('Courses', res)
 
     return res;
 }

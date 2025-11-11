@@ -4,6 +4,42 @@
  */
 
 export interface paths {
+    "/usuarios/{usuarioId}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Actualizar avatar de usuario */
+        put: operations["actualizarAvatar"];
+        post?: never;
+        /** Resetear avatar a default */
+        delete: operations["resetAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/imagen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Actualizar imagen del curso */
+        put: operations["actualizar"];
+        post?: never;
+        /** Restablecer imagen por defecto */
+        delete: operations["reset"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cursos/{cursoId}/anuncios/{anuncioId}": {
         parameters: {
             query?: never;
@@ -12,7 +48,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["actualizar"];
+        put: operations["actualizar_1"];
         post?: never;
         delete: operations["eliminar"];
         options?: never;
@@ -288,6 +324,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/usuarios/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPerfil"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["actualizarPerfil"];
+        trace?: never;
+    };
     "/usuarios/{id}": {
         parameters: {
             query?: never;
@@ -297,38 +349,6 @@ export interface paths {
         };
         /** Busca usuario por id, si es administrador devuelve todos los datos */
         get: operations["buscarUsuarioPorId"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/usuarios/profesores": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["listarProfesoresResponsables"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/usuarios/estudiantes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["listarEstudiantes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -491,6 +511,7 @@ export interface components {
             nombre: string;
             codigo: string;
             descripcion: string;
+            imagenUrl?: string;
             periodoAcademico: string;
             /** Format: date-time */
             fechaCreacion?: string;
@@ -622,6 +643,12 @@ export interface components {
             exp?: number;
             rol?: string;
         };
+        ActualizarPerfilRequest: {
+            nombre?: string;
+            apellido?: string;
+            /** Format: date */
+            fechaNacimiento?: string;
+        };
         PaginatorResponseUsuarioListaResponse: {
             content?: components["schemas"]["UsuarioListaResponse"][];
             /** Format: int32 */
@@ -647,34 +674,14 @@ export interface components {
             /** @enum {string} */
             estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
         };
-        UsuarioListadoResponse: {
-            /** Format: int64 */
-            id?: number;
+        UsuarioBasicoResponse: {
             nombre?: string;
             apellido?: string;
             cedula?: string;
             correo?: string;
-            /** @enum {string} */
-            estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
-            fotoPerfilUrl?: string;
             /** Format: date */
             fechaNacimiento?: string;
-            /** Format: date-time */
-            fechaCreacion?: string;
-            /** Format: date-time */
-            ultimoLogin?: string;
-            /** Format: int32 */
-            intentosFallidos?: number;
-            /** @enum {string} */
-            rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
-        };
-        EstudianteListadoResponse: {
-            /** Format: int64 */
-            estudianteId?: number;
-            nombre?: string;
-            apellido?: string;
-            cedula?: string;
-            correo?: string;
+            fotoPerfil?: string;
         };
         Pageable: {
             /** Format: int32 */
@@ -688,6 +695,7 @@ export interface components {
             id?: number;
             nombre?: string;
             codigo?: string;
+            imagenUrl?: string;
             descripcion?: string;
             periodoAcademico?: string;
             /** @enum {string} */
@@ -735,6 +743,7 @@ export interface components {
             nombre?: string;
             apellido?: string;
             correo?: string;
+            fotoPerfilUrl?: string;
             rol?: string;
         };
         RecursoListadoResponse: {
@@ -770,7 +779,101 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    actualizarAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                usuarioId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    archivo: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    resetAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                usuarioId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     actualizar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    archivo: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    actualizar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1389,6 +1492,48 @@ export interface operations {
             };
         };
     };
+    getPerfil: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UsuarioBasicoResponse"];
+                };
+            };
+        };
+    };
+    actualizarPerfil: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActualizarPerfilRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     buscarUsuarioPorId: {
         parameters: {
             query?: never;
@@ -1407,46 +1552,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": Record<string, never>;
-                };
-            };
-        };
-    };
-    listarProfesoresResponsables: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["UsuarioListadoResponse"][];
-                };
-            };
-        };
-    };
-    listarEstudiantes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["EstudianteListadoResponse"][];
                 };
             };
         };
