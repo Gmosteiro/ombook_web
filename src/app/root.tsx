@@ -11,6 +11,7 @@ import "./app.css";
 import Navbar from "./features/common/components/Navbar";
 import { getUserId, getUserRole } from "./services/session.server";
 import { User } from "./features/auth/types";
+import { getPerfil } from "./routes/api.profile"; // importa tu función
 
 
 export const links = () => [
@@ -30,16 +31,25 @@ export const links = () => [
 export async function loader({ request }: { request: Request }) {
   const userEmail = await getUserId(request);
   const userRole = await getUserRole(request);
-  // Si tienes notificaciones, obtén el count aquí. Si no, pon 0.
+  let avatarUrl: string | undefined = undefined;
+  if (userEmail) {
+    try {
+      const perfil = await getPerfil(request);
+      avatarUrl = perfil.fotoPerfil || undefined;
+    } catch {
+      // Si falla, deja avatarUrl como undefined
+    }
+  }
   const notificationCount = 0;
-  return { userEmail, userRole, notificationCount };
+  return { userEmail, userRole, notificationCount, avatarUrl };
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { userEmail, userRole, notificationCount } = useLoaderData() as {
+  const { userEmail, userRole, notificationCount, avatarUrl } = useLoaderData() as {
     userEmail: string;
     userRole: User['rol']
     notificationCount: number;
+    avatarUrl: string | undefined;
   };
 
   return (
@@ -55,6 +65,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           userEmail={userEmail}
           userRole={userRole}
           notificationCount={notificationCount}
+          avatarUrl={avatarUrl}
         />
         <div className="bg-gray-50 min-h-screen">
           {children}

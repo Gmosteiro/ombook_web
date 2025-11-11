@@ -9,9 +9,10 @@ interface NavbarProps {
     userEmail?: string;
     userRole?: UserRole;
     notificationCount?: number;
+    avatarUrl?: string; // <-- Nuevo prop
 }
 
-export default function Navbar({ userEmail, userRole, notificationCount = 0 }: NavbarProps) {
+export default function Navbar({ userEmail, userRole, notificationCount = 0, avatarUrl }: NavbarProps) {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -84,11 +85,19 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0 }: N
                                 aria-label="Abrir menú de usuario"
                                 type="button"
                             >
-                                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                                    <span className="text-white font-medium text-sm">
-                                        {getInitials(userEmail ?? "")}
-                                    </span>
-                                </div>
+                                {avatarUrl ? (
+                                    <img
+                                        src={avatarUrl}
+                                        alt="Avatar"
+                                        className="w-10 h-10 rounded-full object-cover" // <-- sin border-2 border-orange-500
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                                        <span className="text-white font-medium text-sm">
+                                            {getInitials(userEmail ?? "")}
+                                        </span>
+                                    </div>
+                                )}
                                 <svg
                                     className="w-4 h-4 text-gray-400 ml-1"
                                     fill="none"
