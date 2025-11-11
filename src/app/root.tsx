@@ -35,7 +35,9 @@ export async function loader({ request }: { request: Request }) {
   if (userEmail) {
     try {
       const perfil = await getPerfil(request);
-      avatarUrl = perfil.fotoPerfil || undefined;
+      avatarUrl = perfil.fotoPerfil
+        ? `${perfil.fotoPerfil}?v=${Date.now()}`
+        : undefined;
     } catch {
       // Si falla, deja avatarUrl como undefined
     }

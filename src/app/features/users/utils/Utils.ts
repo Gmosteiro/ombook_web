@@ -51,3 +51,9 @@ export const validateCedula = (cedula: string): boolean => {
     // return digitoVerificador === digitos[7];
     return true
 };
+
+export const formatFecha = (fecha: string | undefined) => {
+    if (!fecha) return "";
+    const [year, month, day] = fecha.split("-");
+    return `${day}/${month}/${year}`;
+}

@@ -1,6 +1,7 @@
-import { useLoaderData, useFetcher } from "react-router";
+import { useLoaderData, useFetcher, useRevalidator } from "react-router";
 import { getPerfil, actualizarPerfil, actualizarAvatar, UsuarioBasicoResponse } from "../../../routes/api.profile";
 import { useEffect, useState } from "react";
+import { formatFecha } from "../utils/Utils";
 
 // Loader para obtener el perfil
 export const loader = async ({ request }: { request: Request }) => {
@@ -45,6 +46,7 @@ export const action = async ({ request }: { request: Request }) => {
 export default function ProfilePage() {
     const initialPerfil = (useLoaderData() as { perfil: UsuarioBasicoResponse }).perfil;
     const fetcher = useFetcher<any>();
+    const revalidator = useRevalidator();
     const [edit, setEdit] = useState(false);
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -55,7 +57,8 @@ export default function ProfilePage() {
         if (fetcher.data?.success && fetcher.data.perfil) {
             setPerfil(fetcher.data.perfil);
             setAvatarVersion(Date.now());
-            setEdit(false); // Cierra el modo edición después de actualizar
+            setEdit(false);
+            revalidator.revalidate(); // <-- Esto recarga los loaders, incluido el root
         }
     }, [fetcher.data]);
 
@@ -80,9 +83,9 @@ export default function ProfilePage() {
                 {fetcher.data?.error && (
                     <div className="text-red-600 mt-4">{fetcher.data.error}</div>
                 )}
-                {fetcher.data?.success && (
+                {/* {fetcher.data?.success && (
                     <div className="text-green-600 mt-4">{fetcher.data.success}</div>
-                )}
+                )} */}
                 {!edit && (
                     <button
                         className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
@@ -191,7 +194,7 @@ export default function ProfilePage() {
                         <input
                             name="fechaNacimiento"
                             type="date"
-                            defaultValue={perfil.fechaNacimiento}
+                            defaultValue={formatFecha(perfil.fechaNacimiento)}
                             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
                         />
                     </div>
@@ -225,7 +228,7 @@ export default function ProfilePage() {
                         <span className="font-semibold text-gray-800">Correo:</span> {perfil.correo}
                     </div>
                     <div>
-                        <span className="font-semibold text-gray-800">Fecha de nacimiento:</span> {perfil.fechaNacimiento}
+                        <span className="font-semibold text-gray-800">Fecha de nacimiento:</span> {formatFecha(perfil.fechaNacimiento)}
                     </div>
                 </div>
             )}

@@ -17,7 +17,6 @@ export async function getPerfil(request: Request): Promise<UsuarioBasicoResponse
 
 
     const res = await response.json() as UsuarioBasicoResponse;
-    console.log("Fetched user profile:", res);
     return res;
 }
 
@@ -51,10 +50,8 @@ export async function actualizarAvatar(request: Request, archivo: File): Promise
     });
 
     const errorText = await response.text();
-    console.log("Avatar update response error text:", errorText);
-
     if (!response.ok) throw new Error(errorText || "No se pudo actualizar el avatar");
-    console.log("Avatar updated successfully.");
+
     return getPerfil(request);
 }
 
