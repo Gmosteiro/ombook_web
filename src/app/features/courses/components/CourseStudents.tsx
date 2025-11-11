@@ -31,9 +31,6 @@ export default function CourseStudents() {
   const context = useOutletContext<Ctx>();
   const course = context?.course;
 
-  console.log("Curso: ", JSON.stringify(course));
-
-
   const users = useLoaderData() as UsuarioListaResponse[];
   const navigate = useNavigate();
 

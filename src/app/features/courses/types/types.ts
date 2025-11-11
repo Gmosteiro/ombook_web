@@ -1,4 +1,5 @@
 import type { components } from "../../../../types/openapi";
+import type { UsuarioListaResponse } from "../../../routes/api.users";
 
 // Utilidad para hacer campos obligatorios
 type RequiredCourseFields = "id" | "nombre" | "codigo" | "descripcion" | "periodoAcademico";
@@ -37,7 +38,9 @@ export type EnrollUserData = {
 };
 
 export type EnrollUserResponse = {
-    [key: string]: string;
+    success?: string;
+    error?: string;
+    estudiantes?: UsuarioListaResponse[];
 };
 
 // Respuesta de eliminación de curso (auxiliar)

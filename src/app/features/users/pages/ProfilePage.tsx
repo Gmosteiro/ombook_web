@@ -58,7 +58,7 @@ export default function ProfilePage() {
             setPerfil(fetcher.data.perfil);
             setAvatarVersion(Date.now());
             setEdit(false);
-            revalidator.revalidate(); // <-- Esto recarga los loaders, incluido el root
+            revalidator.revalidate();
         }
     }, [fetcher.data]);
 

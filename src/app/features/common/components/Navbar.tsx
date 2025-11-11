@@ -9,7 +9,7 @@ interface NavbarProps {
     userEmail?: string;
     userRole?: UserRole;
     notificationCount?: number;
-    avatarUrl?: string; // <-- Nuevo prop
+    avatarUrl?: string;
 }
 
 export default function Navbar({ userEmail, userRole, notificationCount = 0, avatarUrl }: NavbarProps) {
@@ -52,6 +52,7 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
     return (
         <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">
             <div className="flex items-center">
+
                 {/* Logo */}
                 <Link to="/" className="flex items-center space-x-2">
                     <span className="text-2xl font-semibold text-blue-700 ">Ombook</span>
@@ -89,7 +90,7 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
                                     <img
                                         src={avatarUrl}
                                         alt="Avatar"
-                                        className="w-10 h-10 rounded-full object-cover" // <-- sin border-2 border-orange-500
+                                        className="w-10 h-10 rounded-full object-cover"
                                     />
                                 ) : (
                                     <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
