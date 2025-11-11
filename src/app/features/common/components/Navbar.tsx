@@ -50,7 +50,7 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
     let isLoggedIn = Boolean(userEmail);
 
     return (
-        <nav className="bg-white border-b border-gray-200 px-6 py-4">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">
             <div className="flex items-center">
                 {/* Logo */}
                 <Link to="/" className="flex items-center space-x-2">
