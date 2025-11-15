@@ -1,30 +1,24 @@
 import React, { useState } from "react";
+import { useFetcher } from "react-router";
 import type { IndividualFormProps } from "../../../common/components/EntityCreate";
-import type { UsuarioVinculado } from "../../types/types";
-// import { useEstudiantes } from "~/features/users/hooks/useUsers";
+import type { UsuarioListaResponse } from "../../../../routes/api.users";
 
-const UnenrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitting }) => {
+const UnenrollIndividualForm: React.FC<IndividualFormProps & { cursoId?: number }> = ({ onSubmit, submitting, cursoId }) => {
+    const fetcher = useFetcher();
     const [search, setSearch] = useState("");
-    const [selected, setSelected] = useState<UsuarioVinculado | null>(null);
+    const [selected, setSelected] = useState<UsuarioListaResponse | null>(null);
+    const [intent, setIntent] = useState<"buscar" | "desmatricular">("buscar");
 
-    const { estudiantes, error, loadEstudiantes } = useEstudiantes(); //TODO: cambiar a endpoint de estudiantes dentro de curso
-
-    // Buscar estudiantes al enviar el formulario
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        loadEstudiantes(); //TODO agregar filtro de búsqueda
-    };
-
-    // Confirmar matrícula
-    const handleMatricular = () => {
-        if (selected) {
-            onSubmit({ usuarioId: selected.id });
-        }
-    };
-
+    const estudiantes: UsuarioListaResponse[] = fetcher.data?.estudiantes ?? [];
     return (
         <>
-            <form onSubmit={handleSearch} className="mb-4">
+            <fetcher.Form
+                method="post"
+                className="mb-4"
+                onSubmit={() => setIntent("buscar")}
+            >
+                <input type="hidden" name="intent" value="buscar" />
+                <input type="hidden" name="cursoId" value={cursoId ?? ""} />
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                     Buscar usuario por nombre, apellido, correo o cédula
                 </label>
@@ -41,18 +35,22 @@ const UnenrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submi
                     <button
                         type="submit"
                         className="bg-blue-600 text-white px-4 py-2 rounded"
-                        disabled={submitting || !search}
+                        disabled={submitting || !search || fetcher.state === "submitting"}
                     >
-                        Buscar
+                        {fetcher.state === "submitting" && intent === "buscar"
+                            ? "Buscando..."
+                            : "Buscar"}
                     </button>
                 </div>
-                {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-            </form>
+                {fetcher.data && estudiantes.length === 0 && (
+                    <p className="text-red-500 text-xs mt-1">No se encontraron estudiantes.</p>
+                )}
+            </fetcher.Form>
 
             {estudiantes.length > 0 && (
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Selecciona un usuario para matricular
+                        Selecciona un usuario para desmatricular
                     </label>
                     <ul className="border rounded divide-y max-h-56 overflow-y-auto">
                         {estudiantes.map(user => (
@@ -72,7 +70,9 @@ const UnenrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submi
             <div className="flex justify-end">
                 <button
                     type="button"
-                    onClick={handleMatricular}
+                    onClick={() => {
+                        if (selected) onSubmit({ usuarioId: selected.id });
+                    }}
                     disabled={submitting || !selected}
                     className={`min-w-[200px] bg-blue-600 text-white py-2 px-4 rounded font-semibold
                         ${submitting || !selected ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}

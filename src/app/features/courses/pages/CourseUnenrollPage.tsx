@@ -3,86 +3,94 @@ import { UserRole } from "~/features/auth/types";
 import { EnrollUserResponse, EnrollMasivaUserData, Course } from "../types/types";
 import EntityCreate from "../../common/components/EntityCreate";
 import UnenrollIndividualForm from "../components/enroll/UnenrollIndividualForm";
-import { apiFetch } from "~/features/auth/utils/methods";
-import { getValidJWTToken } from "~/services/session.server";
-import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
+import { getUsuariosVinculadosByCurso } from "../../../routes/api.users";
+import { unenrollUser, unenrollUsersMassive } from "../../../routes/api.matricula";
+import React, { useCallback } from "react";
 
 export const loader = requireRoleLoader([UserRole.PROFESOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
     const formData = await request.formData();
-    const usuarioId = formData.get("usuarioId") as string;
-    const cursoId = formData.get("cursoId") as string;
+    const intent = formData.get("intent");
 
-    const response = await apiFetch("/matricula/baja", {
-        method: "POST",
-        body: JSON.stringify({
-            estudianteId: Number(usuarioId),
-            cursoId: Number(cursoId)
-        }),
-        secure: true,
-        jwtToken: await getValidJWTToken(request)
-    })
-
-    if (response.ok) {
-        return { success: "true" };
-    } else {
-        const errorData = await response.json();
-        console.log("Error un-enrolling user:", errorData);
-        return { success: "false", error: errorData.message || "Error al desmatricular usuario" };
+    if (intent === "buscar") {
+        const cursoId = Number(formData.get("cursoId"));
+        const search = formData.get("search") as string;
+        const paginator = await getUsuariosVinculadosByCurso(request, cursoId, { q: search });
+        return { estudiantes: paginator.content ?? [] };
     }
+
+    if (intent === "desmatricular") {
+        const usuarioId = Number(formData.get("usuarioId"));
+        const cursoId = Number(formData.get("cursoId"));
+        const response = await unenrollUser(request, cursoId, usuarioId);
+
+        if (response.ok) {
+            return { success: true };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message || "Error al desmatricular usuario" };
+        }
+    }
+
+    if (intent === "masivo") {
+        const cursoId = Number(formData.get("cursoId"));
+        const file = formData.get("file") as File;
+        const response = await unenrollUsersMassive(request, cursoId, file);
+        const result = await response.json();
+        return result;
+    }
+
+    return { error: "Acción no reconocida" };
 }
 
 type Ctx = { course: Course };
 
-export default function UserEnrollPage() {
+export default function UserUnenrollPage() {
     const context = useOutletContext<Ctx>();
     const course = context?.course;
     const fetcher = useFetcher<EnrollUserResponse>();
     const importFetcher = useFetcher<EnrollMasivaUserData>();
 
-    const unEnrollUserImportHandler = createCsvImportHandler({
-        allowedRoles: [UserRole.PROFESOR],
-        backendEndpoint: `/matricula/baja/masiva?cursoId=${course.id}`,
-        successMessage: "Estudiantes Desmatriculados Correctamente",
-    });
+    const handleUnenrollUser = useCallback(
+        (data: { usuarioId: number }) => {
+            if (!course?.id) return;
+            const formData = new FormData();
+            formData.append("usuarioId", data.usuarioId.toString());
+            formData.append("cursoId", course.id.toString());
+            formData.append("intent", "desmatricular");
+            fetcher.submit(formData, { method: "POST" });
+        },
+        [course?.id, fetcher]
+    );
 
-    const handleUnenrollUser = (data: { usuarioId: number }) => {
-        if (!course?.id) return;
+    const handleImportUsers = useCallback(
+        (file: File) => {
+            if (!course?.id) return;
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("cursoId", course.id.toString());
+            formData.append("intent", "masivo");
+            importFetcher.submit(formData, { method: "POST" });
+        },
+        [course?.id, importFetcher]
+    );
 
-        const formData = new FormData();
-        formData.append("usuarioId", data.usuarioId.toString());
-        formData.append("cursoId", course.id.toString());
-
-        fetcher.submit(formData, { method: "POST" });
-    };
-
-    const handleImportUsers = async (file: File) => {
-        try {
-            const { payload, action } = await unEnrollUserImportHandler(file);
-
-            importFetcher.submit(payload, {
-                method: "POST",
-                action,
-                encType: "application/json"
-            });
-        } catch (error) {
-            console.error('Error preparing import:', error);
-        }
-    };
     const importResult: any = importFetcher.data;
-
     const isLoading = fetcher.state === "submitting";
-    const error = importResult && !importResult.success ? importResult.error || "Error al desmatricular usuarios" : "";
-    const success = importResult && importResult.success ? "Usuario desmatriculado correctamente" : "";
+    const error = importResult && !importResult.success ? "Error al desmatricular usuarios" : fetcher.data?.success === false ? "Error desmatriculando usuario" : "";
+    const success = importResult && importResult.success ? "Usuario desmatriculado correctamente" : fetcher.data?.success ? "Usuario desmatriculado correctamente" : "";
 
     return (
         <div className="max-w-3xl mx-auto">
             <EntityCreate
                 entityName="Usuario"
                 title="Desmatricular a un usuario"
-                IndividualForm={UnenrollIndividualForm}
+                IndividualForm={React.useCallback(
+                    props => <UnenrollIndividualForm {...props} cursoId={course?.id} />,
+                    [course?.id]
+                )}
                 addSingle={handleUnenrollUser}
                 addMasive={handleImportUsers}
                 bulk={{ accept: ".csv", templateUrl: "/plantillas/matricular.csv" }}

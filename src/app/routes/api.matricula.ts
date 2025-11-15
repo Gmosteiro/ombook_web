@@ -18,7 +18,35 @@ export async function enrollUsersMassive(request: Request, cursoId: number, file
     const formData = new FormData();
     formData.append("csvFile", file);
 
-    const response = await apiFetch(`/matricula/alta/masiva?cursoId=${cursoId}`, {
+    // Usar endpoint correcto para alta masiva
+    const response = await apiFetch(`/cursos/${cursoId}/matriculas/importaciones-alta`, {
+        method: "POST",
+        body: formData,
+        secure: true,
+        jwtToken: await getValidJWTToken(request)
+    });
+    return response;
+}
+
+// Individual unenroll (desmatricular estudiante de curso)
+export async function unenrollUser(request: Request, cursoId: number, estudianteId: number) {
+    const { getValidJWTToken } = await import("../services/session.server");
+    const response = await apiFetch(`/cursos/${cursoId}/matriculas/${estudianteId}`, {
+        method: "DELETE",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
+    });
+    return response;
+}
+
+// Mass unenroll (CSV)
+export async function unenrollUsersMassive(request: Request, cursoId: number, file: File) {
+    const { getValidJWTToken } = await import("../services/session.server");
+    const formData = new FormData();
+    formData.append("csvFile", file);
+
+    // Usar endpoint correcto para baja masiva
+    const response = await apiFetch(`/cursos/${cursoId}/matriculas/importaciones-baja`, {
         method: "POST",
         body: formData,
         secure: true,

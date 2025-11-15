@@ -65,6 +65,8 @@ export async function getUsers(
 
     const data = await response.json() as PaginatorResponseUsuarioListaResponse;
 
+    console.log("getUsers - data:", data);
+
     return data
 }
 
@@ -127,6 +129,8 @@ export async function getUsuariosVinculadosByCurso(
         if (params.sort) params.sort.forEach(s => searchParams.append("sort", s));
     }
     const url = `/cursos/${cursoId}/usuarios-vinculados${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    // console.log("Filters applied:", searchParams.toString());
+    // console.log("Constructed URL:", url);
 
     const response = await apiFetch(url, {
         method: "GET",
@@ -135,6 +139,8 @@ export async function getUsuariosVinculadosByCurso(
     });
 
     if (!response.ok) throw new Error("Error al obtener usuarios vinculados al curso");
+
+    // console.log("Response data:", await response.clone().json());
 
     return await response.json() as PaginatorResponseUsuarioListaResponse;
 }
