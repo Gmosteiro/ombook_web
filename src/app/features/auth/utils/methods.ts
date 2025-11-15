@@ -3,7 +3,7 @@ import { API_URL } from "../../common/utils/Utils";
 interface BaseApiFetchOptions {
     extraHeaders?: Record<string, string>;
     body?: {};
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 }
 
 interface SecureApiFetchOptions extends BaseApiFetchOptions {
@@ -38,21 +38,30 @@ export const apiFetch = async (
             endpoint = `/${endpoint}`;
         }
 
+        // Solo agrega Content-Type si el body NO es FormData
         const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
             'Accept': 'application/json',
             ...extraHeaders,
         };
 
+        if (body && !(body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
+
         if (secure) {
-            // TypeScript ya garantiza que jwtToken existe aquí
             headers['Authorization'] = `Bearer ${jwtToken}`;
         }
 
         return await fetch(`${API_URL}${endpoint}`, {
             method,
             headers,
-            body: method === 'GET' || method === 'DELETE' ? undefined : JSON.stringify(body),
+            body: method === 'GET' || method === 'DELETE'
+                ? undefined
+                : body instanceof FormData
+                    ? body
+                    : typeof body === 'string'
+                        ? body
+                        : JSON.stringify(body),
         });
     } catch (error) {
         console.error("API Fetch Error:", error);

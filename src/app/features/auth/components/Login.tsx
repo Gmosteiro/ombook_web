@@ -53,7 +53,7 @@ export async function action({ request }: Route.ActionArgs) {
         // Guardar token, rol y email en la sesión
         response = await createUserSession({
             request,
-            userId: email,
+            // userId: email,
             remember: true,
             extraSessionData: {
                 token: data.token,

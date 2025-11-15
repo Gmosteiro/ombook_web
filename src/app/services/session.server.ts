@@ -117,7 +117,7 @@ export async function requireValidSession(request: Request): Promise<void> {
  */
 export async function getUserId(
     request: Request
-): Promise<User["email"] | undefined> {
+): Promise<User["correo"] | undefined> {
     const session = await getUserSession(request);
     return session.get(USER_SESSION_KEY);
 }
@@ -167,13 +167,13 @@ export async function getValidJWTToken(request: Request): Promise<string> {
  */
 export async function createUserSession({
     request,
-    userId,
+    // userId
     remember = true,
     redirectUrl,
     extraSessionData,
 }: {
     request: Request;
-    userId: string;
+    // userId: string;
     remember: boolean;
     redirectUrl?: string;
     extraSessionData: {
@@ -182,7 +182,14 @@ export async function createUserSession({
     };
 }) {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-    session.set(USER_SESSION_KEY, userId);
+
+    const data = _decodeJWT(extraSessionData.token);
+
+    if (!data) {
+        throw new Error("Invalid token data");
+    }
+
+    session.set(USER_SESSION_KEY, data.id);
     if (extraSessionData) {
         Object.entries(extraSessionData).forEach(([key, value]) => {
             session.set(key, value);
@@ -200,4 +207,32 @@ export async function createUserSession({
             }),
         },
     });
+}
+
+
+
+interface Token {
+    ip: string;
+    id: string;
+    canal: string;
+    rol: UserRole;
+    sub: string;
+    iat: number;
+    exp: number;
+}
+
+const _decodeJWT = (token: string): Token | null => {
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+
+        // Decode the payload (base64url)
+        const payload = JSON.parse(
+            atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+        );
+        return payload;
+    } catch (error) {
+        console.error('Error decoding JWT:', error);
+        return null;
+    }
 }

@@ -5,16 +5,16 @@ import CourseIndividualForm from "../components/general/CourseForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { CreateCourseData, ImportCoursesResponse } from "../types/types";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
-import { useCoursesApi } from "../hooks/useCoursesApi";
+import { crearCurso } from "../../../routes/api.courses";
 import { useState } from "react";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
 
 export default function CourseCreatePage() {
     const importFetcher = useFetcher<ImportCoursesResponse>();
-    const { createCourse, isLoading, error: apiError } = useCoursesApi();
     const [success, setSuccess] = useState<string | undefined>();
     const [error, setError] = useState<string | undefined>();
+    const [isLoading, setIsLoading] = useState(false);
 
     const createCoursesImportHandler = createCsvImportHandler({
         allowedRoles: [UserRole.ADMINISTRADOR],
@@ -26,17 +26,17 @@ export default function CourseCreatePage() {
         try {
             setError(undefined);
             setSuccess(undefined);
+            setIsLoading(true);
 
-            const result = await createCourse(values);
+            // Usar el método crearCurso directamente
+            await crearCurso(new Request(window.location.href), values);
 
-            if (result) {
-                setSuccess("Curso creado exitosamente");
-            } else {
-                setError(apiError || "Error al crear el curso");
-            }
-        } catch (error) {
+            setSuccess("Curso creado exitosamente");
+        } catch (error: any) {
             console.error("Error al crear curso:", error);
-            setError("Error inesperado al crear el curso");
+            setError(error?.message || "Error inesperado al crear el curso");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -55,7 +55,7 @@ export default function CourseCreatePage() {
         }
     };
 
-    const finalError = error || apiError || importFetcher.data?.error;
+    const finalError = error || importFetcher.data?.error;
     const finalSuccess = success || (importFetcher.data?.success ? importFetcher.data.message : undefined);
 
     // Determinar si hay errores de importación para mostrar diferente
@@ -104,7 +104,7 @@ export default function CourseCreatePage() {
                 bulk={{ accept: ".csv", templateUrl: "/plantillas/cursos.csv" }}
                 labels={{ submitBulk: "Importar Cursos" }}
                 isLoading={isLoading || importFetcher.state === "submitting"}
-                error={!hasImportErrors ? finalError : undefined} // No mostrar error genérico si hay errores detallados
+                error={!hasImportErrors ? finalError : undefined}
                 success={finalSuccess}
             />
         </div>

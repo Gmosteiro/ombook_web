@@ -3,35 +3,40 @@ import { UserRole } from "~/features/auth/types";
 import { EnrollUserResponse, EnrollMasivaUserData, Course } from "../types/types";
 import EntityCreate from "../../common/components/EntityCreate";
 import EnrollIndividualForm from "../components/enroll/EnrollIndividualForm";
-import { apiFetch } from "~/features/auth/utils/methods";
-import { getValidJWTToken } from "~/services/session.server";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
+import { getEstudiantes } from "../../../routes/api.users";
+import { enrollUser } from "../../../routes/api.matricula";
 
 export const loader = requireRoleLoader([UserRole.PROFESOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
     const formData = await request.formData();
-    const usuarioId = formData.get("usuarioId") as string;
-    const cursoId = formData.get("cursoId") as string;
+    const intent = formData.get("intent");
+    console.log("Action intent:", intent);
 
-    const response = await apiFetch("/matricula/alta", {
-        method: "POST",
-        body: JSON.stringify({
-            estudianteId: Number(usuarioId),
-            cursoId: Number(cursoId)
-        }),
-        secure: true,
-        jwtToken: await getValidJWTToken(request)
-    })
-
-    if (response.ok) {
-        return { success: "true" };
-    } else {
-        const errorData = await response.json();
-        console.log("Error enrolling user:", errorData);
-        return { success: "false", error: errorData.message || "Error al matricular usuario" };
+    if (intent === "buscar") {
+        const search = formData.get("search") as string;
+        const estudiantes = await getEstudiantes(request, { q: search });
+        return { estudiantes };
     }
+
+    if (intent === "matricular") {
+        const usuarioId = Number(formData.get("usuarioId"));
+        const cursoId = Number(formData.get("cursoId"));
+
+        const response = await enrollUser(request, usuarioId, cursoId);
+
+        console.log("Enrollment response:", response);
+        if (response.ok) {
+            return { success: "true" };
+        } else {
+            const errorData = await response.json();
+            return { success: "false", error: errorData.message || "Error al matricular usuario" };
+        }
+    }
+
+    return { error: "Acción no reconocida" };
 }
 
 type Ctx = { course: Course };
@@ -54,7 +59,8 @@ export default function UserEnrollPage() {
         const formData = new FormData();
         formData.append("usuarioId", data.usuarioId.toString());
         formData.append("cursoId", course.id.toString());
-
+        formData.append("intent", "matricular");
+        console.log("Submitting enrollment for user:", data.usuarioId, "to course:", course.id);
         fetcher.submit(formData, { method: "POST" });
     };
 

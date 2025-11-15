@@ -1,29 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
-import { useCoursesApi } from "../../hooks/useCoursesApi";
-import { Course } from "../../types/types";
-import { useNavigate } from "react-router";
+import { useNavigate, useFetcher } from "react-router";
+import { CursoListadoResponse } from "../../../../routes/api.courses";
 
 interface CourseCardProps {
-  course: Course;
+  course: CursoListadoResponse;
   onDeleted?: () => void;
 }
 
 export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { deleteCourse, isLoading: isDeleting, error } = useCoursesApi();
+  const fetcher = useFetcher();
+  const isDeleting = fetcher.state === "submitting";
+  const error = fetcher.data?.error;
   const navigate = useNavigate();
 
-  const handleDelete = async () => {
-    const success = await deleteCourse(course.id);
+  const handleDelete = () => {
+    fetcher.submit(
+      (() => {
+        const formData = new FormData();
+        formData.append("courseId", String(course.id));
+        return formData;
+      })(),
+      { method: "post", action: "/courses" }
+    );
+  };
 
-    if (success) {
+  // Efecto para cerrar el diálogo y notificar al padre si fue exitoso
+  useEffect(() => {
+    if (fetcher.data?.success) {
       setShowDeleteDialog(false);
       onDeleted?.();
-    } else {
-      console.error("Error al eliminar el curso:", error);
     }
-  };
+  }, [fetcher.data, onDeleted]);
 
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
@@ -38,22 +47,12 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
     }
   };
 
-
-  const getRandomImageUrl = () => {
-    const images = [
-      "https://cdn.computerhoy.com/sites/navi.axelspringer.es/public/media/image/2018/11/cursos-online.jpg?tf=3840x",
-      "https://vilmanunez.com/wp-content/uploads/2016/03/herramientas-y-recursos-para-crear-curso-online.png",
-      "https://maxmultimedia.com.uy/wp-content/uploads/2025/10/curso-intensivo-de-informatica.jpg",
-    ];
-    return images[Math.floor(Math.random() * images.length)];
-  }
-
   return (
     <>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
 
         <img
-          src={getRandomImageUrl()} //TODO
+          src={course.imagenUrl}
           alt={course.nombre}
           className="w-full h-48 object-cover rounded-t-xl"
         />
@@ -89,7 +88,6 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
 
           </p>
 
-          {/* Mostrar error si hay */}
           {error && (
             <div className="mb-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-2 rounded">
               {error}

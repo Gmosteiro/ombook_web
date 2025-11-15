@@ -31,6 +31,9 @@ const routes: RouteConfig = [
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
     route("/users/delete", "./features/users/pages/UsersDeletePage.tsx"),
 
+
+    route("/profile", "./features/users/pages/ProfilePage.tsx"),
+
     // API Routes
     route("/csv/import", "./routes/api-csv-import.ts"),
     route("/app/users", "./routes/api.users.ts"),

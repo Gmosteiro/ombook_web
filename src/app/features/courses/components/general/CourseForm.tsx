@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CreateCourseData } from "../../types/types";
-import { useProfesores } from "../../../users/hooks/useUsers";
-import { ProfesorResponsable } from "../../../users/types";
+import { User } from "../../../auth/types";
+import { useLoaderData } from "react-router";
 
 interface CourseFormProps {
     onSubmit: (data: CreateCourseData) => void;
@@ -9,13 +9,8 @@ interface CourseFormProps {
 }
 
 export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
-    const { profesores, isLoading: isLoadingProfesores, error: profesoresError, loadProfesores } = useProfesores();
-    const [selectedProfesores, setSelectedProfesores] = useState<ProfesorResponsable[]>([]);
-
-    // Cargar profesores al montar el componente
-    useEffect(() => {
-        loadProfesores();
-    }, []);
+    const { profesores } = useLoaderData() as { profesores: User[] };
+    const [selectedProfesores, setSelectedProfesores] = useState<User[]>([]);
 
     const removeProfesor = (profesorId: number) => {
         setSelectedProfesores(selectedProfesores.filter(p => p.id !== profesorId));
@@ -141,22 +136,6 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                     Profesores Responsables
                 </label>
 
-                {/* Mostrar error si hay */}
-                {profesoresError && (
-                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md p-3">
-                        <p className="text-sm text-red-600 dark:text-red-400">{profesoresError}</p>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                loadProfesores();
-                            }}
-                            className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline"
-                        >
-                            Reintentar
-                        </button>
-                    </div>
-                )}
-
                 {/* Chips de profesores seleccionados */}
                 {selectedProfesores.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
@@ -183,53 +162,46 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                 )}
 
                 {/* Lista de profesores disponibles con checkboxes */}
-                {isLoadingProfesores ? (
-                    <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Cargando profesores...</span>
-                    </div>
-                ) : (
-                    <div className="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg">
-                        <div className="p-2 space-y-1">
-                            {profesores && profesores.length > 0 ? (
-                                profesores.map((profesor) => {
-                                    const isSelected = selectedProfesores.find(p => p.id === profesor.id);
-                                    return (
-                                        <label
-                                            key={profesor.id}
-                                            className={`flex items-center p-2 rounded-md cursor-pointer transition-colors ${isSelected
-                                                ? 'bg-blue-50 dark:bg-blue-900/30'
-                                                : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                                }`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={!!isSelected}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        if (!selectedProfesores.find(p => p.id === profesor.id)) {
-                                                            setSelectedProfesores([...selectedProfesores, profesor]);
-                                                        }
-                                                    } else {
-                                                        if (typeof profesor.id === "number") removeProfesor(profesor.id);
+                <div className="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg">
+                    <div className="p-2 space-y-1">
+                        {profesores && profesores.length > 0 ? (
+                            profesores.map((profesor) => {
+                                const isSelected = selectedProfesores.find(p => p.id === profesor.id);
+                                return (
+                                    <label
+                                        key={profesor.id}
+                                        className={`flex items-center p-2 rounded-md cursor-pointer transition-colors ${isSelected
+                                            ? 'bg-blue-50 dark:bg-blue-900/30'
+                                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={!!isSelected}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    if (!selectedProfesores.find(p => p.id === profesor.id)) {
+                                                        setSelectedProfesores([...selectedProfesores, profesor]);
                                                     }
-                                                }}
-                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                            />
-                                            <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                                                {profesor.nombreCompleto}
-                                            </span>
-                                        </label>
-                                    );
-                                })
-                            ) : (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                                    No hay profesores disponibles
-                                </p>
-                            )}
-                        </div>
+                                                } else {
+                                                    if (typeof profesor.id === "number") removeProfesor(profesor.id);
+                                                }
+                                            }}
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        />
+                                        <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                            {profesor.nombreCompleto}
+                                        </span>
+                                    </label>
+                                );
+                            })
+                        ) : (
+                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                                No hay profesores disponibles
+                            </p>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Botón de envío */}
@@ -245,3 +217,4 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
         </form>
     );
 }
+

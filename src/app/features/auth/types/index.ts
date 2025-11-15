@@ -6,16 +6,26 @@ export const enum UserRole {
     ESTUDIANTE = "ESTUDIANTE"
 }
 
+export const enum UserStatus {
+    ACTIVO = "ACTIVO",
+    INACTIVO = "INACTIVO",
+    BLOQUEADO = "BLOQUEADO"
+}
+
 export type claims = {
     rol: UserRole;
     orige: string;
 }
 export interface User {
     id?: number;
-    email: string;
+    nombre: string;
+    apellido: string;
+    correo: string;
+    cedula: string;
+    fechaNacimiento: string;
     rol: UserRole;
-    name?: string;
-    // Agregar más campos según tu API
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 // Schemas

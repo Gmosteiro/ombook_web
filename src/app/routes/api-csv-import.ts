@@ -48,13 +48,6 @@ export async function action({ request }: ActionFunctionArgs) {
         const backendFormData = new FormData();
         backendFormData.append('csvFile', reconstructedFile, fileName);
 
-        console.log('Submitting CSV Import to backend:', {
-            backendEndpoint,
-            fileName,
-            fileType,
-            fileSize: reconstructedFile.size
-        });
-
         const response = await fetch(`${API_URL}${backendEndpoint}`, {
             method: 'POST',
             headers: {
@@ -62,10 +55,6 @@ export async function action({ request }: ActionFunctionArgs) {
             },
             body: backendFormData,
         });
-
-        console.log('CSV Import Response Status:', response.status);
-        const responseBody = await response.clone().text();
-        console.log('CSV Import Response Body:', responseBody);
 
         if (!response.ok) {
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;

@@ -9,9 +9,10 @@ interface NavbarProps {
     userEmail?: string;
     userRole?: UserRole;
     notificationCount?: number;
+    avatarUrl?: string;
 }
 
-export default function Navbar({ userEmail, userRole, notificationCount = 0 }: NavbarProps) {
+export default function Navbar({ userEmail, userRole, notificationCount = 0, avatarUrl }: NavbarProps) {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +50,9 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0 }: N
     let isLoggedIn = Boolean(userEmail);
 
     return (
-        <nav className="bg-white border-b border-gray-200 px-6 py-4">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">
             <div className="flex items-center">
+
                 {/* Logo */}
                 <Link to="/" className="flex items-center space-x-2">
                     <span className="text-2xl font-semibold text-blue-700 ">Ombook</span>
@@ -84,11 +86,19 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0 }: N
                                 aria-label="Abrir menú de usuario"
                                 type="button"
                             >
-                                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                                    <span className="text-white font-medium text-sm">
-                                        {getInitials(userEmail ?? "")}
-                                    </span>
-                                </div>
+                                {avatarUrl ? (
+                                    <img
+                                        src={avatarUrl}
+                                        alt="Avatar"
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                                        <span className="text-white font-medium text-sm">
+                                            {getInitials(userEmail ?? "")}
+                                        </span>
+                                    </div>
+                                )}
                                 <svg
                                     className="w-4 h-4 text-gray-400 ml-1"
                                     fill="none"
@@ -110,7 +120,7 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0 }: N
                             >
                                 <div className="py-1">
                                     <Link
-                                        to="/perfil"
+                                        to="/profile"
                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                         onClick={() => setIsUserMenuOpen(false)}
                                     >

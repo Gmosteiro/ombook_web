@@ -1,82 +1,54 @@
 import { ActionFunctionArgs, useFetcher } from "react-router";
-import { getValidJWTToken } from "~/services/session.server";
 import { UserRole } from "~/features/auth/types";
 import EntityCreate from "../../common/components/EntityCreate";
 import UserIndividualForm from "../components/UserForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
-import { API_URL } from "../../common/utils/Utils";
 import { CreateUserData, CreateUserResponse, ImportUsersResponse } from "../types";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
+import { crearUsuario } from "../../../routes/api.users";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<CreateUserResponse> {
-    const formData = await request.formData();
-    const intent = formData.get("intent") as string;
+    let data: any;
+    let intent: string | undefined;
+
+    if (request.headers.get("content-type")?.includes("application/json")) {
+        data = await request.json();
+        intent = data.intent;
+    } else {
+        const formData = await request.formData();
+        intent = formData.get("intent") as string;
+        data = Object.fromEntries(formData.entries());
+    }
 
     if (intent === "createUser") {
-        const jwtToken = await getValidJWTToken(request);
-        return await createUser(formData, jwtToken);
+        const rawCedula = data.cedula as string;
+        const cedula = rawCedula.replace(/\D/g, ""); // Elimina todo lo que no sea número
+
+        const userData: CreateUserData = {
+            nombre: data.nombre,
+            apellido: data.apellido,
+            correo: data.correo,
+            contrasena: data.contrasena,
+            cedula, // Usa la cédula limpia
+            fechaNacimiento: data.fechaNacimiento,
+            rol: data.rol,
+        };
+
+        try {
+            await crearUsuario(request, userData);
+            return { success: true, message: "Usuario creado exitosamente" };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error?.message || "Error al crear usuario"
+            };
+        }
     }
 
     return { success: false, error: "Intent no reconocido" };
 }
-
-const createUser = async (formData: FormData, jwtToken: string): Promise<CreateUserResponse> => {
-    const userData: CreateUserData = {
-        nombre: formData.get("nombre") as string,
-        apellido: formData.get("apellido") as string,
-        correo: formData.get("correo") as string,
-        contrasena: formData.get("contrasena") as string,
-        cedula: formData.get("cedula") as string,
-        fechaNacimiento: formData.get("fechaNacimiento") as string,
-        rol: formData.get("rol") as UserRole,
-    };
-
-    try {
-        const response = await fetch(`${API_URL}/usuarios/alta`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${jwtToken}`,
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(userData),
-        });
-
-        if (!response.ok) {
-            let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-            try {
-                const errorText = await response.text();
-                if (errorText) {
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        errorMessage = errorJson.message || errorJson.error || errorText;
-                    } catch {
-                        errorMessage = errorText;
-                    }
-                }
-            } catch {
-                // usar errorMessage por defecto
-            }
-
-            return {
-                success: false,
-                error: `Error al crear usuario: ${errorMessage}`
-            };
-        }
-
-        return { success: true, message: "Usuario creado exitosamente" };
-
-    } catch (fetchError) {
-        console.error('Fetch error:', fetchError);
-        return {
-            success: false,
-            error: "Error de conexión. Verifica tu conexión a internet e intenta nuevamente."
-        };
-    }
-};
 
 export default function UserCreatePage() {
     const fetcher = useFetcher<CreateUserResponse>();
@@ -90,13 +62,16 @@ export default function UserCreatePage() {
 
     const handleCreateUser = (values: CreateUserData) => {
         try {
-            const formData = new FormData();
-            formData.append("intent", "createUser");
-            Object.entries(values).forEach(([key, value]) => {
-                formData.append(key, value);
-            });
-
-            fetcher.submit(formData, { method: "POST" });
+            fetcher.submit(
+                JSON.stringify({
+                    intent: "createUser",
+                    ...values,
+                }),
+                {
+                    method: "POST",
+                    encType: "application/json",
+                }
+            );
         } catch (error) {
             console.error("Error al crear usuario:", error);
         }

@@ -1,66 +1,3 @@
-import { apiFetch } from "../../auth/utils/methods";
-import { ProfesorResponsable, UsuarioListadoResponse, Usuario } from "../types";
-
-export const loadProfesores = async (jwtToken: string): Promise<ProfesorResponsable[]> => {
-    try {
-        const response = await apiFetch("/usuarios/profesores", {
-            method: 'GET',
-            secure: true,
-            jwtToken: jwtToken,
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        const data: ProfesorResponsable[] = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Error loading profesores:", error);
-        throw error;
-    }
-};
-
-export const loadUsuarios = async (jwtToken: string): Promise<UsuarioListadoResponse[]> => {
-    try {
-        const response = await apiFetch("/usuarios/listar", {
-            method: 'GET',
-            secure: true,
-            jwtToken: jwtToken,
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        const data: UsuarioListadoResponse[] = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Error loading usuarios:", error);
-        throw error;
-    }
-};
-
-export const loadUsuarioById = async (id: number, jwtToken: string): Promise<Usuario> => {
-    try {
-        const response = await apiFetch(`/usuarios/${id}`, {
-            method: 'GET',
-            secure: true,
-            jwtToken: jwtToken,
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        const data: Usuario = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Error loading usuario:", error);
-        throw error;
-    }
-};
-
 /**
  * Formats a Uruguayan ID (cédula) by automatically adding dots and dash
  * @param value - String with ID digits
@@ -114,3 +51,9 @@ export const validateCedula = (cedula: string): boolean => {
     // return digitoVerificador === digitos[7];
     return true
 };
+
+export const formatFecha = (fecha: string | undefined) => {
+    if (!fecha) return "";
+    const [year, month, day] = fecha.split("-");
+    return `${day}/${month}/${year}`;
+}
