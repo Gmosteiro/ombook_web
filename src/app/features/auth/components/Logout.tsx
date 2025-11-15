@@ -1,22 +1,9 @@
-import { type MetaFunction, Form } from "react-router";
 import { redirect } from "react-router";
+import { Form } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
 import { logout, getValidJWTToken } from "~/services/session.server";
 import { API_URL } from "../../common/utils/Utils";
 import type { CerrarSesionRequest } from "../../auth/types";
-
-/**
- * Defines metadata for the logout route.
- * 
- * @returns An array of metadata objects for the route.
- * @see https://reactrouter.com/en/dev/route/meta
- */
-export const meta: MetaFunction = () => {
-    return [
-        { title: "New React Router App" },
-        { name: "description", content: "Welcome to React Router!" },
-    ];
-};
 
 /**
  * Action function for the logout route.

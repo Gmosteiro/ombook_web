@@ -59,6 +59,12 @@ export const action = async ({ request }: { request: Request }) => {
   }
 };
 
+export function meta() {
+  return [
+    { title: "Ombook | Cursos" }
+  ];
+}
+
 export default function CoursesPage() {
   const { cursos, profesores, filters, page, showTeacherFilter } = useLoaderData() as {
     cursos: PaginatorResponseCursoListadoResponse;

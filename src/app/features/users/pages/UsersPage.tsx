@@ -3,6 +3,7 @@ import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole, UserStatus } from "../../auth/types";
 import { getUsers, PaginatorResponseUsuarioListaResponse, UsuarioListaResponse } from "../../../routes/api.users";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
+import { getUserRole } from "../../../services/session.server";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR])(args);
@@ -15,11 +16,17 @@ export const loader = async (args: any) => {
   const size = url.searchParams.get("size") ? Number(url.searchParams.get("size")) : undefined;
 
   const users = await getUsers(args.request, { q, rol, estado, page, size });
-  const { userRole } = useLoaderData() as { userRole: UserRole };
-
+  const userRole = await getUserRole(args.request);
 
   return { userRole, users, filters: { search: q || "", rol: rol || "", estado: estado || "" }, page: page || 1 };
 };
+
+export function meta() {
+  return [
+    { title: `Ombook | Usuarios` }
+  ];
+}
+
 
 export default function UsersPage() {
   const { users, filters, page } = useLoaderData() as {

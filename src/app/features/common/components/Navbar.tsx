@@ -126,13 +126,15 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
                                     >
                                         Mi Perfil
                                     </Link>
-                                    <Link
+
+                                    {/* <Link
                                         to="/configuracion"
                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                         onClick={() => setIsUserMenuOpen(false)}
                                     >
                                         Configuración
-                                    </Link>
+                                    </Link> */}
+
                                     <hr className="my-1" />
                                     <div className="px-4 py-2">
                                         <Logout

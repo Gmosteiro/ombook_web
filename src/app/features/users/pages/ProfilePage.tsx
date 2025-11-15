@@ -9,6 +9,13 @@ export const loader = async ({ request }: { request: Request }) => {
     return { perfil };
 };
 
+
+export function meta() {
+    return [
+        { title: `Ombook | Perfil` }
+    ];
+}
+
 // Action para actualizar perfil y avatar
 export const action = async ({ request }: { request: Request }) => {
     const formData = await request.formData();

@@ -23,6 +23,15 @@ export async function loader({ params, request }: { params: { id: string }, requ
   }
 }
 
+
+export function meta() {
+  const course = useLoaderData() as Course;
+
+  return [
+    { title: `Ombook | ${course.nombre ? course.nombre : 'Cursos'}` }
+  ];
+}
+
 export default function CourseDetailPage() {
   const course = useLoaderData() as Course;
   return (

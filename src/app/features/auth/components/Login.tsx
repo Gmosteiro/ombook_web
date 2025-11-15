@@ -7,8 +7,7 @@ import type { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
 
 export const meta: MetaFunction = () => {
     return [
-        { title: "New React Router App" },
-        { name: "description", content: "Welcome to React Router!" },
+        { title: "Ombook | Iniciar Sesion" }
     ];
 };
 
