@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
-import { useNavigate, useFetcher } from "react-router-dom";
+import { useNavigate, useFetcher } from "react-router";
 import { CursoListadoResponse } from "../../../../routes/api.courses";
 
 interface CourseCardProps {
@@ -47,22 +47,12 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
     }
   };
 
-
-  const getRandomImageUrl = () => {
-    const images = [
-      "https://cdn.computerhoy.com/sites/navi.axelspringer.es/public/media/image/2018/11/cursos-online.jpg?tf=3840x",
-      "https://vilmanunez.com/wp-content/uploads/2016/03/herramientas-y-recursos-para-crear-curso-online.png",
-      "https://maxmultimedia.com.uy/wp-content/uploads/2025/10/curso-intensivo-de-informatica.jpg",
-    ];
-    return images[Math.floor(Math.random() * images.length)];
-  }
-
   return (
     <>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
 
         <img
-          src={getRandomImageUrl()} //TODO
+          src={course.imagenUrl}
           alt={course.nombre}
           className="w-full h-48 object-cover rounded-t-xl"
         />

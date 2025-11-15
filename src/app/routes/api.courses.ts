@@ -1,5 +1,5 @@
-import { getValidJWTToken } from "~/services/session.server";
-import { apiFetch } from "~/features/auth/utils/methods";
+import { getValidJWTToken } from "../services/session.server";
+import { apiFetch } from '../features/auth/utils/methods'
 import type { components } from "../../types/openapi";
 
 // Tipos OpenAPI
@@ -48,7 +48,6 @@ export async function getCursos(
     if (!response.ok) throw new Error("Error al obtener cursos");
 
     const res = await response.json() as PaginatorResponseCursoListadoResponse;
-
     return res;
 }
 

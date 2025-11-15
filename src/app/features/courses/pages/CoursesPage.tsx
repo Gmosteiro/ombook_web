@@ -1,15 +1,15 @@
 import { useNavigate, useLoaderData, useSearchParams } from "react-router";
-import { useRevalidator } from "react-router-dom"; // Agrega este import
+import { useRevalidator } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
 import { getCursos, PaginatorResponseCursoListadoResponse, CourseStatus, CursoListadoResponse } from "../../../routes/api.courses";
-import { getProfesores, UsuarioListadoResponse } from "../../../routes/api.users";
+import { getProfesores, UsuarioListaResponse } from "../../../routes/api.users";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { FilterBar, Filters } from "../components/general/FilterBar";
 import { CourseCard } from "../components/general/CourseCard";
 import { Pagination } from "../components/general/Pagination";
 import { deleteCurso } from "../../../routes/api.courses";
-import { getUserRole } from "../../../services/session.server"; // Importa la función
+import { getUserRole } from "../../../services/session.server";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
@@ -23,7 +23,7 @@ export const loader = async (args: any) => {
 
   const userRole = await getUserRole(args.request);
 
-  let profesores: UsuarioListadoResponse[] = [];
+  let profesores: UsuarioListaResponse[] = [];
   let showTeacherFilter = true;
 
   if (userRole === UserRole.ADMINISTRADOR) {
@@ -61,7 +61,7 @@ export const action = async ({ request }: { request: Request }) => {
 export default function CoursesPage() {
   const { cursos, profesores, filters, page, showTeacherFilter } = useLoaderData() as {
     cursos: PaginatorResponseCursoListadoResponse;
-    profesores: UsuarioListadoResponse[];
+    profesores: UsuarioListaResponse[];
     filters: Filters;
     page: number;
     size: number;
@@ -69,9 +69,8 @@ export default function CoursesPage() {
   };
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const revalidator = useRevalidator(); // Agrega este hook
+  const revalidator = useRevalidator();
 
-  // Handlers para filtros
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
@@ -83,7 +82,6 @@ export default function CoursesPage() {
     setSearchParams(params);
   };
 
-  // Handler para paginación
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", newPage.toString());
@@ -113,7 +111,7 @@ export default function CoursesPage() {
           handleFilterChange("teacher", newFilters.teacher || "");
         }}
         teachers={profesores}
-        showTeacherFilter={showTeacherFilter} // Pasa la prop para mostrar/ocultar el filtro de profesores
+        showTeacherFilter={showTeacherFilter}
       />
 
       {allCourses.length === 0 ? (
@@ -148,7 +146,7 @@ export default function CoursesPage() {
               <CourseCard
                 key={course.id}
                 course={course}
-                onDeleted={() => revalidator.revalidate()} // Recarga la lista al eliminar
+                onDeleted={() => revalidator.revalidate()}
               />
             ))}
           </div>

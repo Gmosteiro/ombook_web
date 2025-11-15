@@ -62,14 +62,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="">
         <Navbar
           userEmail={userEmail}
           userRole={userRole}
           notificationCount={notificationCount}
           avatarUrl={avatarUrl}
         />
-        <div className="bg-gray-50 min-h-screen">
+        <div className="bg-gray-50 min-h-screen pt-20">
           {children}
           <ScrollRestoration />
           <Scripts />

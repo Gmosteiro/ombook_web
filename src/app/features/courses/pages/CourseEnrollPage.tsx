@@ -3,17 +3,17 @@ import { UserRole } from "~/features/auth/types";
 import { EnrollUserResponse, EnrollMasivaUserData, Course } from "../types/types";
 import EntityCreate from "../../common/components/EntityCreate";
 import EnrollIndividualForm from "../components/enroll/EnrollIndividualForm";
-import { apiFetch } from "~/features/auth/utils/methods";
-import { getValidJWTToken } from "~/services/session.server";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { getEstudiantes } from "../../../routes/api.users";
+import { enrollUser } from "../../../routes/api.matricula";
 
 export const loader = requireRoleLoader([UserRole.PROFESOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
     const formData = await request.formData();
     const intent = formData.get("intent");
+    console.log("Action intent:", intent);
 
     if (intent === "buscar") {
         const search = formData.get("search") as string;
@@ -22,28 +22,16 @@ export async function action({ request }: ActionFunctionArgs): Promise<EnrollUse
     }
 
     if (intent === "matricular") {
-        const usuarioId = formData.get("usuarioId");
-        const cursoId = formData.get("cursoId") as string;
+        const usuarioId = Number(formData.get("usuarioId"));
+        const cursoId = Number(formData.get("cursoId"));
 
-        console.log("Matriculando usuarioId:", usuarioId, "al cursoId:", cursoId);
+        const response = await enrollUser(request, usuarioId, cursoId);
 
-        const response = await apiFetch("/matricula/alta", {
-            method: "POST",
-            body: JSON.stringify({
-                estudianteId: Number(usuarioId),
-                cursoId: Number(cursoId)
-            }),
-            secure: true,
-            jwtToken: await getValidJWTToken(request)
-        })
-
-
-        console.log("Respuesta de la API de matriculación:", response);
+        console.log("Enrollment response:", response);
         if (response.ok) {
             return { success: "true" };
         } else {
             const errorData = await response.json();
-            console.log("Error enrolling user:", errorData);
             return { success: "false", error: errorData.message || "Error al matricular usuario" };
         }
     }
@@ -72,7 +60,7 @@ export default function UserEnrollPage() {
         formData.append("usuarioId", data.usuarioId.toString());
         formData.append("cursoId", course.id.toString());
         formData.append("intent", "matricular");
-
+        console.log("Submitting enrollment for user:", data.usuarioId, "to course:", course.id);
         fetcher.submit(formData, { method: "POST" });
     };
 
