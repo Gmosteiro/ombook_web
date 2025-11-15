@@ -13,7 +13,6 @@ export const loader = requireRoleLoader([UserRole.PROFESOR]);
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
     const formData = await request.formData();
     const intent = formData.get("intent");
-    console.log("Action intent:", intent);
 
     if (intent === "buscar") {
         const search = formData.get("search") as string;
@@ -27,12 +26,11 @@ export async function action({ request }: ActionFunctionArgs): Promise<EnrollUse
 
         const response = await enrollUser(request, usuarioId, cursoId);
 
-        console.log("Enrollment response:", response);
         if (response.ok) {
-            return { success: "true" };
+            return { success: true };
         } else {
             const errorData = await response.json();
-            return { success: "false", error: errorData.message || "Error al matricular usuario" };
+            return { success: false, error: errorData.message || "Error al matricular usuario" };
         }
     }
 
@@ -80,8 +78,8 @@ export default function UserEnrollPage() {
     const importResult: any = importFetcher.data;
 
     const isLoading = fetcher.state === "submitting";
-    const error = importResult && !importResult.success ? importResult.error || "Error al matricular usuarios" : "";
-    const success = importResult && importResult.success ? "Usuario matriculado correctamente" : "";
+    const error = importResult && !importResult.success ? "Error al matricular usuarios" : fetcher.data?.success === false ? "Error Matriculando Usuario" : "";
+    const success = importResult && importResult.success ? "Usuario matriculado correctamente" : fetcher.data?.success ? "Usuario matriculado correctamente" : "";
 
     return (
         <div className="max-w-3xl mx-auto">
