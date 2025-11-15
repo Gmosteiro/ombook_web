@@ -1,8 +1,281 @@
+import { useState, useEffect } from "react";
+import { useLoaderData, useOutletContext } from "react-router";
+import { getValidJWTToken, getUserRole } from "~/services/session.server";
+import { apiFetch } from "../../auth/utils/methods";
+import type { Course } from "../types/types";
+
+type Anuncio = {
+  id: number;
+  titulo: string;
+  contenido: string;
+  fechaCreacion?: string;
+  fechaProgramada?: string;
+  nombreCreador?: string;
+  apellidoCreador?: string;
+  fotoPerfilUrl?: string;
+  autorId?: number;
+};
+
+export async function loader({ params, request }: { params: { id: string }, request: Request }) {
+  const { id } = params;
+  try {
+    const jwtToken = await getValidJWTToken(request);
+    const userRole = await getUserRole(request);
+
+    const res = await apiFetch(`/cursos/${id}/anuncios`, {
+      method: 'GET',
+      secure: true,
+      jwtToken
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const anuncios: Anuncio[] = await res.json();
+
+    return {
+      anuncios,
+      jwtToken,
+      isProfesor: userRole === 'PROFESOR'
+    };
+  } catch (err) {
+    console.error("Error fetching announcements:", err);
+    return {
+      anuncios: [] as Anuncio[],
+      jwtToken: '',
+      isProfesor: false
+    };
+  }
+}
+
 export default function CourseAnnouncements() {
+  const context = useOutletContext<{ course: Course }>();
+  const course = context?.course;
+
+  const loaderData = useLoaderData() as { anuncios: Anuncio[]; jwtToken: string; isProfesor: boolean };
+  const [anuncios, setAnuncios] = useState(loaderData?.anuncios || []);
+  const jwtToken = loaderData?.jwtToken || '';
+  const isProfesor = loaderData?.isProfesor || false;
+
+  const [showNew, setShowNew] = useState(false);
+  const [titulo, setTitulo] = useState('');
+  const [contenido, setContenido] = useState('');
+  const [fechaProgramada, setFechaProgramada] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingAnuncioId, setEditingAnuncioId] = useState<number | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (jwtToken) {
+      try {
+        const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+        setCurrentUserId(payload.id || payload.sub);
+      } catch (e) {
+        console.error('Error decoding JWT:', e);
+      }
+    }
+  }, [jwtToken]);
+
+  const canEditAnuncio = (anuncio: Anuncio) => isProfesor || currentUserId === anuncio.autorId;
+
+  const handleCreate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!course?.id || !titulo || !contenido) return;
+    setIsSubmitting(true);
+    try {
+      const res = await apiFetch(`/cursos/${course.id}/anuncios`, {
+        method: 'POST',
+        secure: true,
+        jwtToken,
+        body: { 
+          titulo, 
+          contenido,
+          ...(fechaProgramada && { fechaProgramada })
+        }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const newAnuncio = await res.json();
+      setAnuncios([newAnuncio, ...anuncios]);
+      setTitulo('');
+      setContenido('');
+      setFechaProgramada('');
+      setShowNew(false);
+    } catch (err) {
+      console.error('Error creating announcement:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = async (anuncioId: number, updatedData: { titulo: string; contenido: string; fechaProgramada?: string }) => {
+    if (!course?.id) return;
+    setIsSubmitting(true);
+    try {
+      const res = await apiFetch(`/cursos/${course.id}/anuncios/${anuncioId}`, {
+        method: 'PUT',
+        secure: true,
+        jwtToken,
+        body: updatedData
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const updated = await res.json();
+      setAnuncios(anuncios.map(a => a.id === anuncioId ? updated : a));
+      setEditingAnuncioId(null);
+    } catch (err) {
+      console.error('Error editing announcement:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (anuncioId: number) => {
+    if (!course?.id) return;
+    if (!window.confirm('¿Eliminar anuncio?')) return;
+    try {
+      const res = await apiFetch(`/cursos/${course.id}/anuncios/${anuncioId}`, {
+        method: 'DELETE',
+        secure: true,
+        jwtToken
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setAnuncios(anuncios.filter(a => a.id !== anuncioId));
+    } catch (err) {
+      console.error('Error deleting announcement:', err);
+    }
+  };
+
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-4">Anuncios</h1>
-      <p className="text-gray-700 dark:text-gray-300">Anuncios del curso.</p>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold">Anuncios del Curso</h1>
+        {isProfesor && (
+          <button onClick={() => setShowNew(s => !s)} className="px-3 py-2 bg-blue-600 text-white rounded-md">
+            {showNew ? 'Cancelar' : 'Crear Anuncio'}
+          </button>
+        )}
+      </div>
+
+      {showNew && (
+        <form onSubmit={handleCreate} className="mb-6 bg-white p-4 rounded-md shadow">
+          <div className="mb-2">
+            <label htmlFor="anuncio-titulo" className="block text-sm font-medium">Título</label>
+            <input id="anuncio-titulo" placeholder="Título del anuncio" value={titulo} onChange={e => setTitulo(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" required />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="anuncio-contenido" className="block text-sm font-medium">Contenido</label>
+            <textarea id="anuncio-contenido" placeholder="Escribe el contenido del anuncio" value={contenido} onChange={e => setContenido(e.target.value)} rows={4} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" required />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="anuncio-fechaProgramada" className="block text-sm font-medium">Fecha programada (opcional)</label>
+            <input id="anuncio-fechaProgramada" type="datetime-local" value={fechaProgramada} onChange={e => setFechaProgramada(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button 
+              type="button"
+              onClick={() => {
+                setShowNew(false);
+                setTitulo('');
+                setContenido('');
+                setFechaProgramada('');
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+              {isSubmitting ? 'Creando...' : 'Crear'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="space-y-4">
+        {anuncios.length === 0 && <div className="text-gray-500">No hay anuncios.</div>}
+        {anuncios.map(a => (
+          <div key={a.id} className="bg-white p-4 rounded-md shadow">
+            {editingAnuncioId === a.id ? (
+              <div className="space-y-2">
+                <div>
+                  <label htmlFor={`edit-titulo-${a.id}`} className="block text-sm font-medium mb-1">Título</label>
+                  <input 
+                    id={`edit-titulo-${a.id}`}
+                    defaultValue={a.titulo} 
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`edit-contenido-${a.id}`} className="block text-sm font-medium mb-1">Contenido</label>
+                  <textarea 
+                    id={`edit-contenido-${a.id}`}
+                    defaultValue={a.contenido} 
+                    rows={3}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`edit-fecha-${a.id}`} className="block text-sm font-medium mb-1">Fecha programada</label>
+                  <input 
+                    id={`edit-fecha-${a.id}`}
+                    type="datetime-local"
+                    defaultValue={a.fechaProgramada ? new Date(a.fechaProgramada).toISOString().slice(0, 16) : ''} 
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
+                  />
+                </div>
+                <div className="flex justify-end gap-2 mt-3">
+                  <button 
+                    onClick={() => setEditingAnuncioId(null)}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const newTitulo = (document.getElementById(`edit-titulo-${a.id}`) as HTMLInputElement)?.value;
+                      const newContenido = (document.getElementById(`edit-contenido-${a.id}`) as HTMLTextAreaElement)?.value;
+                      const newFecha = (document.getElementById(`edit-fecha-${a.id}`) as HTMLInputElement)?.value;
+                      if (newTitulo && newContenido) {
+                        handleEdit(a.id, { 
+                          titulo: newTitulo, 
+                          contenido: newContenido,
+                          ...(newFecha && { fechaProgramada: new Date(newFecha).toISOString() })
+                        });
+                      }
+                    }}
+                    disabled={isSubmitting}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-700">
+                    {a.nombreCreador ? a.nombreCreador.charAt(0) : 'A'}{a.apellidoCreador ? a.apellidoCreador.charAt(0) : ''}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="text-sm font-semibold">{(a.nombreCreador && a.apellidoCreador) ? `${a.nombreCreador} ${a.apellidoCreador}` : 'Usuario'}</div>
+                      <div className="text-xs text-gray-500">
+                        {a.fechaCreacion ? new Date(a.fechaCreacion).toLocaleString() : ''}
+                        {a.fechaProgramada && ` • Programado: ${new Date(a.fechaProgramada).toLocaleString()}`}
+                      </div>
+                    </div>
+                    {canEditAnuncio(a) && (
+                      <div className="flex gap-2">
+                        <button onClick={() => setEditingAnuncioId(a.id)} className="text-blue-500 text-sm hover:text-blue-700 font-medium">Editar</button>
+                        <button onClick={() => handleDelete(a.id)} className="text-red-500 text-sm hover:text-red-700 font-medium">Eliminar</button>
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="mt-2 font-medium">{a.titulo}</h3>
+                  <p className="text-sm text-gray-700 mt-1 whitespace-pre-line">{a.contenido}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
