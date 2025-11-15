@@ -65,7 +65,7 @@ export async function getUsers(
 
     const data = await response.json() as PaginatorResponseUsuarioListaResponse;
 
-    console.log("getUsers - data:", data);
+    // console.log("getUsers - data:", data);
 
     return data
 }
