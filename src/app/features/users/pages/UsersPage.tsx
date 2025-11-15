@@ -15,8 +15,10 @@ export const loader = async (args: any) => {
   const size = url.searchParams.get("size") ? Number(url.searchParams.get("size")) : undefined;
 
   const users = await getUsers(args.request, { q, rol, estado, page, size });
+  const { userRole } = useLoaderData() as { userRole: UserRole };
 
-  return { users, filters: { search: q || "", rol: rol || "", estado: estado || "" }, page: page || 1 };
+
+  return { userRole, users, filters: { search: q || "", rol: rol || "", estado: estado || "" }, page: page || 1 };
 };
 
 export default function UsersPage() {
@@ -57,7 +59,11 @@ export default function UsersPage() {
         <h1 className="text-2xl font-semibold">Gestión de Usuarios</h1>
         <UserActionsMenu
           options={[
-            { label: "Crear Usuario", onClick: () => navigate('/users/create') },
+            {
+              label: "Crear Usuario",
+              onClick: () => navigate('/users/create'),
+              roles: [UserRole.ADMINISTRADOR]
+            },
           ]}
         />
       </div>

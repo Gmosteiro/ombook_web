@@ -42,6 +42,7 @@ export const loader = async (args: any) => {
     filters: { search: q || "", status: estado || "", teacher: teacher || "" },
     page,
     size,
+    userRole,
   };
 };
 
@@ -97,8 +98,8 @@ export default function CoursesPage() {
         <h1 className="text-2xl font-semibold">Cursos</h1>
         <UserActionsMenu
           options={[
-            { label: "Crear Curso", onClick: () => navigate('/courses/create') },
-            { label: "Eliminar Masivo", onClick: () => navigate('/courses/delete-bulk') }
+            { label: "Crear Curso", onClick: () => navigate('/courses/create'), roles: [UserRole.ADMINISTRADOR] },
+            { label: "Eliminar Masivo", onClick: () => navigate('/courses/delete-bulk'), roles: [UserRole.ADMINISTRADOR] }
           ]}
         />
       </div>

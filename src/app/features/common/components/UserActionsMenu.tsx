@@ -1,8 +1,11 @@
 import { useRef, useEffect, useState } from "react";
+import { useLoaderData } from "react-router";
+import { UserRole } from "../../auth/types";
 
-interface ActionOption {
+export interface ActionOption {
     label: string;
     onClick: () => void;
+    roles: UserRole[];
 }
 
 interface Props {
@@ -10,6 +13,7 @@ interface Props {
 }
 
 export default function UserActionsMenu({ options }: Props) {
+    const { userRole } = useLoaderData() as { userRole: UserRole };
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -27,6 +31,12 @@ export default function UserActionsMenu({ options }: Props) {
         };
     }, [open]);
 
+    const visibleOptions = options.filter(
+        (opt) => !opt.roles || opt.roles.includes(userRole)
+    );
+
+    if (visibleOptions.length === 0) return null;
+
     return (
         <div className="relative" ref={ref}>
             <button
@@ -38,7 +48,7 @@ export default function UserActionsMenu({ options }: Props) {
             <div
                 className={`absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 transition ${open ? "block" : "hidden"}`}
             >
-                {options.map((opt, idx) => (
+                {visibleOptions.map((opt, idx) => (
                     <button
                         key={idx}
                         onClick={() => {

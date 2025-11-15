@@ -4,6 +4,7 @@ import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { getUsuariosVinculadosByCurso, UsuarioListaResponse } from "../../../routes/api.users";
 import { UserRole } from "../../auth/types";
 import { useState, useEffect } from "react";
+import { getUserRole } from "../../../services/session.server"; // Asegúrate de importar esto
 
 type Ctx = { course: Course };
 
@@ -12,7 +13,8 @@ export async function loader({ params, request }: { params: { id: string }, requ
   const url = new URL(request.url);
   const q = url.searchParams.get("search") || "";
   const rol = url.searchParams.get("rol") || "";
-  // Puedes agregar page, size, sort si lo necesitas
+
+  const userRole = await getUserRole(request);
 
   try {
     const paginator = await getUsuariosVinculadosByCurso(request, Number(id), {
@@ -20,10 +22,16 @@ export async function loader({ params, request }: { params: { id: string }, requ
       rol: rol as UserRole,
       // page, size, sort...
     });
-    return paginator.content ?? [];
+    return {
+      users: paginator.content ?? [],
+      userRole,
+    };
   } catch (err) {
     console.error("Error fetching users:", err);
-    return [];
+    return {
+      users: [],
+      userRole,
+    };
   }
 }
 
@@ -31,7 +39,7 @@ export default function CourseStudents() {
   const context = useOutletContext<Ctx>();
   const course = context?.course;
 
-  const users = useLoaderData() as UsuarioListaResponse[];
+  const { users } = useLoaderData() as { users: UsuarioListaResponse[] };
   const navigate = useNavigate();
 
 
@@ -78,12 +86,14 @@ export default function CourseStudents() {
       onClick: () => {
         navigate(`/courses/${course.id}/enroll`);
       },
+      roles: [UserRole.PROFESOR]
     },
     {
       label: "Desmatricular usuarios",
       onClick: () => {
         navigate(`/courses/${course.id}/unenroll`);
       },
+      roles: [UserRole.PROFESOR]
     },
   ];
 
