@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
-import { useNavigate, useFetcher } from "react-router";
+import { useNavigate, useFetcher, useLoaderData } from "react-router";
 import { CursoListadoResponse } from "../../../../routes/api.courses";
+import { UserRole } from "../../../auth/types"; // Asegúrate de importar esto
 
 interface CourseCardProps {
   course: CursoListadoResponse;
@@ -14,6 +15,9 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
   const isDeleting = fetcher.state === "submitting";
   const error = fetcher.data?.error;
   const navigate = useNavigate();
+
+  // Obtiene el rol del loader de la ruta
+  const { userRole } = useLoaderData() as { userRole: UserRole };
 
   const handleDelete = () => {
     fetcher.submit(
@@ -102,13 +106,15 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
               Ver Detalles
             </button>
 
-            <button
-              className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={isDeleting || course.estadoCurso === "ELIMINADO"}
-            >
-              {isDeleting ? "..." : "Eliminar"}
-            </button>
+            {userRole === UserRole.ADMINISTRADOR && (
+              <button
+                className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={isDeleting || course.estadoCurso === "ELIMINADO"}
+              >
+                {isDeleting ? "..." : "Eliminar"}
+              </button>
+            )}
           </div>
         </div>
       </div>
