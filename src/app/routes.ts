@@ -29,7 +29,6 @@ const routes: RouteConfig = [
     // Users
     route("/users", "./features/users/pages/UsersPage.tsx"),
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
-    route("/users/delete", "./features/users/pages/UsersDeletePage.tsx"),
 
 
     route("/profile", "./features/users/pages/ProfilePage.tsx"),

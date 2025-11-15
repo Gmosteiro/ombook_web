@@ -58,7 +58,6 @@ export default function UsersPage() {
         <UserActionsMenu
           options={[
             { label: "Crear Usuario", onClick: () => navigate('/users/create') },
-            { label: "Eliminar Usuarios", onClick: () => navigate('/users/delete') }
           ]}
         />
       </div>

@@ -101,6 +101,7 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
             >
               Ver Detalles
             </button>
+
             <button
               className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               onClick={() => setShowDeleteDialog(true)}
