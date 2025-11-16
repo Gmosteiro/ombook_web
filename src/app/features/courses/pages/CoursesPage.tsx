@@ -2,13 +2,12 @@ import { useNavigate, useLoaderData, useSearchParams } from "react-router";
 import { useRevalidator } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
-import { getCursos, PaginatorResponseCursoListadoResponse, CourseStatus, CursoListadoResponse } from "../../../routes/api.courses";
+import { getCursos, deleteCurso, PaginatorResponseCursoListadoResponse, CourseStatus, CursoListadoResponse } from "../../../routes/api.courses";
 import { getProfesores, UsuarioListaResponse } from "../../../routes/api.users";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { FilterBar, Filters } from "../components/general/FilterBar";
 import { CourseCard } from "../components/general/CourseCard";
 import { Pagination } from "../components/general/Pagination";
-import { deleteCurso } from "../../../routes/api.courses";
 import { getUserRole } from "../../../services/session.server";
 
 export const loader = async (args: any) => {
