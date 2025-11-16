@@ -5,8 +5,26 @@ import { UserRole, UserStatus } from "~/features/auth/types";
 
 // Tipos OpenAPI
 export type UsuarioListaResponse = components["schemas"]["UsuarioListaResponse"];
+export type Usuario = components["schemas"]["Usuario"];
 export type PaginatorResponseUsuarioListaResponse = components["schemas"]["PaginatorResponseUsuarioListaResponse"];
 export type AltaUsuarioRequest = components["schemas"]["AltaUsuarioRequest"];
+
+// Tipo personalizado para getUserById - Creado manualmente porque el Swagger está mal tipado
+// El endpoint retorna todos los datos del usuario incluyendo fotoPerfilUrl
+export type UsuarioDetalleResponse = {
+    id?: number;
+    nombre?: string;
+    apellido?: string;
+    cedula?: string;
+    correo?: string;
+    estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
+    fotoPerfilUrl?: string;
+    fechaNacimiento?: string;
+    fechaCreacion?: string;
+    ultimoLogin?: string | null;
+    intentosFallidos?: number;
+    rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+};
 
 /**
  * Crea un usuario individualmente.
@@ -74,7 +92,7 @@ export async function getUsers(
 export const getUserById = async (
     request: Request,
     userId: number
-): Promise<UsuarioListaResponse> => {
+): Promise<UsuarioDetalleResponse> => {
     const response = await apiFetch(`/usuarios/${userId}`, {
         method: "GET",
         secure: true,
@@ -83,7 +101,7 @@ export const getUserById = async (
 
     if (!response.ok) throw new Error("Error al obtener el usuario");
 
-    return await response.json() as UsuarioListaResponse;
+    return await response.json() as UsuarioDetalleResponse;
 };
 
 // Obtener solo profesores usando filtro + otros filtros opcionales

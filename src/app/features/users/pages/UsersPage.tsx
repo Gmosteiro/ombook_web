@@ -1,7 +1,7 @@
 import { useNavigate, useLoaderData, useSearchParams, useFetcher } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole, UserStatus } from "../../auth/types";
-import { getUsers, PaginatorResponseUsuarioListaResponse, UsuarioListaResponse } from "../../../routes/api.users";
+import { getUsers, PaginatorResponseUsuarioListaResponse, UsuarioListaResponse, UsuarioDetalleResponse } from "../../../routes/api.users";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { getUserRole } from "../../../services/session.server";
 import { useState, useEffect } from "react";
@@ -59,8 +59,8 @@ export default function UsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState(filters.search);
-  const fetcher = useFetcher<{ user?: UsuarioListaResponse; error?: string }>();
-  const [selectedUser, setSelectedUser] = useState<UsuarioListaResponse | null>(null);
+  const fetcher = useFetcher<{ user?: UsuarioDetalleResponse; error?: string }>();
+  const [selectedUser, setSelectedUser] = useState<UsuarioDetalleResponse | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   // Cuando el fetcher devuelve datos del usuario, abrir el modal

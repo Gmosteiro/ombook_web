@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { UsuarioListaResponse } from '../../../routes/api.users';
+import { UsuarioDetalleResponse } from '../../../routes/api.users';
 
 interface UserDetailModalProps {
     open: boolean;
-    user: UsuarioListaResponse | null;
+    user: UsuarioDetalleResponse | null;
     onClose: () => void;
 }
 
@@ -94,6 +94,21 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ open, user, onClose }
 
                 {/* Body */}
                 <div className="p-6 space-y-6">
+                    {/* Foto de perfil */}
+                    <div className="flex justify-center">
+                        {user.fotoPerfilUrl ? (
+                            <img
+                                src={user.fotoPerfilUrl}
+                                alt={`${user.nombre} ${user.apellido}`}
+                                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-lg"
+                            />
+                        ) : (
+                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                                {user.nombre?.[0]}{user.apellido?.[0]}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Información del usuario */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
