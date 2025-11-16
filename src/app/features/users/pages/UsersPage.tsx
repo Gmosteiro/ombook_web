@@ -4,21 +4,25 @@ import { UserRole, UserStatus } from "../../auth/types";
 import { getUsers, PaginatorResponseUsuarioListaResponse, UsuarioListaResponse } from "../../../routes/api.users";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { getUserRole } from "../../../services/session.server";
+import { useState, useEffect } from "react";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR])(args);
 
   const url = new URL(args.request.url);
-  const q = url.searchParams.get("search") || undefined;
+  const searchParam = url.searchParams.get("search") || undefined;
   const rol = url.searchParams.get("rol") as UserRole | undefined;
   const estado = url.searchParams.get("estado") as UserStatus | undefined;
   const page = url.searchParams.get("page") ? Number(url.searchParams.get("page")) : undefined;
   const size = url.searchParams.get("size") ? Number(url.searchParams.get("size")) : undefined;
 
+  // Solo aplicar búsqueda si tiene 3 o más caracteres
+  const q = searchParam && searchParam.length >= 3 ? searchParam : undefined;
+
   const users = await getUsers(args.request, { q, rol, estado, page, size });
   const userRole = await getUserRole(args.request);
 
-  return { userRole, users, filters: { search: q || "", rol: rol || "", estado: estado || "" }, page: page || 1 };
+  return { userRole, users, filters: { search: searchParam || "", rol: rol || "", estado: estado || "" }, page: page || 1 };
 };
 
 export function meta() {
@@ -26,7 +30,6 @@ export function meta() {
     { title: `Ombook | Usuarios` }
   ];
 }
-
 
 export default function UsersPage() {
   const { users, filters, page } = useLoaderData() as {
@@ -36,9 +39,32 @@ export default function UsersPage() {
   };
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState(filters.search);
+
+  // Sincronizar el input con los filtros externos
+  useEffect(() => {
+    setSearchInput(filters.search);
+  }, [filters.search]);
 
   // Handlers para filtros
   const handleFilterChange = (key: string, value: string) => {
+    if (key === "search") {
+      setSearchInput(value);
+
+      // Solo buscar si está vacío o tiene 3+ caracteres
+      if (value === "" || value.length >= 3) {
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+        params.set("page", "0");
+        setSearchParams(params);
+      }
+      return;
+    }
+
     const params = new URLSearchParams(searchParams);
     if (value) {
       params.set(key, value);
@@ -79,9 +105,9 @@ export default function UsersPage() {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
         <input
           type="text"
-          placeholder="Buscar por nombre, email o cédula..."
+          placeholder="Buscar por nombre, email o cédula (mín. 3 caracteres)..."
           className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
-          value={filters.search}
+          value={searchInput}
           onChange={(e) => handleFilterChange("search", e.target.value)}
         />
         <select
