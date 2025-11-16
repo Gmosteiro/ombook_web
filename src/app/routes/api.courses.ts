@@ -34,9 +34,11 @@ export async function getCursos(
         if (params.estado) searchParams.append("estado", params.estado);
         if (params.profesorId !== undefined) searchParams.append("profesorId", params.profesorId.toString());
         if (params.page !== undefined) searchParams.append("page", params.page.toString());
-        if (params.size !== undefined) searchParams.append("size", params.size.toString());
         if (params.sort) params.sort.forEach(s => searchParams.append("sort", s));
     }
+    // Fijar size en 6
+    searchParams.append("size", "6");
+
     const url = "/cursos" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
     const response = await apiFetch(url, {
