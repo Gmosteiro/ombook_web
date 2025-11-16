@@ -14,11 +14,14 @@ export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
 
   const url = new URL(args.request.url);
-  const q = url.searchParams.get("search") || undefined;
+  const searchParam = url.searchParams.get("search") || undefined;
   const estado = url.searchParams.get("status") as CourseStatus || undefined;
   const teacher = url.searchParams.get("teacher") || undefined;
   const page = url.searchParams.get("page") ? Number(url.searchParams.get("page")) : 0;
   const size = url.searchParams.get("size") ? Number(url.searchParams.get("size")) : 9;
+
+  // Solo aplicar búsqueda si tiene 3 o más caracteres
+  const q = searchParam && searchParam.length >= 3 ? searchParam : undefined;
 
   const userRole = await getUserRole(args.request);
 
@@ -38,7 +41,7 @@ export const loader = async (args: any) => {
     cursos,
     profesores,
     showTeacherFilter,
-    filters: { search: q || "", status: estado || "", teacher: teacher || "" },
+    filters: { search: searchParam || "", status: estado || "", teacher: teacher || "" },
     page,
     size,
     userRole,
@@ -77,13 +80,30 @@ export default function CoursesPage() {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
 
-  const handleFilterChange = (key: string, value: string) => {
+  const setFilters = (newFilters: Filters) => {
     const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
+
+    // Solo aplicar búsqueda si tiene 3+ caracteres o está vacío
+    if (newFilters.search === "" || newFilters.search.length >= 3) {
+      if (newFilters.search) {
+        params.set("search", newFilters.search);
+      } else {
+        params.delete("search");
+      }
     }
+
+    if (newFilters.status) {
+      params.set("status", newFilters.status);
+    } else {
+      params.delete("status");
+    }
+
+    if (newFilters.teacher) {
+      params.set("teacher", newFilters.teacher);
+    } else {
+      params.delete("teacher");
+    }
+
     params.set("page", "0");
     setSearchParams(params);
   };
@@ -111,11 +131,7 @@ export default function CoursesPage() {
 
       <FilterBar
         filters={filters}
-        setFilters={(newFilters) => {
-          handleFilterChange("search", newFilters.search);
-          handleFilterChange("status", newFilters.status);
-          handleFilterChange("teacher", newFilters.teacher || "");
-        }}
+        setFilters={setFilters}
         teachers={profesores}
         showTeacherFilter={showTeacherFilter}
       />

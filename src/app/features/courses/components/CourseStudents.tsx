@@ -42,7 +42,6 @@ export default function CourseStudents() {
   const { users } = useLoaderData() as { users: UsuarioListaResponse[] };
   const navigate = useNavigate();
 
-
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
   const rol = searchParams.get("rol") || "";
@@ -56,8 +55,10 @@ export default function CourseStudents() {
   // Cuando cambian los filtros, actualiza la URL (lo que dispara el loader)
   function handleFilterChange(field: string, value: string) {
     if (field === "search") {
-      setSearchInput(value); // Siempre actualiza el input
-      if (value === "" || value.length > 3) {
+      setSearchInput(value);
+
+      // Solo buscar si está vacío o tiene 3+ caracteres
+      if (value === "" || value.length >= 3) {
         const params = new URLSearchParams(searchParams);
         if (value) {
           params.set(field, value);
@@ -112,7 +113,7 @@ export default function CourseStudents() {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-6 flex flex-wrap gap-3 items-center">
         <input
           type="text"
-          placeholder="Buscar por nombre o correo..."
+          placeholder="Buscar por nombre o correo (mín. 3 caracteres)..."
           className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
           value={searchInput}
           onChange={e => handleFilterChange("search", e.target.value)}
