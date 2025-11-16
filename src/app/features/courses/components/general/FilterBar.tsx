@@ -1,4 +1,4 @@
-import { UsuarioListadoResponse } from "../../../../routes/api.users";
+import { UsuarioListaResponse } from "../../../../routes/api.users";
 
 export type Filters = {
   search: string;
@@ -8,7 +8,7 @@ export type Filters = {
 interface FilterBarProps {
   filters: Filters;
   setFilters: (filters: Filters) => void;
-  teachers: UsuarioListadoResponse[];
+  teachers: UsuarioListaResponse[];
   showTeacherFilter?: boolean;
 }
 

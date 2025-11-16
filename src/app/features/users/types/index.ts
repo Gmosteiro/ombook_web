@@ -56,9 +56,18 @@ export type ImportUsersResponse = {
     success: boolean;
     message?: string;
     error?: string;
+    errorDetails?: Array<{
+        linea: number;
+        motivo: string;
+    }>;
     data?: {
+        total: number;
         correctos: number;
         errores: number;
+        detalleErrores?: Array<{
+            linea: number;
+            motivo: string;
+        }>;
     };
 };
 

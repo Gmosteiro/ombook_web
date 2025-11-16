@@ -1,0 +1,11 @@
+nombre;apellido;correo;contrasena;cedula;fechaNacimiento;rol
+Juan Pablo;Sales;juanpablo.sales@ombook.com;profe123;12345678;1985-03-15;profesor
+Martín;Zabalza;martin.zabalza@ombook.com;profe123;23456789;1982-07-22;profesor
+Carlos;Fidalgo;carlos.fidalgo@ombook.com;profe123;34567890;1978-11-08;profesor
+Martha;Durante;martha.durante@ombook.com;profe123;45678901;1980-05-30;profesor
+Shoshanna;Rodríguez;shoshanna.rodriguez@ombook.com;profe123;56789012;1988-09-12;profesor
+Denisse Eliana;Echevarría;denisseeliana.echevarria@ombook.com;profe123;67890123;1983-02-18;profesor
+Inés;Anguilla;ines.anguilla@ombook.com;profe123;78901234;1986-06-25;profesor
+Solange;Mikeliunas;solange.mikeliunas@ombook.com;profe123;89012345;1984-12-03;profesor
+Sergio;Machuca;sergio.machuca@ombook.com;profe123;90123456;1981-04-17;profesor
+Ernesto Nicolás;López;ernestonicolas.lopez@ombook.com;profe123;01234567;1987-08-29;profesor

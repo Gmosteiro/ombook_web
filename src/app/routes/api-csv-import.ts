@@ -56,6 +56,9 @@ export async function action({ request }: ActionFunctionArgs) {
             body: backendFormData,
         });
 
+
+        console.log('Backend Response Status:', response.status);
+
         if (!response.ok) {
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
 
@@ -82,17 +85,25 @@ export async function action({ request }: ActionFunctionArgs) {
         try {
             const responseData = await response.json();
 
-            // Construir mensaje con detalles de errores
-            let message = `${responseData.errores === 0 ? successMessage : 'Import con Errores'}: `;
+            console.log('Backend Response Data:', responseData);
+
+            // Construir mensaje detallado
+            let message = '';
+            if (responseData.errores === 0) {
+                message = `${successMessage}: ${responseData.correctos} registros importados correctamente`;
+            } else {
+                message = `Importación completada con errores: ${responseData.correctos} correctos, ${responseData.errores} errores`;
+            }
 
             return Response.json({
-                success: responseData.errores === 0, // Solo es éxito si no hay errores
+                success: responseData.errores === 0,
                 message: message,
+                error: responseData.errores > 0 ? message : undefined, // Agregar esto
                 data: responseData,
-                // Incluir detalles separadamente para el frontend
                 errorDetails: responseData.detalleErrores || []
             });
         } catch {
+            console.log('No JSON response from backend, assuming success.');
             return Response.json({
                 success: true,
                 message: successMessage

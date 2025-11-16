@@ -46,7 +46,7 @@ export default function CourseCreatePage() {
 
     const createCoursesImportHandler = createCsvImportHandler({
         allowedRoles: [UserRole.ADMINISTRADOR],
-        backendEndpoint: "/cursos/crear/masivo",
+        backendEndpoint: "/cursos/importaciones",
         successMessage: "Cursos importados",
     });
 
@@ -73,46 +73,25 @@ export default function CourseCreatePage() {
         }
     };
 
-    const finalError = createFetcher.data?.error || importFetcher.data?.error;
-    const finalSuccess = createFetcher.data?.message || (importFetcher.data?.success ? importFetcher.data.message : undefined);
+    const isLoading = createFetcher.state === "submitting" || importFetcher.state === "submitting";
 
-    // Determinar si hay errores de importación para mostrar diferente
-    const hasImportErrors = importFetcher.data && !importFetcher.data.success && importFetcher.data.errorDetails;
+    // Construir mensaje de error detallado (igual que en usuarios)
+    let errorMessage = createFetcher.data?.error;
+
+    if (importFetcher.data?.errorDetails && importFetcher.data.errorDetails.length > 0) {
+        const detalles = importFetcher.data.errorDetails
+            .map((e: any) => `Línea ${e.linea}: ${e.motivo}`)
+            .join('\n');
+        errorMessage = `${importFetcher.data.message}\n\nDetalles:\n${detalles}`;
+    } else if (importFetcher.data?.error) {
+        errorMessage = importFetcher.data.error;
+    }
+
+    const success = createFetcher.data?.message ||
+        (importFetcher.data?.success ? importFetcher.data.message : undefined);
 
     return (
         <div className="max-w-3xl mx-auto">
-            {/* Mostrar errores detallados de importación */}
-            {hasImportErrors && (
-                <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-md">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M8.485 3.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 3.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                                {importFetcher.data?.message}
-                            </h3>
-                            {importFetcher.data?.errorDetails && importFetcher.data.errorDetails.length > 0 && (
-                                <div className="mt-2">
-                                    <div className="text-sm text-yellow-700 dark:text-yellow-300">
-                                        <strong>Detalles de errores:</strong>
-                                    </div>
-                                    <ul className="mt-1 list-disc list-inside text-sm text-yellow-700 dark:text-yellow-300">
-                                        {importFetcher.data.errorDetails.map((error, index) => (
-                                            <li key={index}>
-                                                <strong>Línea {error.linea}:</strong> {error.motivo}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <EntityCreate
                 entityName="Curso"
                 title="Alta de Cursos"
@@ -121,9 +100,9 @@ export default function CourseCreatePage() {
                 addMasive={handleImportCourses}
                 bulk={{ accept: ".csv", templateUrl: "/plantillas/cursos.csv" }}
                 labels={{ submitBulk: "Importar Cursos" }}
-                isLoading={createFetcher.state === "submitting" || importFetcher.state === "submitting"}
-                error={!hasImportErrors ? finalError : undefined}
-                success={finalSuccess}
+                isLoading={isLoading}
+                error={errorMessage}
+                success={success}
             />
         </div>
     );
