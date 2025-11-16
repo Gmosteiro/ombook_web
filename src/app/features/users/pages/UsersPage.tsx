@@ -1,10 +1,11 @@
-import { useNavigate, useLoaderData, useSearchParams } from "react-router";
+import { useNavigate, useLoaderData, useSearchParams, useFetcher } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole, UserStatus } from "../../auth/types";
 import { getUsers, PaginatorResponseUsuarioListaResponse, UsuarioListaResponse } from "../../../routes/api.users";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { getUserRole } from "../../../services/session.server";
 import { useState, useEffect } from "react";
+import UserDetailModal from "../components/UserDetailModal";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR])(args);
@@ -25,6 +26,24 @@ export const loader = async (args: any) => {
   return { userRole, users, filters: { search: searchParam || "", rol: rol || "", estado: estado || "" }, page: page || 1 };
 };
 
+export const action = async ({ request }: { request: Request }) => {
+  const formData = await request.formData();
+  const intent = formData.get("intent") as string;
+  const userId = formData.get("userId") as string;
+
+  if (intent === "getUserDetail" && userId) {
+    const { getUserById } = await import("../../../routes/api.users");
+    try {
+      const user = await getUserById(request, Number(userId));
+      return { user };
+    } catch (error: any) {
+      return { error: error.message || "Error al obtener usuario" };
+    }
+  }
+
+  return { error: "Intent no reconocido" };
+};
+
 export function meta() {
   return [
     { title: `Ombook | Usuarios` }
@@ -40,6 +59,17 @@ export default function UsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState(filters.search);
+  const fetcher = useFetcher<{ user?: UsuarioListaResponse; error?: string }>();
+  const [selectedUser, setSelectedUser] = useState<UsuarioListaResponse | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  // Cuando el fetcher devuelve datos del usuario, abrir el modal
+  useEffect(() => {
+    if (fetcher.data?.user) {
+      setSelectedUser(fetcher.data.user);
+      setShowModal(true);
+    }
+  }, [fetcher.data]);
 
   // Sincronizar el input con los filtros externos
   useEffect(() => {
@@ -81,6 +111,14 @@ export default function UsersPage() {
     const params = new URLSearchParams(searchParams);
     params.set("page", newPage.toString());
     setSearchParams(params);
+  };
+
+  // Handler para ver detalles de usuario
+  const handleViewUser = (userId: number) => {
+    const formData = new FormData();
+    formData.append("intent", "getUserDetail");
+    formData.append("userId", userId.toString());
+    fetcher.submit(formData, { method: "POST" });
   };
 
   const allUsers: UsuarioListaResponse[] = users.content ?? [];
@@ -191,7 +229,8 @@ export default function UsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
                         className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm"
-                        onClick={() => console.log("Ver usuario", user.id)}
+                        onClick={() => handleViewUser(user.id!)}
+                        disabled={fetcher.state === "submitting"}
                       >
                         Ver
                       </button>
@@ -224,6 +263,16 @@ export default function UsersPage() {
           </div>
         </>
       )}
+
+      {/* Modal de detalles de usuario */}
+      <UserDetailModal
+        open={showModal}
+        user={selectedUser}
+        onClose={() => {
+          setShowModal(false);
+          setSelectedUser(null);
+        }}
+      />
     </div>
   );
 }

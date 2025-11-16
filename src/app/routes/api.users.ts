@@ -70,6 +70,22 @@ export async function getUsers(
     return data
 }
 
+
+export const getUserById = async (
+    request: Request,
+    userId: number
+): Promise<UsuarioListaResponse> => {
+    const response = await apiFetch(`/usuarios/${userId}`, {
+        method: "GET",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
+    });
+
+    if (!response.ok) throw new Error("Error al obtener el usuario");
+
+    return await response.json() as UsuarioListaResponse;
+};
+
 // Obtener solo profesores usando filtro + otros filtros opcionales
 export async function getProfesores(
     request: Request,
