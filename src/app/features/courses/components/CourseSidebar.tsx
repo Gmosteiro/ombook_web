@@ -23,7 +23,7 @@ export default function CourseSidebar({ course }: Props) {
 
   const links = [
     { label: "General", path: `${base}/general`, icon: <HomeIcon className={iconClasses} /> },
-    { label: "Materiales", path: `${base}/materials`, icon: <FolderIcon className={iconClasses} /> },
+    { label: "Tareas", path: `${base}/tasks`, icon: <FolderIcon className={iconClasses} /> },
     { label: "Foro", path: `${base}/forums`, icon: <ChatBubbleLeftRightIcon className={iconClasses} /> },
     { label: "Anuncios", path: `${base}/announcements`, icon: <MegaphoneIcon className={iconClasses} /> },
     { label: "Usuarios", path: `${base}/students`, icon: <UsersIcon className={iconClasses} /> },

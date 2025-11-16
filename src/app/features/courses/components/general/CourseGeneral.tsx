@@ -13,7 +13,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     const jwtToken = await getValidJWTToken(request);
     const userRole = await getUserRole(request);
     
-    const res = await apiFetch(`/paginas/listar/${id}`, {
+    const res = await apiFetch(`/cursos/${id}/paginas`, {
       method: 'GET',
       secure: true,
       jwtToken
