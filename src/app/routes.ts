@@ -8,6 +8,8 @@ const routes: RouteConfig = [
     // Auth
     route("/login", "./features/auth/components/Login.tsx"),
     route("/logout", "./features/auth/components/Logout.tsx"),
+    route("/forgot-password", "./features/auth/components/ForgotPassword.tsx"),
+    route("/reset-password", "./features/auth/components/ResetPassword.tsx"),
 
     // Courses
     route("/courses", "./features/courses/pages/CoursesPage.tsx"),
@@ -36,7 +38,10 @@ const routes: RouteConfig = [
     // API Routes
     route("/csv/import", "./routes/api-csv-import.ts"),
     route("/app/users", "./routes/api.users.ts"),
-    route("/app/courses", "./routes/api.courses.ts"), // Nueva ruta
+    route("/app/courses", "./routes/api.courses.ts"),
+    route("/auth/recuperacion-contrasena", "./routes/api.auth.ts"),
+    route("/auth/restablecer-contrasena/verificar", "./routes/api.auth.ts"),
+    route("/auth/restablecer-contrasena", "./routes/api.auth.ts"),
 
     // Not Found
     route("*", './features/common/pages/NotFound.tsx'),

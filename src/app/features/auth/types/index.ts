@@ -48,6 +48,33 @@ export type CerrarSesionRequest = {
 // Mantén el nombre que ya usabas, pero alineado al schema generado
 export type LoginResponse = TokenResponse;
 
+// Tipos para recuperación de contraseña
+export interface RecuperacionContrasenaRequest {
+    correo: string;
+}
+
+export interface RecuperacionContrasenaResponse {
+    mensaje: string;
+}
+
+export interface VerificarTokenResponse {
+    valido: boolean;
+}
+
+export interface RestablecerContrasenaRequest {
+    token: string;
+    nuevaContrasena: string;
+    confirmarContrasena: string;
+}
+
+export interface RestablecerContrasenaResponse {
+    mensaje: string;
+}
+
+export interface ErrorResponse {
+    error: string;
+}
+
 export interface ApiError {
     message: string;
     statusCode?: number;

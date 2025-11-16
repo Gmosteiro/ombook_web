@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, redirect, type MetaFunction } from "react-router";
+import { Form, redirect, Link, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
 import { createUserSession, getUserId } from "~/services/session.server";
 import { API_URL } from "../../common/utils/Utils";
@@ -131,7 +131,9 @@ export default function Login({ actionData }: Route.ComponentProps) {
                         </button>
                     </div>
                     <div className="text-center">
-                        <a href="#" className="text-sm font-medium text-primary hover:underline">¿Olvidaste tu contraseña?</a>
+                        <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+                            ¿Olvidaste tu contraseña?
+                        </Link>
                     </div>
                 </Form>
             </div>
