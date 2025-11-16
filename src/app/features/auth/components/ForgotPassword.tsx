@@ -18,7 +18,7 @@ const ForgotPassword: React.FC = () => {
         setMessage(null);
 
         try {
-            const response = await fetch('/auth/recuperacion-contrasena', {
+            const response = await fetch('/api/auth?action=recuperacion-contrasena', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,8 +77,8 @@ const ForgotPassword: React.FC = () => {
                     {message && (
                         <div
                             className={`mb-4 p-3 rounded-lg ${message.type === 'success'
-                                    ? 'bg-green-100 text-green-700 border border-green-300'
-                                    : 'bg-red-100 text-red-700 border border-red-300'
+                                ? 'bg-green-100 text-green-700 border border-green-300'
+                                : 'bg-red-100 text-red-700 border border-red-300'
                                 }`}
                         >
                             {message.text}

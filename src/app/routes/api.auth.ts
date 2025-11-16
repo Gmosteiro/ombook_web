@@ -40,11 +40,12 @@ export interface ErrorResponse {
  */
 export async function action({ request }: { request: Request }) {
     const url = new URL(request.url);
-    const pathname = url.pathname;
+    const searchParams = url.searchParams;
+    const action = searchParams.get('action');
 
     try {
-        // POST /auth/recuperacion-contrasena
-        if (request.method === "POST" && pathname === "/auth/recuperacion-contrasena") {
+        // POST /api/auth?action=recuperacion-contrasena
+        if (request.method === "POST" && action === "recuperacion-contrasena") {
             const body = await request.json() as RecuperacionContrasenaRequest;
 
             const response = await fetch(`${API_URL}/auth/recuperacion-contrasena`, {
@@ -64,8 +65,8 @@ export async function action({ request }: { request: Request }) {
             return Response.json(data, { status: 200 });
         }
 
-        // POST /auth/restablecer-contrasena
-        if (request.method === "POST" && pathname === "/auth/restablecer-contrasena") {
+        // POST /api/auth?action=restablecer-contrasena
+        if (request.method === "POST" && action === "restablecer-contrasena") {
             const body = await request.json() as RestablecerContrasenaRequest;
 
             // Validar que las contraseñas coincidan en el frontend también
@@ -116,13 +117,12 @@ export async function action({ request }: { request: Request }) {
  */
 export async function loader({ request }: { request: Request }) {
     const url = new URL(request.url);
-    const pathname = url.pathname;
+    const action = url.searchParams.get("action");
+    const token = url.searchParams.get("token");
 
     try {
-        // GET /auth/restablecer-contrasena/verificar?token=xxx
-        if (pathname === "/auth/restablecer-contrasena/verificar") {
-            const token = url.searchParams.get("token");
-
+        // GET /api/auth?action=verificar-token&token=xxx
+        if (action === "verificar-token") {
             if (!token) {
                 return Response.json(
                     { error: "Token no proporcionado" } as ErrorResponse,
@@ -150,8 +150,8 @@ export async function loader({ request }: { request: Request }) {
         }
 
         return Response.json(
-            { error: "Ruta no encontrada" } as ErrorResponse,
-            { status: 404 }
+            { error: "Acción no válida" } as ErrorResponse,
+            { status: 400 }
         );
     } catch (error) {
         console.error("Error en api.auth loader:", error);

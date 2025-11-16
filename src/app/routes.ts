@@ -39,9 +39,7 @@ const routes: RouteConfig = [
     route("/csv/import", "./routes/api-csv-import.ts"),
     route("/app/users", "./routes/api.users.ts"),
     route("/app/courses", "./routes/api.courses.ts"),
-    route("/auth/recuperacion-contrasena", "./routes/api.auth.ts"),
-    route("/auth/restablecer-contrasena/verificar", "./routes/api.auth.ts"),
-    route("/auth/restablecer-contrasena", "./routes/api.auth.ts"),
+    route("/api/auth", "./routes/api.auth.ts"),
 
     // Not Found
     route("*", './features/common/pages/NotFound.tsx'),
