@@ -29,7 +29,9 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
             codigo: formData.get("codigo") as string,
             descripcion: formData.get("descripcion") as string,
             periodoAcademico: periodoAcademico,
-            profesoresResponsables: selectedProfesores,
+            profesoresResponsables: selectedProfesores
+                .map(profesor => profesor.id)
+                .filter((id): id is number => typeof id === "number"),
         };
 
         // Validar que los campos requeridos estén presentes
@@ -144,7 +146,7 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                                 key={profesor.id}
                                 className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
                             >
-                                {profesor.nombreCompleto}
+                                {profesor.nombre + " " + profesor.apellido}
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -190,7 +192,7 @@ export default function CourseForm({ onSubmit, isLoading }: CourseFormProps) {
                                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                         />
                                         <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                                            {profesor.nombreCompleto}
+                                            {profesor.nombre} {profesor.apellido}
                                         </span>
                                     </label>
                                 );

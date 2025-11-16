@@ -5,16 +5,44 @@ import CourseIndividualForm from "../components/general/CourseForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { CreateCourseData, ImportCoursesResponse } from "../types/types";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
-import { crearCurso } from "../../../routes/api.courses";
-import { useState } from "react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 
-export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
+export async function loader({ request }: LoaderFunctionArgs) {
+    // Verificar roles primero
+    await requireRoleLoader([UserRole.ADMINISTRADOR])({ request } as any);
+
+    // Importación dinámica server-side para obtener profesores
+    const { getProfesores } = await import("../../../routes/api.users");
+
+    try {
+        const profesores = await getProfesores(request);
+        return { profesores };
+    } catch (error) {
+        console.error("Error al cargar profesores:", error);
+        return { profesores: [] };
+    }
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+    // Importación dinámica server-side
+    const { crearCurso } = await import("../../../routes/api.courses");
+    const data = await request.json();
+
+    try {
+        await crearCurso(request, data);
+        return { success: true, message: "Curso creado exitosamente" };
+    } catch (error: any) {
+        console.error("Error al crear curso:", error);
+        return {
+            success: false,
+            error: error?.message || "Error inesperado al crear el curso"
+        };
+    }
+}
 
 export default function CourseCreatePage() {
     const importFetcher = useFetcher<ImportCoursesResponse>();
-    const [success, setSuccess] = useState<string | undefined>();
-    const [error, setError] = useState<string | undefined>();
-    const [isLoading, setIsLoading] = useState(false);
+    const createFetcher = useFetcher<{ success: boolean; message?: string; error?: string }>();
 
     const createCoursesImportHandler = createCsvImportHandler({
         allowedRoles: [UserRole.ADMINISTRADOR],
@@ -23,21 +51,11 @@ export default function CourseCreatePage() {
     });
 
     const handleCreateCourse = async (values: CreateCourseData) => {
-        try {
-            setError(undefined);
-            setSuccess(undefined);
-            setIsLoading(true);
-
-            // Usar el método crearCurso directamente
-            await crearCurso(new Request(window.location.href), values);
-
-            setSuccess("Curso creado exitosamente");
-        } catch (error: any) {
-            console.error("Error al crear curso:", error);
-            setError(error?.message || "Error inesperado al crear el curso");
-        } finally {
-            setIsLoading(false);
-        }
+        createFetcher.submit(values, {
+            method: "POST",
+            action: "/courses/create",
+            encType: "application/json"
+        });
     };
 
     const handleImportCourses = async (file: File) => {
@@ -55,8 +73,8 @@ export default function CourseCreatePage() {
         }
     };
 
-    const finalError = error || importFetcher.data?.error;
-    const finalSuccess = success || (importFetcher.data?.success ? importFetcher.data.message : undefined);
+    const finalError = createFetcher.data?.error || importFetcher.data?.error;
+    const finalSuccess = createFetcher.data?.message || (importFetcher.data?.success ? importFetcher.data.message : undefined);
 
     // Determinar si hay errores de importación para mostrar diferente
     const hasImportErrors = importFetcher.data && !importFetcher.data.success && importFetcher.data.errorDetails;
@@ -103,7 +121,7 @@ export default function CourseCreatePage() {
                 addMasive={handleImportCourses}
                 bulk={{ accept: ".csv", templateUrl: "/plantillas/cursos.csv" }}
                 labels={{ submitBulk: "Importar Cursos" }}
-                isLoading={isLoading || importFetcher.state === "submitting"}
+                isLoading={createFetcher.state === "submitting" || importFetcher.state === "submitting"}
                 error={!hasImportErrors ? finalError : undefined}
                 success={finalSuccess}
             />

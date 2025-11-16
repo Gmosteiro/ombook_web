@@ -51,17 +51,17 @@ export async function getCursos(
     return res;
 }
 
-export async function listarCursos(request: Request): Promise<CursoListadoResponse[]> {
-    const response = await apiFetch("/cursos/listar", {
-        method: "GET",
-        secure: true,
-        jwtToken: await getValidJWTToken(request),
-    });
+// export async function listarCursos(request: Request): Promise<CursoListadoResponse[]> {
+//     const response = await apiFetch("/cursos/listar", {
+//         method: "GET",
+//         secure: true,
+//         jwtToken: await getValidJWTToken(request),
+//     });
 
-    if (!response.ok) throw new Error("Error al listar cursos");
+//     if (!response.ok) throw new Error("Error al listar cursos");
 
-    return await response.json() as CursoListadoResponse[];
-}
+//     return await response.json() as CursoListadoResponse[];
+// }
 
 /**
  * Elimina un curso por su ID.
@@ -87,7 +87,7 @@ export async function deleteCurso(request: Request, id: number): Promise<boolean
  * @param data Datos del curso a crear
  * @returns El curso creado
  */
-export async function crearCurso(request: Request, data: CursoCreateRequest): Promise<Curso> {
+export async function crearCurso(request: Request, data: CursoCreateRequest): Promise<any> {
     const response = await apiFetch("/cursos", {
         method: "POST",
         secure: true,
@@ -95,9 +95,13 @@ export async function crearCurso(request: Request, data: CursoCreateRequest): Pr
         body: JSON.stringify(data)
     });
 
-    if (!response.ok) throw new Error("Error al crear el curso");
+    if (!response.ok) {
+        console.error("Error response crearCurso:", await response.text());
+        throw new Error(await response.text() || "Error al crear el curso");
+    }
 
-    return await response.json() as Curso;
+    // return await response.json() as Curso;
+    return await response.text()
 }
 
 
