@@ -24,9 +24,19 @@ export const { commitSession, destroySession } = sessionStorage;
 /**
  * Decodes a JWT token (basic decoding, no signature verification)
  * @param {string} token - The JWT token to decode
- * @returns {any | null} The decoded payload or null if invalid
+ * @returns {Token | null} The decoded payload or null if invalid
  */
-function decodeJWT(token: string): any | null {
+interface Token {
+    ip: string;
+    id: string;
+    canal: string;
+    rol: UserRole;
+    sub: string;
+    iat: number;
+    exp: number;
+}
+
+const decodeJWT = (token: string): Token | null => {
     try {
         const parts = token.split('.');
         if (parts.length !== 3) return null;
@@ -37,7 +47,7 @@ function decodeJWT(token: string): any | null {
         );
         return payload;
     } catch (error) {
-        console.error('Error decoding JWT:', error);
+        console.error('Session Server - Error decoding JWT:', error);
         return null;
     }
 }
@@ -70,6 +80,7 @@ const getUserSession = async (request: Request) => {
         // Clear session data but don't redirect here, let the calling function handle it
         session.unset(USER_SESSION_KEY);
         session.unset("token");
+        session.unset("refreshToken");
         session.unset("rol");
         session.unset("exp");
     }
@@ -182,8 +193,8 @@ export async function createUserSession({
     };
 }) {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-
-    const data = _decodeJWT(extraSessionData.token);
+    console.log("Creating session with data:", extraSessionData);
+    const data = decodeJWT(extraSessionData.token);
 
     if (!data) {
         throw new Error("Invalid token data");
@@ -207,32 +218,4 @@ export async function createUserSession({
             }),
         },
     });
-}
-
-
-
-interface Token {
-    ip: string;
-    id: string;
-    canal: string;
-    rol: UserRole;
-    sub: string;
-    iat: number;
-    exp: number;
-}
-
-const _decodeJWT = (token: string): Token | null => {
-    try {
-        const parts = token.split('.');
-        if (parts.length !== 3) return null;
-
-        // Decode the payload (base64url)
-        const payload = JSON.parse(
-            atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
-        );
-        return payload;
-    } catch (error) {
-        console.error('Error decoding JWT:', error);
-        return null;
-    }
 }
