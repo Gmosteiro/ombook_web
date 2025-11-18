@@ -200,7 +200,7 @@ export async function requireValidSession(request: Request): Promise<void> {
  */
 export async function getUserId(
     request: Request
-): Promise<User["correo"] | undefined> {
+): Promise<User["id"] | undefined> {
     const session = await getUserSession(request);
     return session.get(USER_SESSION_KEY);
 }
