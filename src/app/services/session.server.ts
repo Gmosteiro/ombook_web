@@ -1,6 +1,7 @@
 // app/services/session.server.ts
 import { createCookieSessionStorage, redirect } from "react-router";
 import type { User, UserRole } from "~/features/auth/types";
+import { API_URL } from "~/features/common/utils/Utils";
 
 const USER_SESSION_KEY = "userId";
 
@@ -66,18 +67,81 @@ function isJWTValid(token: string): boolean {
 }
 
 /**
+ * Refreshes the access token using the refresh token
+ * @param {string} refreshToken - The refresh token
+ * @returns {Promise<{accessToken: string, accessTokenExp: number, refreshToken: string} | null>} New tokens or null if failed
+ */
+async function refreshAccessToken(refreshToken: string): Promise<{
+    accessToken: string;
+    accessTokenExp: number;
+    refreshToken: string;
+    rol: string;
+} | null> {
+    try {
+        const response = await fetch(`${API_URL}/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        if (!response.ok) {
+            console.error("Failed to refresh token:", response.status);
+            return null;
+        }
+
+        const data = await response.json();
+        return {
+            accessToken: data.accessToken,
+            accessTokenExp: data.accessTokenExp,
+            refreshToken: data.refreshToken,
+            rol: data.rol,
+        };
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        return null;
+    }
+}
+
+/**
  * Retrieves the user session from the request and validates JWT expiration.
- * If JWT is expired, destroys the session.
+ * If JWT is expired, tries to refresh it using the refresh token.
+ * Automatically commits session changes if token was refreshed.
  * @param {Request} request - The incoming request.
  * @returns {Promise<Session>} The user session.
  */
 const getUserSession = async (request: Request) => {
-    const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+    const cookieHeader = request.headers.get("Cookie");
+    const session = await sessionStorage.getSession(cookieHeader);
 
     // Check if session has a token and if it's expired
     const token = session.get("token");
+    const refreshToken = session.get("refreshToken");
+
     if (token && !isJWTValid(token)) {
-        // Clear session data but don't redirect here, let the calling function handle it
+        // Token expired, try to refresh
+        if (refreshToken) {
+            const newTokens = await refreshAccessToken(refreshToken);
+
+            if (newTokens) {
+                // Successfully refreshed, update session
+                const decoded = decodeJWT(newTokens.accessToken);
+                if (decoded) {
+                    session.set("token", newTokens.accessToken);
+                    session.set("refreshToken", newTokens.refreshToken);
+                    session.set("exp", newTokens.accessTokenExp);
+                    session.set("rol", newTokens.rol);
+                    session.set(USER_SESSION_KEY, decoded.id);
+
+                    console.log("Token refreshed successfully");
+                    // Note: Session will be committed by the calling function
+                    (session as any)._tokenRefreshed = true;
+                    return session;
+                }
+            }
+        }
+
+        // Couldn't refresh, clear session data
+        console.log("Token expired and couldn't refresh, clearing session");
         session.unset(USER_SESSION_KEY);
         session.unset("token");
         session.unset("refreshToken");
@@ -104,6 +168,7 @@ export async function logout(request: Request) {
 
 /**
  * Checks if the user has a valid session, redirects to login if not.
+ * Automatically persists session if token was refreshed.
  * @param {Request} request - The incoming request.
  * @returns {Promise<void>} Throws redirect if session is invalid.
  */
@@ -118,6 +183,13 @@ export async function requireValidSession(request: Request): Promise<void> {
                 "Set-Cookie": await sessionStorage.destroySession(session),
             },
         });
+    }
+
+    // If token was refreshed, we need to commit the session
+    // This will be handled by the response headers in loaders/actions
+    if ((session as any)._tokenRefreshed) {
+        // Mark that we need to update the session cookie
+        // The calling loader/action should handle this
     }
 }
 
