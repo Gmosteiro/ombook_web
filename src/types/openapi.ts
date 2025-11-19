@@ -687,6 +687,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cursos/{cursoId}/tareas/{tareaId}/entregas/{entregaId}/archivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Descargar archivo de una entrega de tarea */
+        get: operations["descargarArchivoEntrega"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/tareas/{tareaId}/entregas/estudiantes/{estudianteId}/archivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Descargar archivo de la entrega de un estudiante para una tarea (prof responsable o entrega propia de estudiante */
+        get: operations["descargarArchivoEntregaDeEstudiante"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/tareas/{tareaId}/entregas/estado-estudiantes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar estudiantes del curso con estado de entrega para la tarea */
+        get: operations["listarEstadoEntregas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cursos/{cursoId}/recursos/{recursoId}/descargar-url": {
         parameters: {
             query?: never;
@@ -804,7 +855,6 @@ export interface components {
             apellido: string;
             /** Format: email */
             correo: string;
-            contrasena: string;
             cedula: string;
             /** Format: date */
             fechaNacimiento: string;
@@ -897,6 +947,7 @@ export interface components {
             ultimoLogin?: string;
             /** Format: int32 */
             intentosFallidos?: number;
+            contrasenaInicialCambiada?: boolean;
             /** @enum {string} */
             rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
         };
@@ -1045,6 +1096,7 @@ export interface components {
             /** Format: int64 */
             refreshTokenExp?: number;
             rol?: string;
+            contrasenaInicialCambiada?: boolean;
         };
         RecuperacionContrasenaRequest: {
             /** Format: email */
@@ -1197,6 +1249,24 @@ export interface components {
             /** Format: double */
             calificacion?: number;
         };
+        RecursoDescargaResponse: {
+            url?: string;
+            /** Format: int64 */
+            expiraEnSegundos?: number;
+        };
+        EntregaEstadoEstudianteResponse: {
+            /** Format: int64 */
+            estudianteId?: number;
+            nombre?: string;
+            apellido?: string;
+            entregado?: boolean;
+            /** Format: date-time */
+            fechaEnvio?: string;
+            /** @enum {string} */
+            estado?: "ENVIADA" | "CORREGIDA" | "RECHAZADA";
+            /** Format: double */
+            calificacion?: number;
+        };
         RecursoListadoResponse: {
             /** Format: int64 */
             id?: number;
@@ -1212,11 +1282,6 @@ export interface components {
             fechaSubida?: string;
             /** Format: int64 */
             subidoPorUsuarioId?: number;
-        };
-        RecursoDescargaResponse: {
-            url?: string;
-            /** Format: int64 */
-            expiraEnSegundos?: number;
         };
         DesactivarTokenRequest: {
             token?: string;
@@ -2567,6 +2632,77 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["EntregaDetalleResponse"];
+                };
+            };
+        };
+    };
+    descargarArchivoEntrega: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                tareaId: number;
+                entregaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecursoDescargaResponse"];
+                };
+            };
+        };
+    };
+    descargarArchivoEntregaDeEstudiante: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                tareaId: number;
+                estudianteId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecursoDescargaResponse"];
+                };
+            };
+        };
+    };
+    listarEstadoEntregas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                tareaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EntregaEstadoEstudianteResponse"][];
                 };
             };
         };

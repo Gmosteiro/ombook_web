@@ -25,6 +25,9 @@ export const getNavbarLinks = (role: UserRole | undefined): Links[] | [] => {
                 return [
                     { to: "/courses", label: "Mis Cursos" },
                 ];
+
+            case UserRole.SIN_VERIFICAR:
+                return [];
             default:
                 throw new Error(`Unknown user role: ${role}`);
         }

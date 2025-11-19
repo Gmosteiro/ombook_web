@@ -265,7 +265,6 @@ export async function createUserSession({
     };
 }) {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-    console.log("Creating session with data:", extraSessionData);
     const data = decodeJWT(extraSessionData.token);
 
     if (!data) {

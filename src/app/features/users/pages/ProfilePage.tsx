@@ -2,9 +2,13 @@ import { useLoaderData, useFetcher, useRevalidator } from "react-router";
 import { getPerfil, actualizarPerfil, actualizarAvatar, UsuarioBasicoResponse } from "../../../routes/api.profile";
 import { useEffect, useState } from "react";
 import { formatFecha } from "../utils/Utils";
+import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
+import { UserRole } from "~/features/auth/types";
 
 // Loader para obtener el perfil
 export const loader = async ({ request }: { request: Request }) => {
+    await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
+
     const perfil = await getPerfil(request);
     return { perfil };
 };

@@ -31,133 +31,82 @@ export interface ErrorResponse {
 }
 
 // ==========================================
-// POST /auth/recuperacion-contrasena
+// Métodos de API
 // ==========================================
+
 /**
  * Solicita la recuperación de contraseña enviando un correo con el enlace.
- * @param request Request con el body conteniendo el correo
- * @returns Response 200 OK o 404 Not Found
+ * @param correo El correo electrónico del usuario
+ * @returns Response con mensaje de éxito
  */
-export async function action({ request }: { request: Request }) {
-    const url = new URL(request.url);
-    const searchParams = url.searchParams;
-    const action = searchParams.get('action');
+export async function solicitarRecuperacionContrasena(
+    correo: string
+): Promise<RecuperacionContrasenaResponse> {
+    const response = await fetch(`${API_URL}/auth/recuperacion-contrasena`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ correo }),
+    });
 
-    try {
-        // POST /api/auth?action=recuperacion-contrasena
-        if (request.method === "POST" && action === "recuperacion-contrasena") {
-            const body = await request.json() as RecuperacionContrasenaRequest;
-
-            const response = await fetch(`${API_URL}/auth/recuperacion-contrasena`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(body),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json() as ErrorResponse;
-                return Response.json(errorData, { status: response.status });
-            }
-
-            const data = await response.json() as RecuperacionContrasenaResponse;
-            return Response.json(data, { status: 200 });
-        }
-
-        // POST /api/auth?action=restablecer-contrasena
-        if (request.method === "POST" && action === "restablecer-contrasena") {
-            const body = await request.json() as RestablecerContrasenaRequest;
-
-            // Validar que las contraseñas coincidan en el frontend también
-            if (body.nuevaContrasena !== body.confirmarContrasena) {
-                return Response.json(
-                    { error: "Las contraseñas no coinciden." } as ErrorResponse,
-                    { status: 400 }
-                );
-            }
-
-            const response = await fetch(`${API_URL}/auth/restablecer-contrasena`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(body),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json() as ErrorResponse;
-                return Response.json(errorData, { status: response.status });
-            }
-
-            const data = await response.json() as RestablecerContrasenaResponse;
-            return Response.json(data, { status: 200 });
-        }
-
-        return Response.json(
-            { error: "Método no permitido" } as ErrorResponse,
-            { status: 405 }
-        );
-    } catch (error) {
-        console.error("Error en api.auth:", error);
-        return Response.json(
-            { error: "Error interno del servidor" } as ErrorResponse,
-            { status: 500 }
-        );
+    if (!response.ok) {
+        const errorData = await response.json() as ErrorResponse;
+        throw new Error(errorData.error || "Error al solicitar recuperación de contraseña");
     }
+
+    return await response.json() as RecuperacionContrasenaResponse;
 }
 
-// ==========================================
-// GET /auth/restablecer-contrasena/verificar
-// ==========================================
 /**
  * Verifica si un token de recuperación es válido.
- * @param request Request con el query param token
- * @returns Response 200 OK con {valido: boolean} o 400 Bad Request
+ * @param token El token a verificar
+ * @returns Response con validez del token
  */
-export async function loader({ request }: { request: Request }) {
-    const url = new URL(request.url);
-    const action = url.searchParams.get("action");
-    const token = url.searchParams.get("token");
-
-    try {
-        // GET /api/auth?action=verificar-token&token=xxx
-        if (action === "verificar-token") {
-            if (!token) {
-                return Response.json(
-                    { error: "Token no proporcionado" } as ErrorResponse,
-                    { status: 400 }
-                );
-            }
-
-            const response = await fetch(
-                `${API_URL}/auth/restablecer-contrasena/verificar?token=${encodeURIComponent(token)}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json",
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                const errorData = await response.json() as ErrorResponse;
-                return Response.json(errorData, { status: response.status });
-            }
-
-            const data = await response.json() as VerificarTokenResponse;
-            return Response.json(data, { status: 200 });
+export async function verificarToken(token: string): Promise<VerificarTokenResponse> {
+    const response = await fetch(
+        `${API_URL}/auth/restablecer-contrasena/verificar?token=${encodeURIComponent(token)}`,
+        {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+            },
         }
+    );
 
-        return Response.json(
-            { error: "Acción no válida" } as ErrorResponse,
-            { status: 400 }
-        );
-    } catch (error) {
-        console.error("Error en api.auth loader:", error);
-        return Response.json(
-            { error: "Error interno del servidor" } as ErrorResponse,
-            { status: 500 }
-        );
+    if (!response.ok) {
+        const errorData = await response.json() as ErrorResponse;
+        throw new Error(errorData.error || "Error al verificar token");
     }
+
+    return await response.json() as VerificarTokenResponse;
+}
+
+/**
+ * Restablece la contraseña usando un token válido.
+ * @param data Datos para restablecer la contraseña
+ * @returns Response con mensaje de éxito
+ */
+export async function restablecerContrasena(
+    data: RestablecerContrasenaRequest
+): Promise<RestablecerContrasenaResponse> {
+    // Validar que las contraseñas coincidan
+    if (data.nuevaContrasena !== data.confirmarContrasena) {
+        throw new Error("Las contraseñas no coinciden.");
+    }
+
+    const response = await fetch(`${API_URL}/auth/restablecer-contrasena`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json() as ErrorResponse;
+        throw new Error(errorData.error || "Error al restablecer contraseña");
+    }
+
+    return await response.json() as RestablecerContrasenaResponse;
 }
