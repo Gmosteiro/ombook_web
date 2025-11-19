@@ -1,4 +1,4 @@
-import { useLoaderData, useFetcher, useRevalidator } from "react-router";
+import { useLoaderData, useFetcher, useRevalidator, Link } from "react-router";
 import { getPerfil, actualizarPerfil, actualizarAvatar, UsuarioBasicoResponse } from "../../../routes/api.profile";
 import { useEffect, useState } from "react";
 import { formatFecha } from "../utils/Utils";
@@ -94,9 +94,6 @@ export default function ProfilePage() {
                 {fetcher.data?.error && (
                     <div className="text-red-600 mt-4">{fetcher.data.error}</div>
                 )}
-                {/* {fetcher.data?.success && (
-                    <div className="text-green-600 mt-4">{fetcher.data.success}</div>
-                )} */}
                 {!edit && (
                     <button
                         className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
@@ -225,6 +222,12 @@ export default function ProfilePage() {
                         >
                             Cancelar
                         </button>
+                        <Link
+                            to="/profile/change-password"
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg transition inline-flex items-center justify-center"
+                        >
+                            Cambiar Contraseña
+                        </Link>
                     </div>
                 </fetcher.Form>
             ) : (
@@ -243,7 +246,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }
