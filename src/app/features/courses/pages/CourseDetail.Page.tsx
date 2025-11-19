@@ -34,6 +34,8 @@ export function meta() {
 
 export default function CourseDetailPage() {
   const course = useLoaderData() as Course;
+
+  console.log("Loaded course data:", course);
   return (
     <div className="min-h-screen bg-[#f6f7f9]">
 

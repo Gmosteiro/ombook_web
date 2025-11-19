@@ -88,6 +88,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["cambiarPassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/usuarios": {
         parameters: {
             query?: never;
@@ -487,6 +503,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/desbloqueo-cuenta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["desbloquearCuenta"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/cerrar-sesion": {
         parameters: {
             query?: never;
@@ -850,6 +882,11 @@ export interface components {
             /** Format: date-time */
             fechaProgramada?: string;
         };
+        CambioPasswordRequest: {
+            contrasenaActual?: string;
+            nuevaContrasena?: string;
+            confirmarContrasena?: string;
+        };
         AltaUsuarioRequest: {
             nombre: string;
             apellido: string;
@@ -1105,6 +1142,9 @@ export interface components {
         LoginRequest: {
             correo?: string;
             contrasena?: string;
+        };
+        DesbloqueoCuentaRequest: {
+            token: string;
         };
         ActualizarPerfilRequest: {
             nombre?: string;
@@ -1518,6 +1558,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    cambiarPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CambioPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
             };
         };
     };
@@ -2319,6 +2383,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TokenResponse"];
+                };
+            };
+        };
+    };
+    desbloquearCuenta: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesbloqueoCuentaRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
                 };
             };
         };

@@ -1,4 +1,6 @@
 import { API_URL } from "~/features/common/utils/Utils";
+import { getValidJWTToken } from "~/services/session.server";
+import { apiFetch } from "~/features/auth/utils/methods";
 
 // ==========================================
 // Tipos para las operaciones de recuperación
@@ -109,4 +111,47 @@ export async function restablecerContrasena(
     }
 
     return await response.json() as RestablecerContrasenaResponse;
+}
+
+/**
+ * Cambia la contraseña del usuario autenticado.
+ * @param request Request object para obtener el JWT token
+ * @param data Datos para cambiar la contraseña (contraseña actual y nueva)
+ * @returns Response con mensaje de éxito
+ */
+export async function cambiarContrasena(
+    request: Request,
+    data: CambiarContrasenaRequest
+): Promise<CambiarContrasenaResponse> {
+    // Validar que las contraseñas coincidan
+    if (data.nuevaContrasena !== data.confirmarContrasena) {
+        throw new Error("Las contraseñas no coinciden.");
+    }
+
+    const jwtToken = await getValidJWTToken(request);
+
+    const response = await apiFetch(`/auth/password`, {
+        method: "PUT",
+        secure: true,
+        jwtToken,
+        body: data,
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json() as { message?: string; error?: string };
+        // Usar 'message' si está disponible, sino 'error', sino mensaje genérico
+        throw new Error(errorData.message || errorData.error || "Error al cambiar contraseña");
+    }
+
+    return await response.json() as CambiarContrasenaResponse;
+}
+
+export interface CambiarContrasenaRequest {
+    contrasenaActual: string;
+    nuevaContrasena: string;
+    confirmarContrasena: string;
+}
+
+export interface CambiarContrasenaResponse {
+    mensaje: string;
 }

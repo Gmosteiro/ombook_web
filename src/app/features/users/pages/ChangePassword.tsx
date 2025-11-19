@@ -1,16 +1,9 @@
-import { useState } from 'react';
-import { Form, useActionData, useNavigation, redirect } from 'react-router';
-import { apiFetch, validatePasswordStrength } from '~/features/auth/utils/methods';
-import { getValidJWTToken, requireValidSession } from '~/services/session.server';
+import { Form, redirect, useActionData, useNavigation } from "react-router";
+import { validatePasswordStrength } from "../../auth/utils/methods";
+import { getUserRole, requireValidSession, forceTokenRefresh } from "../../../services/session.server";
+import { cambiarContrasena, type CambiarContrasenaRequest } from "../../../routes/api.auth";
+import { UserRole } from "~/features/auth/types";
 
-interface CambiarContrasenaRequest {
-    contrasenaActual: string;
-    nuevaContrasena: string;
-}
-
-interface CambiarContrasenaResponse {
-    mensaje: string;
-}
 
 export function meta() {
     return [
@@ -19,10 +12,7 @@ export function meta() {
 }
 
 export async function loader({ request }: { request: Request }) {
-    // Solo verificar que tenga una sesión válida, sin importar el rol
-    // Esta página es accesible para cualquier usuario autenticado
     await requireValidSession(request);
-
     return {};
 }
 
@@ -32,161 +22,163 @@ export async function action({ request }: { request: Request }) {
     const nuevaContrasena = formData.get('nuevaContrasena') as string;
     const confirmarContrasena = formData.get('confirmarContrasena') as string;
 
-    const validationError = validatePasswordStrength(nuevaContrasena);
-
-    if (validationError) {
-        return {
-            error: `La nueva contraseña no cumple con los requisitos de seguridad.
-            Asegúrese de que tenga al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.`};
-    }
-
     // Validar que las contraseñas coincidan
     if (nuevaContrasena !== confirmarContrasena) {
-        return { error: 'Las contraseñas no coinciden.' };
+        return {
+            success: false,
+            error: 'Las contraseñas no coinciden.'
+        };
     }
 
-    try {
-        const body: CambiarContrasenaRequest = {
-            contrasenaActual,
-            nuevaContrasena,
+    // Validar fortaleza de la contraseña
+    const validationError = validatePasswordStrength(nuevaContrasena);
+    if (!validationError) {
+        return {
+            success: false,
+            error: `La nueva contraseña no cumple con los requisitos de seguridad.
+        Asegúrese de que tenga al menos 8 caracteres, una letra mayúscula, una letra minúscula, un número y un carácter especial (@$!%*?&).`
         };
+    }
 
-        const response = await apiFetch('/usuarios/password', {
-            method: 'PUT',
-            secure: true,
-            jwtToken: await getValidJWTToken(request),
-            body: JSON.stringify(body),
-        });
+    const data: CambiarContrasenaRequest = {
+        contrasenaActual,
+        nuevaContrasena,
+        confirmarContrasena
+    };
 
+    try {
+        const userRoleBeforeChange = await getUserRole(request);
+        const response = await cambiarContrasena(request, data);
 
-        const data = await response.json() as CambiarContrasenaResponse & { error?: string };
+        // Si el usuario era SIN_VERIFICAR, su rol cambió - refrescar el token y redirigir
+        if (userRoleBeforeChange === UserRole.SIN_VERIFICAR) {
+            const refreshResult = await forceTokenRefresh(request);
 
-        //TODO esperar a que el backend esté listo para manejar este caso
-        if (!response.ok) {
-            return { error: data.error || 'Ocurrió un error al cambiar la contraseña.' };
+            if (refreshResult.success && refreshResult.headers) {
+                // Redirigir inmediatamente con los headers actualizados
+                return redirect('/', {
+                    headers: refreshResult.headers
+                });
+            } else {
+                // Si falla el refresh, mostrar error pero la contraseña ya se cambió
+                return {
+                    success: true,
+                    message: response.mensaje + ' Por favor, inicie sesión nuevamente.'
+                };
+            }
         }
 
-        // Si el cambio fue exitoso, redirigir al login para que vuelva a iniciar sesión
-        // (el backend actualizará el rol de SIN_VERIFICAR automáticamente)
-        return redirect('/login');
-    } catch (error) {
-        console.error('Error al cambiar contraseña:', error);
-        return { error: 'Error de conexión. Por favor, inténtelo de nuevo.' };
+        // Para otros usuarios, mostrar mensaje de éxito
+        return {
+            success: true,
+            message: response.mensaje || 'Contraseña cambiada exitosamente.'
+        };
+    } catch (error: any) {
+        return {
+            success: false,
+            error: error.message || 'Error al cambiar la contraseña.'
+        };
     }
 }
 
-
-
 export default function ChangePassword() {
-    const actionData = useActionData<typeof action>();
+    const actionData = useActionData<{
+        success: boolean;
+        error?: string;
+        message?: string;
+    }>();
     const navigation = useNavigation();
-
-    const [contrasenaActual, setContrasenaActual] = useState('');
-    const [nuevaContrasena, setNuevaContrasena] = useState('');
-    const [confirmarContrasena, setConfirmarContrasena] = useState('');
-    const [showPasswords, setShowPasswords] = useState(false);
-
-    const isSubmitting = navigation.state === 'submitting';
+    const isSubmitting = navigation.state === "submitting";
 
     return (
-        <div className="max-w-md mx-auto mt-8 p-8 border border-gray-200 rounded-lg bg-white shadow">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-                Cambiar contraseña
-            </h2>
-
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                    <strong>⚠️ Cambio requerido:</strong> Debe cambiar su contraseña para continuar.
-                </p>
-            </div>
-
-            <p className="text-gray-600 mb-6">
-                La nueva contraseña debe cumplir con los siguientes requisitos:
-            </p>
-
-            <ul className="text-sm text-gray-600 mb-4 space-y-1 list-disc list-inside">
-                <li>Mínimo 8 caracteres</li>
-                <li>Al menos una letra mayúscula</li>
-                <li>Al menos una letra minúscula</li>
-                <li>Al menos un número</li>
-            </ul>
-
-            <Form method="post" className="space-y-4">
-                <div>
-                    <label className="block mb-2 text-gray-700 font-medium">
-                        Contraseña actual
-                    </label>
-                    <input
-                        type={showPasswords ? 'text' : 'password'}
-                        name="contrasenaActual"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 bg-white"
-                        placeholder="••••••••"
-                        value={contrasenaActual}
-                        onChange={e => setContrasenaActual(e.target.value)}
-                        required
-                        disabled={isSubmitting}
-                    />
-                </div>
-
-                <div>
-                    <label className="block mb-2 text-gray-700 font-medium">
-                        Nueva contraseña
-                    </label>
-                    <input
-                        type={showPasswords ? 'text' : 'password'}
-                        name="nuevaContrasena"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 bg-white"
-                        placeholder="••••••••"
-                        value={nuevaContrasena}
-                        onChange={e => setNuevaContrasena(e.target.value)}
-                        required
-                        disabled={isSubmitting}
-                    />
-                </div>
-
-                <div>
-                    <label className="block mb-2 text-gray-700 font-medium">
-                        Confirmar nueva contraseña
-                    </label>
-                    <input
-                        type={showPasswords ? 'text' : 'password'}
-                        name="confirmarContrasena"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 bg-white"
-                        placeholder="••••••••"
-                        value={confirmarContrasena}
-                        onChange={e => setConfirmarContrasena(e.target.value)}
-                        required
-                        disabled={isSubmitting}
-                    />
-                </div>
-
-                <div className="flex items-center">
-                    <input
-                        type="checkbox"
-                        id="showPasswords"
-                        checked={showPasswords}
-                        onChange={e => setShowPasswords(e.target.checked)}
-                        className="mr-2"
-                    />
-                    <label htmlFor="showPasswords" className="text-sm text-gray-600">
-                        Mostrar contraseñas
-                    </label>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Cambiar Contraseña
+                    </h1>
+                    <p className="text-gray-600">
+                        Debe cambiar su contraseña antes de continuar
+                    </p>
                 </div>
 
                 {actionData?.error && (
-                    <div className="p-3 rounded-lg bg-red-100 text-red-700 border border-red-300">
-                        {actionData.error}
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm text-red-800">{actionData.error}</p>
                     </div>
                 )}
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? 'Cambiando contraseña...' : 'Cambiar contraseña'}
-                </button>
-            </Form>
+                {actionData?.success && actionData?.message && (
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm text-green-800">{actionData.message}</p>
+                    </div>
+                )}
+
+                <Form method="post" className="space-y-6">
+                    <div>
+                        <label htmlFor="contrasenaActual" className="block text-sm font-medium text-gray-700 mb-2">
+                            Contraseña Actual
+                        </label>
+                        <input
+                            type="password"
+                            id="contrasenaActual"
+                            name="contrasenaActual"
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            placeholder="Ingrese su contraseña actual"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="nuevaContrasena" className="block text-sm font-medium text-gray-700 mb-2">
+                            Nueva Contraseña
+                        </label>
+                        <input
+                            type="password"
+                            id="nuevaContrasena"
+                            name="nuevaContrasena"
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            placeholder="Ingrese su nueva contraseña"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="confirmarContrasena" className="block text-sm font-medium text-gray-700 mb-2">
+                            Confirmar Nueva Contraseña
+                        </label>
+                        <input
+                            type="password"
+                            id="confirmarContrasena"
+                            name="confirmarContrasena"
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            placeholder="Confirme su nueva contraseña"
+                        />
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm font-medium text-blue-900 mb-2">
+                            La contraseña debe cumplir con:
+                        </p>
+                        <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                            <li>Mínimo 8 caracteres</li>
+                            <li>Al menos una letra mayúscula</li>
+                            <li>Al menos una letra minúscula</li>
+                            <li>Al menos un número</li>
+                            <li>Al menos un carácter especial (@$!%*?&)</li>
+                        </ul>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                        {isSubmitting ? 'Cambiando contraseña...' : 'Cambiar Contraseña'}
+                    </button>
+                </Form>
+            </div>
         </div>
     );
 }

@@ -102,6 +102,50 @@ async function refreshAccessToken(refreshToken: string): Promise<{
     }
 }
 
+
+export const forceTokenRefresh = async (request: Request): Promise<{
+    success: boolean;
+    headers?: HeadersInit;
+}> => {
+    const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+    const refreshToken = session.get("refreshToken");
+
+    if (!refreshToken) {
+        console.error("No refresh token found in session");
+        return { success: false };
+    }
+
+    const newTokens = await refreshAccessToken(refreshToken);
+    console.log("Forcing token refresh, new tokens:", newTokens);
+
+    if (!newTokens) {
+        console.error("Failed to refresh token");
+        return { success: false };
+    }
+
+    // Successfully refreshed, update session
+    const decoded = decodeJWT(newTokens.accessToken);
+    if (!decoded) {
+        console.error("Failed to decode new access token");
+        return { success: false };
+    }
+
+    session.set("token", newTokens.accessToken);
+    session.set("refreshToken", newTokens.refreshToken);
+    session.set("exp", newTokens.accessTokenExp);
+    session.set("rol", newTokens.rol);
+    session.set(USER_SESSION_KEY, decoded.id);
+
+    console.log("Session updated with new role:", newTokens.rol);
+
+    // Commit the session and return headers
+    const headers = {
+        "Set-Cookie": await sessionStorage.commitSession(session),
+    };
+
+    return { success: true, headers };
+}
+
 /**
  * Retrieves the user session from the request and validates JWT expiration.
  * If JWT is expired, tries to refresh it using the refresh token.
@@ -141,7 +185,6 @@ const getUserSession = async (request: Request) => {
         }
 
         // Couldn't refresh, clear session data
-        console.log("Token expired and couldn't refresh, clearing session");
         session.unset(USER_SESSION_KEY);
         session.unset("token");
         session.unset("refreshToken");
