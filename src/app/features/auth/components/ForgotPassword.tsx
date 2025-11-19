@@ -5,7 +5,6 @@ import { solicitarRecuperacionContrasena } from '~/routes/api.auth';
 export async function action({ request }: { request: Request }) {
     const formData = await request.formData();
     const correo = formData.get('correo') as string;
-
     try {
         const data = await solicitarRecuperacionContrasena(correo);
         return {

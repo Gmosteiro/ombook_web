@@ -50,7 +50,7 @@ export async function action({ request }: { request: Request }) {
     if (!validationError) {
         return {
             error: `La nueva contraseña no cumple con los requisitos de seguridad.
-        Asegúrese de que tenga al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.`};
+        Asegúrese de que tenga al menos 8 caracteres, una letra mayúscula, una letra minúscula, un número y un carácter especial (@$!%*?&).`};
     }
 
     // Validar que las contraseñas coincidan
@@ -132,6 +132,7 @@ const ResetPassword: React.FC = () => {
                         <li>Al menos una letra mayúscula</li>
                         <li>Al menos una letra minúscula</li>
                         <li>Al menos un número</li>
+                        <li>Al menos un carácter especial (@$!%*?&.)</li>
                     </ul>
 
                     <Form method="post" className="space-y-4">

@@ -9,7 +9,7 @@ const routes: RouteConfig = [
     route("/login", "./features/auth/components/Login.tsx"),
     route("/logout", "./features/auth/components/Logout.tsx"),
     route("/forgot-password", "./features/auth/components/ForgotPassword.tsx"),
-    route("/reset-password", "./features/auth/components/ResetPassword.tsx"),
+    route("/password-reset", "./features/auth/components/ResetPassword.tsx"),
 
     // Courses
     route("/courses", "./features/courses/pages/CoursesPage.tsx"),

@@ -72,6 +72,6 @@ export const apiFetch = async (
 
 export const validatePasswordStrength = (password: string): boolean => {
     // Al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$/;
     return regex.test(password);
 }

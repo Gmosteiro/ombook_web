@@ -1,5 +1,4 @@
 import { API_URL } from "~/features/common/utils/Utils";
-import { apiFetch } from "~/features/auth/utils/methods";
 
 // ==========================================
 // Tipos para las operaciones de recuperación
@@ -43,8 +42,11 @@ export interface ErrorResponse {
 export async function solicitarRecuperacionContrasena(
     correo: string
 ): Promise<RecuperacionContrasenaResponse> {
-    const response = await apiFetch(`${API_URL}/auth/recuperacion-contrasena`, {
+    const response = await fetch(`${API_URL}/auth/recuperacion-contrasena`, {
         method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
         body: JSON.stringify({ correo }),
     });
 
@@ -93,8 +95,11 @@ export async function restablecerContrasena(
         throw new Error("Las contraseñas no coinciden.");
     }
 
-    const response = await apiFetch(`${API_URL}/auth/restablecer-contrasena`, {
+    const response = await fetch(`${API_URL}/auth/restablecer-contrasena`, {
         method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
     });
 
