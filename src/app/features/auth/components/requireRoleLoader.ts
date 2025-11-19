@@ -9,6 +9,11 @@ export function requireRoleLoader(allowedRoles: UserRole[]) {
 
         const userRole = await getUserRole(request);
 
+        if (userRole && userRole === UserRole.SIN_VERIFICAR) {
+            throw redirect("/reset-password");
+        }
+
+
         if (!userRole || !allowedRoles.includes(userRole)) {
             throw redirect("/");
         }

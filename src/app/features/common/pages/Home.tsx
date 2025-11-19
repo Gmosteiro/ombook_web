@@ -3,6 +3,8 @@ import { getUserId, getUserRole } from "~/services/session.server";
 import { redirect } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/common/pages/+types/Home";
 import Layout from "../components/Layout";
+import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
+import { UserRole } from "~/features/auth/types";
 
 export const meta: MetaFunction = () => {
     return [
@@ -12,6 +14,8 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
+    await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
+
     const userId = await getUserId(request);
     if (!userId) {
         throw redirect("/login");
@@ -28,7 +32,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function Index({ loaderData }: Route.ComponentProps) {
     return (
         <Layout
-            userEmail={loaderData.userId}
+            userEmail={loaderData.userId as any}
             userRole={loaderData.userRole}
             notificationCount={5} // Ejemplo: 5 notificaciones //TODO obtener el conteo real
         >

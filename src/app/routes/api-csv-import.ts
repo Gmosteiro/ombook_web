@@ -56,9 +56,6 @@ export async function action({ request }: ActionFunctionArgs) {
             body: backendFormData,
         });
 
-
-        console.log('Backend Response Status:', response.status);
-
         if (!response.ok) {
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
 
@@ -84,8 +81,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
         try {
             const responseData = await response.json();
-
-            console.log('Backend Response Data:', responseData);
 
             // Construir mensaje detallado
             let message = '';

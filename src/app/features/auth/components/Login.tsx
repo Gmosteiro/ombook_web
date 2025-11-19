@@ -3,7 +3,7 @@ import { Form, redirect, Link, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
 import { createUserSession, getUserId } from "~/services/session.server";
 import { API_URL } from "../../common/utils/Utils";
-import type { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
+import { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
 
 export const meta: MetaFunction = () => {
     return [
@@ -48,7 +48,9 @@ export async function action({ request }: Route.ActionArgs) {
         }
 
         const data: LoginResponse = await res.json();
-        console.log("Login action - received data:", data);
+
+        let rol = data.contrasenaInicialCambiada === false ? UserRole.SIN_VERIFICAR : data.rol as UserRole;
+
         // Guardar tokens, rol y exp en la sesión
         response = await createUserSession({
             request,
@@ -56,7 +58,7 @@ export async function action({ request }: Route.ActionArgs) {
             extraSessionData: {
                 token: data.accessToken || "",
                 refreshToken: data.refreshToken || "",
-                rol: data.rol as UserRole,
+                rol: rol,
                 exp: data.accessTokenExp || 0,
             },
         });

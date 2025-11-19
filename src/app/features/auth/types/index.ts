@@ -3,7 +3,8 @@ import type { operations, components } from '../../../../types/openapi';
 export const enum UserRole {
     ADMINISTRADOR = "ADMINISTRADOR",
     PROFESOR = "PROFESOR",
-    ESTUDIANTE = "ESTUDIANTE"
+    ESTUDIANTE = "ESTUDIANTE",
+    SIN_VERIFICAR = "SIN_VERIFICAR"
 }
 
 export const enum UserStatus {

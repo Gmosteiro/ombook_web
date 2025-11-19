@@ -58,7 +58,6 @@ export default function UserEnrollPage() {
         formData.append("usuarioId", data.usuarioId.toString());
         formData.append("cursoId", course.id.toString());
         formData.append("intent", "matricular");
-        console.log("Submitting enrollment for user:", data.usuarioId, "to course:", course.id);
         fetcher.submit(formData, { method: "POST" });
     };
 
