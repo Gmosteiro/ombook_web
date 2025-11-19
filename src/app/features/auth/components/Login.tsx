@@ -48,7 +48,6 @@ export async function action({ request }: Route.ActionArgs) {
         }
 
         const data: LoginResponse = await res.json();
-        console.log("Login action - received data:", data);
         // Guardar tokens, rol y exp en la sesión
         response = await createUserSession({
             request,

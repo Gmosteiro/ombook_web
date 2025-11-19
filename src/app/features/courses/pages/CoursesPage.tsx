@@ -37,12 +37,15 @@ export const loader = async (args: any) => {
 
   const cursos = await getCursos(args.request, { q, estado, profesorId: teacher ? Number(teacher) : undefined, page, size });
 
+  // Convertir page de 0-indexed (API) a 1-indexed (UI)
+  const currentPage = page + 1;
+
   return {
     cursos,
     profesores,
     showTeacherFilter,
     filters: { search: searchParam || "", status: estado || "", teacher: teacher || "" },
-    page,
+    page: currentPage,
     size,
     userRole,
   };
@@ -110,7 +113,8 @@ export default function CoursesPage() {
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", newPage.toString());
+    // Convertir de 1-indexed (UI) a 0-indexed (API)
+    params.set("page", (newPage - 1).toString());
     setSearchParams(params);
   };
 
@@ -172,7 +176,7 @@ export default function CoursesPage() {
               />
             ))}
           </div>
-          <Pagination currentPage={page + 1} totalPages={totalPages} onPageChange={handlePageChange} />
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
         </>
       )}
     </div>

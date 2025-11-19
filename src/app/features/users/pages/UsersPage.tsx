@@ -6,6 +6,7 @@ import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { getUserRole } from "../../../services/session.server";
 import { useState, useEffect } from "react";
 import UserDetailModal from "../components/UserDetailModal";
+import { Pagination } from "../../courses/components/general/Pagination";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR])(args);
@@ -23,7 +24,10 @@ export const loader = async (args: any) => {
   const users = await getUsers(args.request, { q, rol, estado, page, size });
   const userRole = await getUserRole(args.request);
 
-  return { userRole, users, filters: { search: searchParam || "", rol: rol || "", estado: estado || "" }, page: page || 1 };
+  // Convertir page de 0-indexed (API) a 1-indexed (UI)
+  const currentPage = page !== undefined ? page + 1 : 1;
+
+  return { userRole, users, filters: { search: searchParam || "", rol: rol || "", estado: estado || "" }, page: currentPage };
 };
 
 export const action = async ({ request }: { request: Request }) => {
@@ -109,7 +113,8 @@ export default function UsersPage() {
   // Handler para paginación
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", newPage.toString());
+    // Convertir de 1-indexed (UI) a 0-indexed (API)
+    params.set("page", (newPage - 1).toString());
     setSearchParams(params);
   };
 
@@ -242,25 +247,11 @@ export default function UsersPage() {
           </div>
 
           {/* Paginación */}
-          <div className="flex justify-between items-center mt-8 text-sm text-gray-600">
-            <p>Mostrando página {page} de {totalPages}</p>
-            <div className="flex gap-2">
-              <button
-                className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 font-medium shadow-sm transition hover:bg-blue-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-              >
-                Anterior
-              </button>
-              <button
-                className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 font-medium shadow-sm transition hover:bg-blue-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === totalPages}
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       )}
 
