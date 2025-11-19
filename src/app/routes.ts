@@ -34,6 +34,7 @@ const routes: RouteConfig = [
 
 
     route("/profile", "./features/users/pages/ProfilePage.tsx"),
+    route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),
 
     // API Routes
     route("/csv/import", "./routes/api-csv-import.ts"),
