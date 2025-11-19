@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLoaderData, Form, useActionData, useNavigation } from 'react-router';
-import type { VerificarTokenResponse, RestablecerContrasenaResponse, ErrorResponse } from '../../../routes/api.auth';
-import { apiFetch } from '../utils/methods';
+import { verificarToken, restablecerContrasena } from '~/routes/api.auth';
+import { validatePasswordStrength } from '../utils/methods';
 
 // Loader: verificar token al cargar
 export async function loader({ request }: { request: Request }) {
@@ -13,34 +13,29 @@ export async function loader({ request }: { request: Request }) {
             tokenValid: false,
             error: 'Token no proporcionado. Por favor, utilice el enlace del correo.',
         };
-    } else {
-        try {
-            const response = await apiFetch(`/api/auth?action=verificar-token&token=${encodeURIComponent(token)}`,
-                { method: 'GET' }
-            );
-
-            const data = await response.json() as VerificarTokenResponse & ErrorResponse;
-
-            if (!response.ok || !data.valido) {
-                return {
-                    tokenValid: false,
-                    error: data.error || 'El enlace no es válido o ha caducado.',
-                };
-            }
-
-            return {
-                tokenValid: true,
-                token,
-            };
-        } catch (error) {
-            console.error('Error al verificar token:', error);
-            return {
-                tokenValid: false,
-                error: 'Error de conexión. Por favor, inténtelo de nuevo.',
-            };
-        }
     }
 
+    try {
+        const data = await verificarToken(token);
+
+        if (!data.valido) {
+            return {
+                tokenValid: false,
+                error: 'El enlace no es válido o ha caducado.',
+            };
+        }
+
+        return {
+            tokenValid: true,
+            token,
+        };
+    } catch (error: any) {
+        console.error('Error al verificar token:', error);
+        return {
+            tokenValid: false,
+            error: error.message || 'Error de conexión. Por favor, inténtelo de nuevo.',
+        };
+    }
 }
 
 // Action: restablecer contraseña
@@ -50,26 +45,12 @@ export async function action({ request }: { request: Request }) {
     const nuevaContrasena = formData.get('nuevaContrasena') as string;
     const confirmarContrasena = formData.get('confirmarContrasena') as string;
 
-    // Validar política de contraseña
-    const validatePassword = (password: string): string | null => {
-        if (password.length < 8) {
-            return 'La contraseña debe tener al menos 8 caracteres.';
-        }
-        if (!/[A-Z]/.test(password)) {
-            return 'La contraseña debe contener al menos una letra mayúscula.';
-        }
-        if (!/[a-z]/.test(password)) {
-            return 'La contraseña debe contener al menos una letra minúscula.';
-        }
-        if (!/[0-9]/.test(password)) {
-            return 'La contraseña debe contener al menos un número.';
-        }
-        return null;
-    };
 
-    const validationError = validatePassword(nuevaContrasena);
-    if (validationError) {
-        return { error: validationError };
+    const validationError = validatePasswordStrength(nuevaContrasena);
+    if (!validationError) {
+        return {
+            error: `La nueva contraseña no cumple con los requisitos de seguridad.
+        Asegúrese de que tenga al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número.`};
     }
 
     // Validar que las contraseñas coincidan
@@ -78,28 +59,19 @@ export async function action({ request }: { request: Request }) {
     }
 
     try {
-        const response = await apiFetch('/api/auth?action=restablecer-contrasena', {
-            method: 'POST',
-            body: JSON.stringify({
-                token,
-                nuevaContrasena,
-                confirmarContrasena,
-            }),
+        const data = await restablecerContrasena({
+            token,
+            nuevaContrasena,
+            confirmarContrasena,
         });
-
-        const data = await response.json() as RestablecerContrasenaResponse & ErrorResponse;
-
-        if (!response.ok) {
-            return { error: data.error || 'Ocurrió un error al restablecer la contraseña.' };
-        }
 
         return {
             success: true,
             mensaje: data.mensaje || 'Contraseña restablecida exitosamente.',
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al restablecer contraseña:', error);
-        return { error: 'Error de conexión. Por favor, inténtelo de nuevo.' };
+        return { error: error.message || 'Error de conexión. Por favor, inténtelo de nuevo.' };
     }
 }
 
