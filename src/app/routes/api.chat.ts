@@ -25,9 +25,9 @@ export async function obtenerContactos(
     const searchParams = new URLSearchParams();
     if (search) searchParams.append("search", search);
 
-    const url = "/contactos" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+    const url = "/mensajes/contactos/estudiantes" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
-    const response = await apiFetch("/mensajes/contactos/estudiantes", {
+    const response = await apiFetch(url, {
         method: "GET",
         secure: true,
         jwtToken: await getValidJWTToken(request),

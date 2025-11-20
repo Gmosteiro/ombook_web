@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react';
-import { 
-  PaginaTematica, 
+import {
+  PaginaTematica,
   CreatePaginaRequest,
   Recurso,
-  CreateRecursoRequest
 } from '../types/types';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -87,7 +86,7 @@ export const usePaginasTematicas = (cursoId: number) => {
       }
 
       const newRecurso: Recurso = await response.json();
-      
+
       // Actualizar la página con el nuevo recurso
       setPaginas(prev => prev.map(pagina => {
         if (pagina.id === paginaId) {
@@ -145,7 +144,7 @@ export const usePaginasTematicas = (cursoId: number) => {
 
   const getRecursoUrl = useCallback(async (recursoId: number, jwtToken?: string) => {
     try {
-      const headers: Record<string,string> = {
+      const headers: Record<string, string> = {
         'Accept': 'application/json'
       };
       if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;

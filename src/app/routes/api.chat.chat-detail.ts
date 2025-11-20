@@ -7,9 +7,9 @@ import { obtenerChatPorId } from "./api.chat";
  */
 export async function loader({ request, params }: LoaderFunctionArgs) {
     try {
-        const contactoId = parseInt(params.id, 10);
+        const contactoId = parseInt(params.id ?? "", 10);
 
-        if (isNaN(contactoId)) {
+        if (!params.id || isNaN(contactoId)) {
             return Response.json(
                 { error: "ID de contacto inválido" },
                 { status: 400 }

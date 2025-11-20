@@ -39,11 +39,14 @@ export async function action({ request }: ActionFunctionArgs): Promise<CreateUse
             contrasena: data.contrasena,
             cedula,
             fechaNacimiento: data.fechaNacimiento,
-            rol: data.rol,
+            rol: data.rol as UserRole,
         };
 
         try {
-            await crearUsuario(request, userData);
+            await crearUsuario(request, {
+                ...userData,
+                rol: userData.rol as "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE"
+            });
             return { success: true, message: "Usuario creado exitosamente" };
         } catch (error: any) {
             return {
