@@ -25,23 +25,21 @@ export async function loader({ params, request }: { params: { id: string }, requ
 
 
 export function meta() {
-  const course = useLoaderData() as Course;
+  // const course = useLoaderData() as Course;
 
   return [
-    { title: `Ombook | ${course.nombre ? course.nombre : 'Cursos'}` }
+    { title: `Ombook | Cursos` }
   ];
 }
 
 export default function CourseDetailPage() {
   const course = useLoaderData() as Course;
-
-  console.log("Loaded course data:", course);
   return (
     <div className="min-h-screen bg-[#f6f7f9]">
 
       <div className="w-full h-56 bg-gray-200 flex items-end justify-start relative">
         <img
-          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" //TODO
+          src={course.imagenUrl}
           alt="Banner curso"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: "center" }}
