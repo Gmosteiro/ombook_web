@@ -15,7 +15,6 @@ export const getNavbarLinks = (role: UserRole | undefined): Links[] | [] => {
                 return [
                     { to: "/users", label: "Usuarios" },
                     { to: "/courses", label: "Cursos" },
-                    { to: "/chat", label: "Chat" },
                     // { to: "/configuration", label: "Configuración" },
                 ];
             case UserRole.PROFESOR:

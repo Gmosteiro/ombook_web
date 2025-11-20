@@ -34,7 +34,7 @@ const routes: RouteConfig = [
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
 
     // Chat
-    route("/chat", "./features/chat/ChatInterface.tsx"),
+    route("/chat", "./features/chat/pages/ChatInterface.tsx"),
 
     route("/profile", "./features/users/pages/ProfilePage.tsx"),
     route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),

@@ -1,53 +1,11 @@
 import { getValidJWTToken } from "~/services/session.server";
 import { apiFetch } from "~/features/auth/utils/methods";
+import { Contacto, Chat, ErrorResponse, EnviarMensajeResponse } from "~/features/chat/types";
 
 // ==========================================
 // Tipos para el sistema de chat
 // ==========================================
 
-export interface Contacto {
-    id: number;
-    nombre: string;
-    apellido: string;
-    rol: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
-    fotoPerfilUrl?: string;
-    ultimoMensaje?: string;
-    timestampUltimoMensaje?: string;
-    enLinea: boolean;
-    mensajesNoLeidos?: number;
-}
-
-export interface Mensaje {
-    id: number;
-    remitenteId: number;
-    destinatarioId: number;
-    contenido: string;
-    timestamp: string;
-    leido: boolean;
-}
-
-export interface Chat {
-    contacto: Contacto;
-    mensajes: Mensaje[];
-}
-
-export interface EnviarMensajeRequest {
-    destinatarioId: number;
-    contenido: string;
-}
-
-export interface EnviarMensajeResponse {
-    id: number;
-    remitenteId: number;
-    destinatarioId: number;
-    contenido: string;
-    timestamp: string;
-    leido: boolean;
-}
-
-export interface ErrorResponse {
-    error: string;
-}
 
 // ==========================================
 // Métodos de API
@@ -69,7 +27,7 @@ export async function obtenerContactos(
 
     const url = "/contactos" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
-    const response = await apiFetch(url, {
+    const response = await apiFetch("/mensajes/contactos/estudiantes", {
         method: "GET",
         secure: true,
         jwtToken: await getValidJWTToken(request),

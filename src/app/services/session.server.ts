@@ -116,7 +116,6 @@ export const forceTokenRefresh = async (request: Request): Promise<{
     }
 
     const newTokens = await refreshAccessToken(refreshToken);
-    console.log("Forcing token refresh, new tokens:", newTokens);
 
     if (!newTokens) {
         console.error("Failed to refresh token");
@@ -135,8 +134,6 @@ export const forceTokenRefresh = async (request: Request): Promise<{
     session.set("exp", newTokens.accessTokenExp);
     session.set("rol", newTokens.rol);
     session.set(USER_SESSION_KEY, decoded.id);
-
-    console.log("Session updated with new role:", newTokens.rol);
 
     // Commit the session and return headers
     const headers = {
