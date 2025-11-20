@@ -146,6 +146,30 @@ export async function cambiarContrasena(
     return await response.json() as CambiarContrasenaResponse;
 }
 
+/**
+ * Desbloquea una cuenta usando el token recibido por email.
+ * @param data Datos con el token de desbloqueo
+ * @returns Response con mensaje de éxito
+ */
+export async function desbloquearCuenta(
+    data: DesbloquearCuentaRequest
+): Promise<DesbloquearCuentaResponse> {
+    const response = await fetch(`${API_URL}/auth/desbloqueo-cuenta`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json() as ErrorResponse;
+        throw new Error(errorData.error || "Error al desbloquear cuenta");
+    }
+
+    return await response.json() as DesbloquearCuentaResponse;
+}
+
 export interface CambiarContrasenaRequest {
     contrasenaActual: string;
     nuevaContrasena: string;
@@ -153,5 +177,13 @@ export interface CambiarContrasenaRequest {
 }
 
 export interface CambiarContrasenaResponse {
+    mensaje: string;
+}
+
+export interface DesbloquearCuentaRequest {
+    token: string;
+}
+
+export interface DesbloquearCuentaResponse {
     mensaje: string;
 }
