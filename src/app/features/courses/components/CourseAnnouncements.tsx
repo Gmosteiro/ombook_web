@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { useLoaderData, useOutletContext } from "react-router";
-import { getValidJWTToken, getUserRole } from "~/services/session.server";
+import { useState } from "react";
+import { useLoaderData, useOutletContext, useSubmit, useRevalidator, type ActionFunctionArgs } from "react-router";
+import { getValidJWTToken, getUserRole, getUserId } from "~/services/session.server";
 import { apiFetch } from "../../auth/utils/methods";
 import type { Course } from "../types/types";
+import { UserRole } from "~/features/auth/types";
 
 type Anuncio = {
   id: number;
@@ -21,6 +22,7 @@ export async function loader({ params, request }: { params: { id: string }, requ
   try {
     const jwtToken = await getValidJWTToken(request);
     const userRole = await getUserRole(request);
+    const currentUserId = await getUserId(request);
 
     const res = await apiFetch(`/cursos/${id}/anuncios`, {
       method: 'GET',
@@ -32,16 +34,83 @@ export async function loader({ params, request }: { params: { id: string }, requ
 
     return {
       anuncios,
-      jwtToken,
-      isProfesor: userRole === 'PROFESOR'
+      isProfesor: userRole === UserRole.PROFESOR,
+      currentUserId
     };
   } catch (err) {
     console.error("Error fetching announcements:", err);
     return {
       anuncios: [] as Anuncio[],
-      jwtToken: '',
-      isProfesor: false
+      isProfesor: false,
+      currentUserId: null
     };
+  }
+}
+
+export async function action({ params, request }: ActionFunctionArgs) {
+  const { id } = params;
+  const formData = await request.formData();
+  const actionType = formData.get("actionType") as string;
+  const jwtToken = await getValidJWTToken(request);
+
+  try {
+    switch (actionType) {
+      case "create": {
+        const titulo = formData.get("titulo") as string;
+        const contenido = formData.get("contenido") as string;
+        const fechaProgramada = formData.get("fechaProgramada") as string;
+
+        const res = await apiFetch(`/cursos/${id}/anuncios`, {
+          method: 'POST',
+          secure: true,
+          jwtToken,
+          body: {
+            titulo,
+            contenido,
+            ...(fechaProgramada && { fechaProgramada })
+          }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, data: await res.json() };
+      }
+
+      case "edit": {
+        const anuncioId = formData.get("anuncioId") as string;
+        const titulo = formData.get("titulo") as string;
+        const contenido = formData.get("contenido") as string;
+        const fechaProgramada = formData.get("fechaProgramada") as string;
+
+        const res = await apiFetch(`/cursos/${id}/anuncios/${anuncioId}`, {
+          method: 'PUT',
+          secure: true,
+          jwtToken,
+          body: {
+            titulo,
+            contenido,
+            ...(fechaProgramada && { fechaProgramada })
+          }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, data: await res.json() };
+      }
+
+      case "delete": {
+        const anuncioId = formData.get("anuncioId") as string;
+        const res = await apiFetch(`/cursos/${id}/anuncios/${anuncioId}`, {
+          method: 'DELETE',
+          secure: true,
+          jwtToken
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, deletedId: Number(anuncioId) };
+      }
+
+      default:
+        return { success: false, error: "Acción desconocida" };
+    }
+  } catch (err) {
+    console.error(`Error in action ${actionType}:`, err);
+    return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
   }
 }
 
@@ -49,10 +118,16 @@ export default function CourseAnnouncements() {
   const context = useOutletContext<{ course: Course }>();
   const course = context?.course;
 
-  const loaderData = useLoaderData() as { anuncios: Anuncio[]; jwtToken: string; isProfesor: boolean };
-  const [anuncios, setAnuncios] = useState(loaderData?.anuncios || []);
-  const jwtToken = loaderData?.jwtToken || '';
+  const loaderData = useLoaderData() as {
+    anuncios: Anuncio[];
+    isProfesor: boolean;
+    currentUserId: number | null;
+  };
+  const anuncios = loaderData?.anuncios || [];
   const isProfesor = loaderData?.isProfesor || false;
+  const currentUserId = loaderData?.currentUserId || null;
+  const submit = useSubmit();
+  const revalidator = useRevalidator();
 
   const [showNew, setShowNew] = useState(false);
   const [titulo, setTitulo] = useState('');
@@ -60,18 +135,6 @@ export default function CourseAnnouncements() {
   const [fechaProgramada, setFechaProgramada] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingAnuncioId, setEditingAnuncioId] = useState<number | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (jwtToken) {
-      try {
-        const payload = JSON.parse(atob(jwtToken.split('.')[1]));
-        setCurrentUserId(payload.id || payload.sub);
-      } catch (e) {
-        console.error('Error decoding JWT:', e);
-      }
-    }
-  }, [jwtToken]);
 
   const canEditAnuncio = (anuncio: Anuncio) => isProfesor || currentUserId === anuncio.autorId;
 
@@ -79,66 +142,74 @@ export default function CourseAnnouncements() {
     e?.preventDefault();
     if (!course?.id || !titulo || !contenido) return;
     setIsSubmitting(true);
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/anuncios`, {
-        method: 'POST',
-        secure: true,
-        jwtToken,
-        body: { 
-          titulo, 
-          contenido,
-          ...(fechaProgramada && { fechaProgramada })
-        }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const newAnuncio = await res.json();
-      setAnuncios([newAnuncio, ...anuncios]);
+
+    const formData = new FormData();
+    formData.append("actionType", "create");
+    formData.append("titulo", titulo);
+    formData.append("contenido", contenido);
+    if (fechaProgramada) {
+      formData.append("fechaProgramada", fechaProgramada);
+    }
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: "createAnuncio",
+    });
+
+    setTimeout(() => {
       setTitulo('');
       setContenido('');
       setFechaProgramada('');
       setShowNew(false);
-    } catch (err) {
-      console.error('Error creating announcement:', err);
-    } finally {
       setIsSubmitting(false);
-    }
+      revalidator.revalidate();
+    }, 500);
   };
 
   const handleEdit = async (anuncioId: number, updatedData: { titulo: string; contenido: string; fechaProgramada?: string }) => {
     if (!course?.id) return;
     setIsSubmitting(true);
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/anuncios/${anuncioId}`, {
-        method: 'PUT',
-        secure: true,
-        jwtToken,
-        body: updatedData
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const updated = await res.json();
-      setAnuncios(anuncios.map(a => a.id === anuncioId ? updated : a));
-      setEditingAnuncioId(null);
-    } catch (err) {
-      console.error('Error editing announcement:', err);
-    } finally {
-      setIsSubmitting(false);
+
+    const formData = new FormData();
+    formData.append("actionType", "edit");
+    formData.append("anuncioId", String(anuncioId));
+    formData.append("titulo", updatedData.titulo);
+    formData.append("contenido", updatedData.contenido);
+    if (updatedData.fechaProgramada) {
+      formData.append("fechaProgramada", updatedData.fechaProgramada);
     }
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: `editAnuncio-${anuncioId}`,
+    });
+
+    setTimeout(() => {
+      setEditingAnuncioId(null);
+      setIsSubmitting(false);
+      revalidator.revalidate();
+    }, 500);
   };
 
   const handleDelete = async (anuncioId: number) => {
     if (!course?.id) return;
     if (!window.confirm('¿Eliminar anuncio?')) return;
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/anuncios/${anuncioId}`, {
-        method: 'DELETE',
-        secure: true,
-        jwtToken
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setAnuncios(anuncios.filter(a => a.id !== anuncioId));
-    } catch (err) {
-      console.error('Error deleting announcement:', err);
-    }
+
+    const formData = new FormData();
+    formData.append("actionType", "delete");
+    formData.append("anuncioId", String(anuncioId));
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: `deleteAnuncio-${anuncioId}`,
+    });
+
+    setTimeout(() => {
+      revalidator.revalidate();
+    }, 500);
   };
 
   return (
@@ -167,7 +238,7 @@ export default function CourseAnnouncements() {
             <input id="anuncio-fechaProgramada" type="datetime-local" value={fechaProgramada} onChange={e => setFechaProgramada(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" />
           </div>
           <div className="flex justify-end gap-2">
-            <button 
+            <button
               type="button"
               onClick={() => {
                 setShowNew(false);
@@ -194,45 +265,45 @@ export default function CourseAnnouncements() {
               <div className="space-y-2">
                 <div>
                   <label htmlFor={`edit-titulo-${a.id}`} className="block text-sm font-medium mb-1">Título</label>
-                  <input 
+                  <input
                     id={`edit-titulo-${a.id}`}
-                    defaultValue={a.titulo} 
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
+                    defaultValue={a.titulo}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
                   <label htmlFor={`edit-contenido-${a.id}`} className="block text-sm font-medium mb-1">Contenido</label>
-                  <textarea 
+                  <textarea
                     id={`edit-contenido-${a.id}`}
-                    defaultValue={a.contenido} 
+                    defaultValue={a.contenido}
                     rows={3}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
                   <label htmlFor={`edit-fecha-${a.id}`} className="block text-sm font-medium mb-1">Fecha programada</label>
-                  <input 
+                  <input
                     id={`edit-fecha-${a.id}`}
                     type="datetime-local"
-                    defaultValue={a.fechaProgramada ? new Date(a.fechaProgramada).toISOString().slice(0, 16) : ''} 
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
+                    defaultValue={a.fechaProgramada ? new Date(a.fechaProgramada).toISOString().slice(0, 16) : ''}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   />
                 </div>
                 <div className="flex justify-end gap-2 mt-3">
-                  <button 
+                  <button
                     onClick={() => setEditingAnuncioId(null)}
                     className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm"
                   >
                     Cancelar
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       const newTitulo = (document.getElementById(`edit-titulo-${a.id}`) as HTMLInputElement)?.value;
                       const newContenido = (document.getElementById(`edit-contenido-${a.id}`) as HTMLTextAreaElement)?.value;
                       const newFecha = (document.getElementById(`edit-fecha-${a.id}`) as HTMLInputElement)?.value;
                       if (newTitulo && newContenido) {
-                        handleEdit(a.id, { 
-                          titulo: newTitulo, 
+                        handleEdit(a.id, {
+                          titulo: newTitulo,
                           contenido: newContenido,
                           ...(newFecha && { fechaProgramada: new Date(newFecha).toISOString() })
                         });

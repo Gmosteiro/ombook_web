@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { useLoaderData, useOutletContext } from "react-router";
-import { getValidJWTToken, getUserRole } from "~/services/session.server";
+import { useState } from "react";
+import { useLoaderData, useOutletContext, useSubmit, useRevalidator, type ActionFunctionArgs } from "react-router";
+import { getValidJWTToken, getUserRole, getUserId } from "~/services/session.server";
 import { apiFetch } from "../../auth/utils/methods";
 import type { Course } from "../types/types";
+import { UserRole } from "~/features/auth/types";
 
 type Mensaje = {
   id: number;
@@ -30,6 +31,7 @@ export async function loader({ params, request }: { params: { id: string }, requ
   try {
     const jwtToken = await getValidJWTToken(request);
     const userRole = await getUserRole(request);
+    const currentUserId = await getUserId(request);
 
     const res = await apiFetch(`/cursos/${id}/foro`, {
       method: 'GET',
@@ -41,16 +43,108 @@ export async function loader({ params, request }: { params: { id: string }, requ
 
     return {
       publicaciones,
-      jwtToken,
-      isProfesor: userRole === 'PROFESOR'
+      isProfesor: userRole === UserRole.PROFESOR,
+      currentUserId
     };
   } catch (err) {
     console.error("Error fetching forum:", err);
     return {
       publicaciones: [] as Publicacion[],
-      jwtToken: '',
-      isProfesor: false
+      isProfesor: false,
+      currentUserId: null
     };
+  }
+}
+
+export async function action({ params, request }: ActionFunctionArgs) {
+  const { id } = params;
+  const formData = await request.formData();
+  const actionType = formData.get("actionType") as string;
+  const jwtToken = await getValidJWTToken(request);
+
+  try {
+    switch (actionType) {
+      case "createThread": {
+        const contenido = formData.get("contenido") as string;
+        const res = await apiFetch(`/cursos/${id}/foro/publicacion`, {
+          method: 'POST',
+          secure: true,
+          jwtToken,
+          body: { contenido }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, data: await res.json() };
+      }
+
+      case "createReply": {
+        const publicacionId = formData.get("publicacionId") as string;
+        const contenido = formData.get("contenido") as string;
+        const res = await apiFetch(`/cursos/${id}/foro/mensaje/${publicacionId}`, {
+          method: 'POST',
+          secure: true,
+          jwtToken,
+          body: { contenido }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, data: await res.json(), publicacionId: Number(publicacionId) };
+      }
+
+      case "deleteThread": {
+        const publicacionId = formData.get("publicacionId") as string;
+        const res = await apiFetch(`/cursos/${id}/foro/publicacion/${publicacionId}`, {
+          method: 'DELETE',
+          secure: true,
+          jwtToken
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, deletedThreadId: Number(publicacionId) };
+      }
+
+      case "deleteReply": {
+        const mensajeId = formData.get("mensajeId") as string;
+        const publicacionId = formData.get("publicacionId") as string;
+        const res = await apiFetch(`/cursos/${id}/foro/mensaje/${mensajeId}`, {
+          method: 'DELETE',
+          secure: true,
+          jwtToken
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, deletedReplyId: Number(mensajeId), publicacionId: Number(publicacionId) };
+      }
+
+      case "editThread": {
+        const publicacionId = formData.get("publicacionId") as string;
+        const contenido = formData.get("contenido") as string;
+        const res = await apiFetch(`/cursos/${id}/foro/publicacion/${publicacionId}`, {
+          method: 'PUT',
+          secure: true,
+          jwtToken,
+          body: { contenido }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, data: await res.json() };
+      }
+
+      case "editReply": {
+        const mensajeId = formData.get("mensajeId") as string;
+        const publicacionId = formData.get("publicacionId") as string;
+        const contenido = formData.get("contenido") as string;
+        const res = await apiFetch(`/cursos/${id}/foro/mensaje/${mensajeId}`, {
+          method: 'PUT',
+          secure: true,
+          jwtToken,
+          body: { contenido }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return { success: true, data: await res.json(), publicacionId: Number(publicacionId) };
+      }
+
+      default:
+        return { success: false, error: "Acción desconocida" };
+    }
+  } catch (err) {
+    console.error(`Error in action ${actionType}:`, err);
+    return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
   }
 }
 
@@ -58,10 +152,16 @@ export default function CourseForums() {
   const context = useOutletContext<{ course: Course }>();
   const course = context?.course;
 
-  const loaderData = useLoaderData() as { publicaciones: Publicacion[]; jwtToken: string; isProfesor: boolean };
-  const [publicaciones, setPublicaciones] = useState<Publicacion[]>(loaderData?.publicaciones || []);
-  const jwtToken = loaderData?.jwtToken || '';
+  const loaderData = useLoaderData() as {
+    publicaciones: Publicacion[];
+    isProfesor: boolean;
+    currentUserId: number | null
+  };
+  const publicaciones = loaderData?.publicaciones || [];
   const isProfesor = loaderData?.isProfesor || false;
+  const currentUserId = loaderData?.currentUserId || null;
+  const submit = useSubmit();
+  const revalidator = useRevalidator();
 
   const [showNewThread, setShowNewThread] = useState(false);
   const [expandedThreadId, setExpandedThreadId] = useState<number | null>(null);
@@ -70,18 +170,6 @@ export default function CourseForums() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingThreadId, setEditingThreadId] = useState<number | null>(null);
   const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (jwtToken) {
-      try {
-        const payload = JSON.parse(atob(jwtToken.split('.')[1]));
-        setCurrentUserId(payload.id || payload.sub);
-      } catch (e) {
-        console.error('Error decoding JWT:', e);
-      }
-    }
-  }, [jwtToken]);
 
   const canEditThread = (pub: Publicacion) => isProfesor || currentUserId === pub.autorId;
   const canEditReply = (msg: Mensaje) => isProfesor || currentUserId === msg.autorId;
@@ -90,139 +178,138 @@ export default function CourseForums() {
     e?.preventDefault();
     if (!course?.id || !newThreadContent) return;
     setIsSubmitting(true);
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/foro/publicacion`, {
-        method: 'POST',
-        secure: true,
-        jwtToken,
-        body: { contenido: newThreadContent }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const newPublication = await res.json();
-      setPublicaciones([newPublication, ...publicaciones]);
+
+    const formData = new FormData();
+    formData.append("actionType", "createThread");
+    formData.append("contenido", newThreadContent);
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: "createThread",
+    });
+
+    setTimeout(() => {
       setNewThreadContent('');
       setShowNewThread(false);
-    } catch (err) {
-      console.error('Error creating thread:', err);
-    } finally {
       setIsSubmitting(false);
-    }
+      revalidator.revalidate();
+    }, 500);
   };
 
   const handleCreateReply = async (publicacionId: number) => {
     const contenido = replyContent[publicacionId];
     if (!course?.id || !contenido) return;
     setIsSubmitting(true);
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/foro/mensaje/${publicacionId}`, {
-        method: 'POST',
-        secure: true,
-        jwtToken,
-        body: { contenido }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const newMessage = await res.json();
-      setPublicaciones(publicaciones.map(p => 
-        p.id === publicacionId 
-          ? { ...p, respuestas: [...(p.respuestas || []), newMessage] }
-          : p
-      ));
+
+    const formData = new FormData();
+    formData.append("actionType", "createReply");
+    formData.append("publicacionId", String(publicacionId));
+    formData.append("contenido", contenido);
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: `createReply-${publicacionId}`,
+    });
+
+    setTimeout(() => {
       setReplyContent({ ...replyContent, [publicacionId]: '' });
-    } catch (err) {
-      console.error('Error creating reply:', err);
-    } finally {
       setIsSubmitting(false);
-    }
+      revalidator.revalidate();
+    }, 500);
   };
 
   const handleDeleteThread = async (publicacionId: number) => {
     if (!course?.id) return;
     if (!window.confirm('¿Eliminar hilo?')) return;
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/foro/publicacion/${publicacionId}`, {
-        method: 'DELETE',
-        secure: true,
-        jwtToken
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setPublicaciones(publicaciones.filter(p => p.id !== publicacionId));
-    } catch (err) {
-      console.error('Error deleting thread:', err);
-    }
+
+    const formData = new FormData();
+    formData.append("actionType", "deleteThread");
+    formData.append("publicacionId", String(publicacionId));
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: `deleteThread-${publicacionId}`,
+    });
+
+    setTimeout(() => {
+      revalidator.revalidate();
+    }, 500);
   };
 
   const handleDeleteReply = async (publicacionId: number, mensajeId: number) => {
     if (!course?.id) return;
     if (!window.confirm('¿Eliminar mensaje?')) return;
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/foro/mensaje/${mensajeId}`, {
-        method: 'DELETE',
-        secure: true,
-        jwtToken
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setPublicaciones(publicaciones.map(p => 
-        p.id === publicacionId 
-          ? { ...p, respuestas: p.respuestas?.filter(m => m.id !== mensajeId) || [] }
-          : p
-      ));
-    } catch (err) {
-      console.error('Error deleting reply:', err);
-    }
+
+    const formData = new FormData();
+    formData.append("actionType", "deleteReply");
+    formData.append("publicacionId", String(publicacionId));
+    formData.append("mensajeId", String(mensajeId));
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: `deleteReply-${mensajeId}`,
+    });
+
+    setTimeout(() => {
+      revalidator.revalidate();
+    }, 500);
   };
 
   const handleEditThread = async (publicacionId: number, newContent: string) => {
     if (!course?.id || !newContent) return;
     setIsSubmitting(true);
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/foro/publicacion/${publicacionId}`, {
-        method: 'PUT',
-        secure: true,
-        jwtToken,
-        body: { contenido: newContent }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const updated = await res.json();
-      setPublicaciones(publicaciones.map(p => p.id === publicacionId ? updated : p));
+
+    const formData = new FormData();
+    formData.append("actionType", "editThread");
+    formData.append("publicacionId", String(publicacionId));
+    formData.append("contenido", newContent);
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: `editThread-${publicacionId}`,
+    });
+
+    setTimeout(() => {
       setEditingThreadId(null);
-    } catch (err) {
-      console.error('Error editing thread:', err);
-    } finally {
       setIsSubmitting(false);
-    }
+      revalidator.revalidate();
+    }, 500);
   };
 
   const handleEditReply = async (publicacionId: number, mensajeId: number, newContent: string) => {
     if (!course?.id || !newContent) return;
     setIsSubmitting(true);
-    try {
-      const res = await apiFetch(`/cursos/${course.id}/foro/mensaje/${mensajeId}`, {
-        method: 'PUT',
-        secure: true,
-        jwtToken,
-        body: { contenido: newContent }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const updated = await res.json();
-      setPublicaciones(publicaciones.map(p => 
-        p.id === publicacionId 
-          ? { ...p, respuestas: p.respuestas?.map(m => m.id === mensajeId ? updated : m) || [] }
-          : p
-      ));
+
+    const formData = new FormData();
+    formData.append("actionType", "editReply");
+    formData.append("publicacionId", String(publicacionId));
+    formData.append("mensajeId", String(mensajeId));
+    formData.append("contenido", newContent);
+
+    submit(formData, {
+      method: "post",
+      navigate: false,
+      fetcherKey: `editReply-${mensajeId}`,
+    });
+
+    setTimeout(() => {
       setEditingReplyId(null);
-    } catch (err) {
-      console.error('Error editing reply:', err);
-    } finally {
       setIsSubmitting(false);
-    }
+      revalidator.revalidate();
+    }, 500);
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Foro del Curso</h1>
-        <button 
-          onClick={() => setShowNewThread(s => !s)} 
+        <button
+          onClick={() => setShowNewThread(s => !s)}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,27 +323,27 @@ export default function CourseForums() {
         <form onSubmit={handleCreateThread} className="mb-6 bg-white p-4 rounded-md shadow">
           <div className="mb-4">
             <label htmlFor="thread-contenido" className="block text-sm font-medium mb-1">Contenido del hilo</label>
-            <textarea 
+            <textarea
               id="thread-contenido"
               placeholder="Escribe tu pregunta o comentario"
-              value={newThreadContent} 
-              onChange={e => setNewThreadContent(e.target.value)} 
-              rows={4} 
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" 
-              required 
+              value={newThreadContent}
+              onChange={e => setNewThreadContent(e.target.value)}
+              rows={4}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              required
             />
           </div>
           <div className="flex justify-end gap-2">
-            <button 
+            <button
               type="button"
               onClick={() => setShowNewThread(false)}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               Cancelar
             </button>
-            <button 
-              type="submit" 
-              disabled={isSubmitting} 
+            <button
+              type="submit"
+              disabled={isSubmitting}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
               {isSubmitting ? 'Creando...' : 'Crear Hilo'}
@@ -271,7 +358,7 @@ export default function CourseForums() {
             <p>No hay hilos de conversación aún.</p>
           </div>
         )}
-        
+
         {publicaciones.map(pub => (
           <div key={pub.id} className="bg-white rounded-lg shadow overflow-hidden">
             {/* Header del hilo (clickeable para expandir) */}
@@ -301,14 +388,14 @@ export default function CourseForums() {
                   <p className="text-sm text-gray-600 mt-1 line-clamp-2">{pub.contenido}</p>
                   {canEditThread(pub) && (
                     <div className="flex gap-2 mt-2">
-                      <button 
-                        onClick={() => setEditingThreadId(editingThreadId === pub.id ? null : pub.id)} 
+                      <button
+                        onClick={() => setEditingThreadId(editingThreadId === pub.id ? null : pub.id)}
                         className="text-blue-500 text-sm hover:text-blue-700 font-medium"
                       >
                         {editingThreadId === pub.id ? 'Cancelar' : 'Editar'}
                       </button>
-                      <button 
-                        onClick={() => handleDeleteThread(pub.id)} 
+                      <button
+                        onClick={() => handleDeleteThread(pub.id)}
                         className="text-red-500 text-sm hover:text-red-700 font-medium"
                       >
                         Eliminar
@@ -322,7 +409,7 @@ export default function CourseForums() {
             {editingThreadId === pub.id && (
               <div className="p-4 bg-blue-50 border-b">
                 <label htmlFor={`edit-thread-${pub.id}`} className="block text-sm font-medium mb-2">Editar contenido</label>
-                <textarea 
+                <textarea
                   id={`edit-thread-${pub.id}`}
                   defaultValue={pub.contenido}
                   onBlur={(e) => {
@@ -334,13 +421,13 @@ export default function CourseForums() {
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                 />
                 <div className="flex justify-end gap-2 mt-2">
-                  <button 
+                  <button
                     onClick={() => setEditingThreadId(null)}
                     className="px-2 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm"
                   >
                     Cancelar
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       const textarea = document.getElementById(`edit-thread-${pub.id}`) as HTMLTextAreaElement;
                       if (textarea?.value.trim()) {
@@ -366,20 +453,20 @@ export default function CourseForums() {
                         {editingReplyId === msg.id ? (
                           <div>
                             <label htmlFor={`edit-reply-${msg.id}`} className="block text-xs font-medium mb-1">Editar respuesta</label>
-                            <textarea 
+                            <textarea
                               id={`edit-reply-${msg.id}`}
                               defaultValue={msg.contenido}
                               rows={2}
                               className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
                             />
                             <div className="flex justify-end gap-2 mt-2">
-                              <button 
+                              <button
                                 onClick={() => setEditingReplyId(null)}
                                 className="px-2 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 text-xs"
                               >
                                 Cancelar
                               </button>
-                              <button 
+                              <button
                                 onClick={() => {
                                   const textarea = document.getElementById(`edit-reply-${msg.id}`) as HTMLTextAreaElement;
                                   if (textarea?.value.trim()) {
@@ -409,14 +496,14 @@ export default function CourseForums() {
                             </div>
                             {canEditReply(msg) && (
                               <div className="flex gap-1 ml-2">
-                                <button 
-                                  onClick={() => setEditingReplyId(editingReplyId === msg.id ? null : msg.id)} 
+                                <button
+                                  onClick={() => setEditingReplyId(editingReplyId === msg.id ? null : msg.id)}
                                   className="text-blue-500 text-xs hover:text-blue-700 font-medium"
                                 >
                                   Editar
                                 </button>
-                                <button 
-                                  onClick={() => handleDeleteReply(pub.id, msg.id)} 
+                                <button
+                                  onClick={() => handleDeleteReply(pub.id, msg.id)}
                                   className="text-red-500 text-xs hover:text-red-700 font-medium"
                                 >
                                   Eliminar
