@@ -65,48 +65,48 @@ export const usePaginasTematicas = (cursoId: number) => {
   }, [cursoId]);
 
   const uploadRecurso = useCallback(async (paginaId: number, nombre: string, file: File, jwtToken: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append('archivo', file);
-      formData.append('ownerRecurso', 'PAGINA');
-      formData.append('ownerId', paginaId.toString());
-      formData.append('nombre', nombre);
+  setLoading(true);
+  setError(null);
+  try {
+    const formData = new FormData();
+    formData.append('ownerRecurso', 'PAGINA');
+    formData.append('ownerId', paginaId.toString());
+    formData.append('nombre', nombre);
+    formData.append('archivo', file); // <--- archivo real, no base64
 
-      const response = await fetch(`${API_URL}/cursos/${cursoId}/recursos`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`
-        },
-        body: formData,
-      });
+    const response = await fetch(`${API_URL}/cursos/${cursoId}/recursos`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`, // NO agregues Content-Type
+      },
+      body: formData,
+    });
 
-      if (!response.ok) {
-        throw new Error('Error al subir el archivo');
-      }
-
-      const newRecurso: Recurso = await response.json();
-      
-      // Actualizar la página con el nuevo recurso
-      setPaginas(prev => prev.map(pagina => {
-        if (pagina.id === paginaId) {
-          return {
-            ...pagina,
-            recursos: [...(pagina.recursos || []), newRecurso],
-          };
-        }
-        return pagina;
-      }));
-
-      return newRecurso;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-      return null;
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error('Error al subir el archivo');
     }
-  }, [cursoId]);
+
+    const newRecurso: Recurso = await response.json();
+
+    // Actualizar la página con el nuevo recurso
+    setPaginas(prev => prev.map(pagina => {
+      if (pagina.id === paginaId) {
+        return {
+          ...pagina,
+          recursos: [...(pagina.recursos || []), newRecurso],
+        };
+      }
+      return pagina;
+    }));
+
+    return newRecurso;
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Error desconocido');
+    return null;
+  } finally {
+    setLoading(false);
+  }
+}, [cursoId]);
 
   const deleteRecurso = useCallback(async (paginaId: number, recursoId: number, jwtToken: string) => {
     setLoading(true);

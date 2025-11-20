@@ -100,17 +100,24 @@ export async function action({ request }: { request: Request }) {
         return Response.json({ error: 'Missing required fields' }, { status: 400 });
       }
 
-      const form = new FormData();
-      form.append('ownerRecurso', ownerRecurso);
-      form.append('ownerId', String(tareaId));
-      form.append('nombre', nombre);
-      form.append('archivo', archivo);
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(archivo);
+      });
+      const body = {
+        ownerRecurso,
+        ownerId: parseInt(tareaId as string),
+        nombre,
+        archivo: base64.split(',')[1]
+      };
 
       const res = await apiFetch(`/cursos/${cursoId}/recursos`, {
         method: 'POST',
         secure: true,
         jwtToken,
-        body: form
+        body: JSON.stringify(body)
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

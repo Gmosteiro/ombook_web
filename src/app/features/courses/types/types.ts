@@ -110,3 +110,16 @@ export interface UpdateCourseResponse {
   message?: string;
   error?: string;
 }
+
+// Interfaces para tareas
+export interface Tarea {
+  id: number;
+  titulo: string;
+  descripcion?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  fechaCreacion?: string;
+  visibilidad?: string;
+  cursoId?: number;
+  creador?: number; // user id
+}
