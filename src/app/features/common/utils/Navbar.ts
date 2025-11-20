@@ -15,15 +15,18 @@ export const getNavbarLinks = (role: UserRole | undefined): Links[] | [] => {
                 return [
                     { to: "/users", label: "Usuarios" },
                     { to: "/courses", label: "Cursos" },
+                    { to: "/chat", label: "Chat" },
                     // { to: "/configuration", label: "Configuración" },
                 ];
             case UserRole.PROFESOR:
                 return [
                     { to: "/courses", label: "Mis Cursos" },
+                    { to: "/chat", label: "Chat" },
                 ];
             case UserRole.ESTUDIANTE:
                 return [
                     { to: "/courses", label: "Mis Cursos" },
+                    { to: "/chat", label: "Chat" },
                 ];
 
             case UserRole.SIN_VERIFICAR:

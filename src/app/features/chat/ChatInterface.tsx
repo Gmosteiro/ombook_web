@@ -1,9 +1,13 @@
-"use client"
-
 import type React from "react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Send, Phone, Video, Search, MoreVertical } from "lucide-react"
+import { useLoaderData, useFetcher, useSearchParams } from "react-router"
+import type { LoaderFunctionArgs } from "react-router"
 import "./chat.css"
+import type { Contacto, Chat } from "~/routes/api.chat"
+import { obtenerContactos, obtenerChatPorId } from "~/routes/api.chat"
+import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader"
+import { UserRole } from "~/features/auth/types"
 
 interface Contact {
   id: string
@@ -16,13 +20,32 @@ interface Contact {
 
 interface Message {
   id: string
-  senderId: string // "me" o "<id>"
+  senderId: string
   content: string
-  timestamp: string // "HH:mm" | "Ayer" | ISO
+  timestamp: string
   isOwn: boolean
 }
 
-const API_BASE = "http://localhost:8080/api";
+export const loader = async (args: LoaderFunctionArgs) => {
+  await requireRoleLoader([UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
+
+  const url = new URL(args.request.url);
+  const search = url.searchParams.get("search") || undefined;
+  const chatId = url.searchParams.get("chatId") || undefined;
+
+  const contactos = await obtenerContactos(args.request, search);
+
+  let chat: Chat | null = null;
+  if (chatId) {
+    try {
+      chat = await obtenerChatPorId(args.request, Number(chatId));
+    } catch (error) {
+      console.error("Error loading chat:", error);
+    }
+  }
+
+  return { contactos, chat, selectedChatId: chatId };
+};
 
 const initials = (name: string) =>
   name
@@ -41,118 +64,88 @@ const prettyTs = (ts: string) => {
 }
 
 const ChatInterface: React.FC = () => {
-  const [contacts, setContacts] = useState<Contact[]>([])
-  const [contactsLoading, setContactsLoading] = useState(false)
-  const [contactsError, setContactsError] = useState<string | null>(null)
-
-  const [selectedContact, setSelectedContact] = useState<string>("")
-  const [messages, setMessages] = useState<Message[]>([])
-  const [messagesLoading, setMessagesLoading] = useState(false)
-  const [messagesError, setMessagesError] = useState<string | null>(null)
+  const { contactos, chat, selectedChatId } = useLoaderData<typeof loader>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const messageFetcher = useFetcher();
 
   const [newMessage, setNewMessage] = useState("")
-  const [sending, setSending] = useState(false)
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
 
-  // Cargar contactos al montar
+  // Transformar Contacto del backend a Contact del frontend
+  const transformContacto = (contacto: Contacto): Contact => ({
+    id: contacto.id.toString(),
+    name: `${contacto.nombre} ${contacto.apellido}`,
+    lastMessage: contacto.ultimoMensaje || "Sin mensajes",
+    timestamp: contacto.timestampUltimoMensaje ? prettyTs(contacto.timestampUltimoMensaje) : "",
+    isOnline: contacto.enLinea,
+    unreadCount: contacto.mensajesNoLeidos,
+  })
+
+  const contacts = useMemo(() => contactos.map(transformContacto), [contactos])
+
+  const messages: Message[] = useMemo(() => {
+    if (!chat || !chat.mensajes) return []
+
+    // Obtener el ID del usuario actual (el que NO es el contacto seleccionado)
+    const currentUserId = chat.mensajes.length > 0
+      ? chat.mensajes.find(m => m.remitenteId.toString() === selectedChatId)?.destinatarioId
+      : null
+
+    return chat.mensajes.map((m) => ({
+      id: m.id.toString(),
+      senderId: m.remitenteId.toString(),
+      content: m.contenido,
+      timestamp: prettyTs(m.timestamp),
+      isOwn: currentUserId ? m.remitenteId === currentUserId : false,
+    }))
+  }, [chat, selectedChatId])
+
+  // Actualizar búsqueda en URL con debounce
   useEffect(() => {
-    let alive = true
-    const load = async () => {
-      setContactsLoading(true)
-      setContactsError(null)
-      try {
-        const res = await fetch(`${API_BASE}/contacts`)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data: Contact[] = await res.json()
-        if (!alive) return
-        // Normaliza timestamps si vienen ISO
-        const normalized = data.map((c) => ({ ...c, timestamp: prettyTs(c.timestamp) }))
-        setContacts(normalized)
-        // Selecciona el primero si no hay uno seleccionado
-        if (!selectedContact && normalized.length) {
-          setSelectedContact(normalized[0].id)
+    const timer = setTimeout(() => {
+      if (searchQuery !== searchParams.get("search")) {
+        const params = new URLSearchParams(searchParams)
+        if (searchQuery) {
+          params.set("search", searchQuery)
+        } else {
+          params.delete("search")
         }
-      } catch (e: any) {
-        if (!alive) return
-        setContactsError(e?.message ?? "Error cargando contactos")
-      } finally {
-        if (alive) setContactsLoading(false)
+        setSearchParams(params, { replace: true })
       }
-    }
-    load()
-    return () => {
-      alive = false
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, 300)
 
-  // Cargar conversación cuando cambia el contacto
-  useEffect(() => {
-    if (!selectedContact) return
-    let alive = true
-    const load = async () => {
-      setMessagesLoading(true)
-      setMessagesError(null)
-      try {
-        const res = await fetch(`${API_BASE}/messages/${selectedContact}`)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data: Message[] = await res.json()
-        if (!alive) return
-        setMessages(
-          data.map((m) => ({
-            ...m,
-            timestamp: prettyTs(m.timestamp),
-          }))
-        )
-      } catch (e: any) {
-        if (!alive) return
-        setMessagesError(e?.message ?? "Error cargando mensajes")
-      } finally {
-        if (alive) setMessagesLoading(false)
-      }
-    }
-    load()
-    return () => {
-      alive = false
-    }
-  }, [selectedContact])
+    return () => clearTimeout(timer)
+  }, [searchQuery, searchParams, setSearchParams])
+
+  const selectedContact = selectedChatId
 
   const selectedContactData = useMemo(
     () => contacts.find((c) => c.id === selectedContact),
     [contacts, selectedContact]
   )
 
-  const sendMessage = async () => {
-    if (sending) return
+  const selectContact = (contactId: string) => {
+    const params = new URLSearchParams(searchParams)
+    params.set("chatId", contactId)
+    if (searchQuery) {
+      params.set("search", searchQuery)
+    }
+    setSearchParams(params)
+  }
+
+  const sendMessage = () => {
     const content = newMessage.trim()
     if (!content || !selectedContact) return
-    setSending(true)
-    try {
-      const res = await fetch(`${API_BASE}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactId: Number(selectedContact), content }),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const saved: Message = await res.json()
-      setMessages((prev) => [
-        ...prev,
-        { ...saved, timestamp: prettyTs(saved.timestamp) }
-      ])
-      setNewMessage("")
-      // Refresca el lastMessage/timestamp del contacto en la lista (opcional)
-      setContacts((prev) =>
-        prev.map((c) =>
-          c.id === selectedContact
-            ? { ...c, lastMessage: content, timestamp: prettyTs(saved.timestamp) }
-            : c
-        )
-      )
-    } catch (e) {
-      // Podés mostrar un toast si usás alguna lib
-      console.error(e)
-    } finally {
-      setSending(false)
-    }
+
+    messageFetcher.submit(
+      { destinatarioId: Number(selectedContact), contenido: content },
+      { method: "POST", action: "/api/chat/mensajes", encType: "application/json" }
+    )
+
+    setNewMessage("")
   }
+
+  const sending = messageFetcher.state === "submitting"
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -176,6 +169,8 @@ const ChatInterface: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar contactos..."
               className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -183,22 +178,15 @@ const ChatInterface: React.FC = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {contactsLoading && (
-            <div className="p-4 text-sm text-gray-500">Cargando contactos…</div>
-          )}
-          {contactsError && (
-            <div className="p-4 text-sm text-red-600">Error: {contactsError}</div>
-          )}
-          {!contactsLoading && !contactsError && contacts.length === 0 && (
+          {contacts.length === 0 && (
             <div className="p-4 text-sm text-gray-500">Sin contactos</div>
           )}
           {contacts.map((contact) => (
             <div
               key={contact.id}
-              onClick={() => setSelectedContact(contact.id)}
-              className={`contact-item p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                selectedContact === contact.id ? "bg-blue-50 border-r-2 border-r-blue-500" : ""
-              }`}
+              onClick={() => selectContact(contact.id)}
+              className={`contact-item p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${selectedContact === contact.id ? "bg-blue-50 border-r-2 border-r-blue-500" : ""
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <div className="relative">
@@ -268,27 +256,19 @@ const ChatInterface: React.FC = () => {
             </div>
 
             <div className="chat-messages flex-1 overflow-y-auto p-4 space-y-4">
-              {messagesLoading && (
-                <div className="text-sm text-gray-500">Cargando mensajes…</div>
-              )}
-              {messagesError && (
-                <div className="text-sm text-red-600">Error: {messagesError}</div>
-              )}
-              {!messagesLoading &&
-                messages.map((message) => (
-                  <div key={message.id} className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.isOwn ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-900"
+              {messages.map((message) => (
+                <div key={message.id} className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.isOwn ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-900"
                       }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      <p className={`text-xs mt-1 ${message.isOwn ? "text-blue-100" : "text-gray-500"}`}>
-                        {message.timestamp}
-                      </p>
-                    </div>
+                  >
+                    <p className="text-sm">{message.content}</p>
+                    <p className={`text-xs mt-1 ${message.isOwn ? "text-blue-100" : "text-gray-500"}`}>
+                      {message.timestamp}
+                    </p>
                   </div>
-                ))}
+                </div>
+              ))}
             </div>
 
             <div className="bg-white border-t border-gray-200 p-4">

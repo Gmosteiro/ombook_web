@@ -33,6 +33,8 @@ const routes: RouteConfig = [
     route("/users", "./features/users/pages/UsersPage.tsx"),
     route("/users/create", "./features/users/pages/UserCreatePage.tsx"),
 
+    // Chat
+    route("/chat", "./features/chat/ChatInterface.tsx"),
 
     route("/profile", "./features/users/pages/ProfilePage.tsx"),
     route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),
@@ -42,6 +44,10 @@ const routes: RouteConfig = [
     route("/app/users", "./routes/api.users.ts"),
     route("/app/courses", "./routes/api.courses.ts"),
     route("/api/auth", "./routes/api.auth.ts"),
+    route("/api/chat/contactos", "./routes/api.chat.contactos.ts"),
+    route("/api/chat/chats", "./routes/api.chat.chats.ts"),
+    route("/api/chat/chats/:id", "./routes/api.chat.chat-detail.ts"),
+    route("/api/chat/mensajes", "./routes/api.chat.mensajes.ts"),
 
     // Not Found
     route("*", './features/common/pages/NotFound.tsx'),
