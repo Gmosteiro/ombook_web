@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useFetcher } from "react-router";
 import type { IndividualFormProps } from "../../../common/components/EntityCreate";
-import type { UsuarioListaResponse } from "../../../../routes/api.users";
+import type { UsuarioListaResponse } from "../../../../routes/api.users.server";
 
 const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitting }) => {
     const fetcher = useFetcher();

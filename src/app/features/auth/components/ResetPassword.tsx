@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLoaderData, Form, useActionData, useNavigation } from 'react-router';
-import { verificarToken, restablecerContrasena } from '~/routes/api.auth';
 import { validatePasswordStrength } from '../utils/methods';
 
 // Loader: verificar token al cargar
 export async function loader({ request }: { request: Request }) {
+    const { verificarToken } = await import('~/routes/api.auth.server');
+
     const url = new URL(request.url);
     const token = url.searchParams.get('token');
 
@@ -40,6 +41,8 @@ export async function loader({ request }: { request: Request }) {
 
 // Action: restablecer contraseña
 export async function action({ request }: { request: Request }) {
+    const { restablecerContrasena } = await import('~/routes/api.auth.server');
+
     const formData = await request.formData();
     const token = formData.get('token') as string;
     const nuevaContrasena = formData.get('nuevaContrasena') as string;

@@ -5,12 +5,13 @@ import EntityCreate from "../../common/components/EntityCreate";
 import EnrollIndividualForm from "../components/enroll/EnrollIndividualForm";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
-import { getEstudiantes } from "../../../routes/api.users";
-import { enrollUser } from "../../../routes/api.matricula";
 
 export const loader = requireRoleLoader([UserRole.PROFESOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
+    const { getEstudiantes } = await import("../../../routes/api.users.server");
+    const { enrollUser } = await import("../../../routes/api.matricula.server");
+
     const formData = await request.formData();
     const intent = formData.get("intent");
 

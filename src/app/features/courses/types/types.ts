@@ -1,5 +1,5 @@
 import type { components } from "../../../../types/openapi";
-import type { UsuarioListaResponse } from "../../../routes/api.users";
+import type { UsuarioListaResponse } from "../../../routes/api.users.server";
 
 // Utilidad para hacer campos obligatorios
 type RequiredCourseFields = "id" | "nombre" | "codigo" | "descripcion" | "periodoAcademico";

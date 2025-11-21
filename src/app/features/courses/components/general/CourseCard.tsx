@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
 import { useNavigate, useFetcher, useLoaderData } from "react-router";
-import { CursoListadoResponse } from "../../../../routes/api.courses";
+import { CursoListadoResponse } from "../../../../routes/api.courses.server";
 import { UserRole } from "../../../auth/types"; // Asegúrate de importar esto
 
 interface CourseCardProps {

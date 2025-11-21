@@ -12,7 +12,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     await requireRoleLoader([UserRole.ADMINISTRADOR])({ request } as any);
 
     // Importación dinámica server-side para obtener profesores
-    const { getProfesores } = await import("../../../routes/api.users");
+    const { getProfesores } = await import("../../../routes/api.users.server");
 
     try {
         const profesores = await getProfesores(request);
@@ -25,7 +25,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
     // Importación dinámica server-side
-    const { crearCurso } = await import("../../../routes/api.courses");
+    const { crearCurso } = await import("../../../routes/api.courses.server");
     const data = await request.json();
 
     try {

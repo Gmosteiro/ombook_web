@@ -37,12 +37,6 @@ const routes: RouteConfig = [
     route("/profile", "./features/users/pages/ProfilePage.tsx"),
     route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),
 
-    // API Routes
-    route("/csv/import", "./routes/api-csv-import.ts"),
-    route("/app/users", "./routes/api.users.ts"),
-    route("/app/courses", "./routes/api.courses.ts"),
-    route("/api/auth", "./routes/api.auth.ts"),
-
     // Not Found
     route("*", './features/common/pages/NotFound.tsx'),
 ];

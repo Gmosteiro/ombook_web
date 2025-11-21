@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, Form, useActionData, useNavigation } from 'react-router';
-import { solicitarRecuperacionContrasena } from '~/routes/api.auth';
 
 export async function action({ request }: { request: Request }) {
+    const { solicitarRecuperacionContrasena } = await import('~/routes/api.auth.server');
+
     const formData = await request.formData();
     const correo = formData.get('correo') as string;
     try {
