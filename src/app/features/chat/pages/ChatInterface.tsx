@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react"
-import { useLoaderData, useFetcher, useSearchParams } from "react-router"
-import type { LoaderFunctionArgs } from "react-router"
+import { useLoaderData, useFetcher, useSearchParams, useRevalidator } from "react-router"
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router"
 import "../styles/chat.css"
 import type { MensajePrivadoResponse } from "~/features/chat/types/index"
-import { obtenerContactos, obtenerMensajesCon } from "~/routes/api.chat"
+import { obtenerContactos, obtenerMensajesCon, enviarMensaje } from "~/routes/api.chat"
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader"
 import { UserRole } from "~/features/auth/types"
 import { ContactList } from "../components/ContactList"
@@ -11,6 +11,10 @@ import { ChatHeader } from "../components/ChatHeader"
 import { MessageList } from "../components/MessageList"
 import { MessageInput } from "../components/MessageInput"
 import { EmptyChat } from "../components/EmptyChat"
+
+export function meta() {
+  return [{ title: 'Ombook | Chat' }];
+}
 
 export const loader = async (args: LoaderFunctionArgs) => {
   await requireRoleLoader([UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
@@ -33,10 +37,45 @@ export const loader = async (args: LoaderFunctionArgs) => {
   return { contactos, mensajes, selectedChatId: chatId };
 };
 
+export const action = async ({ request }: ActionFunctionArgs) => {
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+
+  try {
+    const body = await request.json();
+    console.log("Received request to send message", body);
+    const { destinatarioId, contenido } = body;
+
+    if (!destinatarioId || !contenido) {
+      return new Response(
+        JSON.stringify({ error: "destinatarioId y contenido son requeridos" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const mensaje = await enviarMensaje(request, Number(destinatarioId), contenido);
+
+    console.log("Mensaje enviado:", mensaje);
+
+    return new Response(JSON.stringify(mensaje), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (error) {
+    console.error("Error al enviar mensaje:", error);
+    return new Response(
+      JSON.stringify({ error: "Error al enviar mensaje" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+};
+
 const ChatInterface = () => {
   const { contactos, mensajes, selectedChatId } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const messageFetcher = useFetcher();
+  const revalidator = useRevalidator();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
 
@@ -56,6 +95,13 @@ const ChatInterface = () => {
     return () => clearTimeout(timer)
   }, [searchQuery, searchParams, setSearchParams])
 
+  // Recargar datos después de enviar un mensaje
+  useEffect(() => {
+    if (messageFetcher.state === "idle" && messageFetcher.data) {
+      revalidator.revalidate();
+    }
+  }, [messageFetcher.state, messageFetcher.data, revalidator])
+
   const selectedContactData = contactos.find((c) => c.id?.toString() === selectedChatId)
 
   const selectContact = (contactId: string) => {
@@ -72,7 +118,7 @@ const ChatInterface = () => {
 
     messageFetcher.submit(
       { destinatarioId: Number(selectedChatId), contenido: content },
-      { method: "POST", action: "/api/chat/mensajes", encType: "application/json" }
+      { method: "POST", encType: "application/json" }
     )
   }
 
