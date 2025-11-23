@@ -1,9 +1,8 @@
 import { useNavigate, useLoaderData, useSearchParams, useFetcher } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole, UserStatus } from "../../auth/types";
-import { getUsers, PaginatorResponseUsuarioListaResponse, UsuarioListaResponse, UsuarioDetalleResponse } from "../../../routes/api.users.server";
+import { PaginatorResponseUsuarioListaResponse, UsuarioListaResponse, UsuarioDetalleResponse } from "../../../routes/api.users.server";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
-import { getUserRole } from "../../../services/session.server";
 import { useState, useEffect } from "react";
 import UserDetailModal from "../components/UserDetailModal";
 import { Pagination } from "../../courses/components/general/Pagination";

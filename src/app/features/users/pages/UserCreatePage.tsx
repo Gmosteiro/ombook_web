@@ -4,7 +4,7 @@ import EntityCreate from "../../common/components/EntityCreate";
 import UserIndividualForm from "../components/UserForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { CreateUserData, CreateUserResponse, ImportUsersResponse } from "../types";
-import { createCsvImportHelper } from "../../common/utils/csvImportHelper";
+import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
 

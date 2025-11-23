@@ -58,6 +58,7 @@ export async function loader({ params, request }: { params: { id: string }, requ
 }
 
 export async function action({ params, request }: ActionFunctionArgs) {
+  const { getValidJWTToken } = await import("~/services/session.server");
   const { id } = params;
   const formData = await request.formData();
   const actionType = formData.get("actionType") as string;
