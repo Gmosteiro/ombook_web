@@ -79,7 +79,7 @@ const ChatInterface = () => {
   const isSending = messageFetcher.state === "submitting"
 
   return (
-    <div className="chat-container flex h-screen bg-gray-50">
+    <div className="chat-container flex bg-gray-50">
       <ContactList
         contacts={contactos}
         selectedContactId={selectedChatId}
@@ -88,7 +88,7 @@ const ChatInterface = () => {
         onSelectContact={selectContact}
       />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {selectedContactData ? (
           <>
             <ChatHeader contact={selectedContactData} />
