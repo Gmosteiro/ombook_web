@@ -1,20 +1,13 @@
 import { Search, MoreVertical } from "lucide-react"
-import type { Contact } from "../types"
+import type { ContactoSimpleResponse } from "../types"
 
 interface ContactListProps {
-    contacts: Contact[]
+    contacts: ContactoSimpleResponse[]
     selectedContactId?: string
     searchQuery: string
     onSearchChange: (query: string) => void
     onSelectContact: (contactId: string) => void
 }
-
-const initials = (name: string) =>
-    name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
 
 export const ContactList: React.FC<ContactListProps> = ({
     contacts,
@@ -51,31 +44,27 @@ export const ContactList: React.FC<ContactListProps> = ({
                 {contacts.map((contact) => (
                     <div
                         key={contact.id}
-                        onClick={() => onSelectContact(contact.id)}
+                        onClick={() => {
+                            if (contact.id)
+                                onSelectContact(contact.id.toString())
+                        }}
                         className={`contact-item p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${selectedContactId === contact.id ? "bg-blue-50 border-r-2 border-r-blue-500" : ""
                             }`}
                     >
                         <div className="flex items-center space-x-3">
                             <div className="relative">
-                                <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-medium">
-                                    {initials(contact.name)}
-                                </div>
-                                {contact.isOnline && (
-                                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                                )}
+                                <img
+                                    src={contact.fotoPerfilUrl}
+                                    alt={`${contact.nombre} ${contact.apellido}`}
+                                    className="w-12 h-12 rounded-full object-cover"
+                                />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="font-medium text-gray-900 truncate">{contact.name}</h3>
-                                    <span className="text-xs text-gray-500">{contact.timestamp}</span>
-                                </div>
-                                <div className="flex items-center justify-between mt-1">
-                                    <p className="text-sm text-gray-600 truncate">{contact.lastMessage}</p>
-                                    {contact.unreadCount ? (
-                                        <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
-                                            {contact.unreadCount}
-                                        </span>
-                                    ) : null}
+                                    <h3 className="font-medium text-gray-900 truncate">
+                                        {contact.nombre} {contact.apellido}
+                                    </h3>
+                                    {/* <span className="text-xs text-gray-500">{contact.timestamp}</span> */}
                                 </div>
                             </div>
                         </div>
