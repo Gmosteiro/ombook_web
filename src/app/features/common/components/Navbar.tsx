@@ -1,18 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import Logout from "../../auth/components/Logout";
-import NotificationBell from "./NotificationBell";
+import { NotificationsDropdown } from "./NotificationsDropdown";
 import { getNavbarLinks } from "../utils/Navbar";
 import { UserRole } from "~/features/auth/types";
 
 interface NavbarProps {
     userEmail?: string;
     userRole?: UserRole;
-    notificationCount?: number;
     avatarUrl?: string;
 }
 
-export default function Navbar({ userEmail, userRole, notificationCount = 0, avatarUrl }: NavbarProps) {
+export default function Navbar({ userEmail, userRole, avatarUrl }: NavbarProps) {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -35,10 +34,6 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
 
     const getInitials = (email: string) => {
         return email.split('@')[0].substring(0, 2).toUpperCase();
-    };
-
-    const handleNotificationClick = () => {
-        console.log('Notificaciones clicked');
     };
 
     const styles = {
@@ -76,10 +71,7 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
 
                         {/* Campana y Perfil juntos */}
                         <div className="relative flex items-center space-x-2" ref={menuRef}>
-                            <NotificationBell
-                                count={notificationCount}
-                                onClick={handleNotificationClick}
-                            />
+                            <NotificationsDropdown />
                             <button
                                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                                 className="flex items-center focus:outline-none cursor-pointer ml-4"

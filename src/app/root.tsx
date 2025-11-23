@@ -9,6 +9,8 @@ import {
 } from "react-router";
 import "./app.css";
 import Navbar from "./features/common/components/Navbar";
+import { NotificationProvider } from "./features/common/contexts/NotificationContext";
+import { useNotificationPolling } from "./features/common/hooks/useSSENotifications";
 import { User } from "./features/auth/types";
 
 
@@ -29,31 +31,42 @@ export const links = () => [
 export async function loader({ request }: { request: Request }) {
   const { getUserId, getUserRole } = await import("./services/session.server");
   const { getPerfil } = await import("./routes/api.profile.server");
+  const { obtenerNotificaciones } = await import("./routes/api.notifications.server");
 
   const userEmail = await getUserId(request);
   const userRole = await getUserRole(request);
   let avatarUrl: string | undefined = undefined;
+  let notifications: any[] = [];
+
   if (userEmail) {
     try {
       const perfil = await getPerfil(request);
       avatarUrl = perfil.fotoPerfil
         ? `${perfil.fotoPerfil}?v=${Date.now()}`
         : undefined;
+
+      // Fetch notifications from backend server-side
+      notifications = await obtenerNotificaciones(request);
     } catch {
-      // Si falla, deja avatarUrl como undefined
+      // Si falla, deja valores por defecto
     }
   }
-  const notificationCount = 0;
-  return { userEmail, userRole, notificationCount, avatarUrl };
+  return { userEmail, userRole, avatarUrl, notifications };
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { userEmail, userRole, notificationCount, avatarUrl } = useLoaderData() as {
+  const { userEmail, userRole, avatarUrl, notifications } = useLoaderData() as {
     userEmail: string;
     userRole: User['rol']
-    notificationCount: number;
     avatarUrl: string | undefined;
+    notifications: any[];
   };
+
+  // Component to initialize polling inside NotificationProvider
+  function PollingInitializer() {
+    useNotificationPolling(Boolean(userEmail));
+    return null;
+  }
 
   return (
     <html lang="en">
@@ -64,17 +77,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="">
-        <Navbar
-          userEmail={userEmail}
-          userRole={userRole}
-          notificationCount={notificationCount}
-          avatarUrl={avatarUrl}
-        />
-        <div className="bg-gray-50 min-h-screen pt-20">
-          {children}
-          <ScrollRestoration />
-          <Scripts />
-        </div>
+        <NotificationProvider initialNotifications={notifications}>
+          <PollingInitializer />
+          <Navbar
+            userEmail={userEmail}
+            userRole={userRole}
+            avatarUrl={avatarUrl}
+          />
+          <div className="bg-gray-50 min-h-screen pt-20">
+            {children}
+            <ScrollRestoration />
+            <Scripts />
+          </div>
+        </NotificationProvider>
       </body>
     </html>
   );

@@ -36,6 +36,10 @@ const routes: RouteConfig = [
     // Chat
     route("/chat", "./features/chat/pages/ChatInterface.tsx"),
 
+    // Notifications API
+    route("/api/notifications/mark-read", "./routes/api.notifications.mark-read.ts"),
+    route("/api/notifications/mark-all-read", "./routes/api.notifications.mark-all-read.ts"),
+
     route("/profile", "./features/users/pages/ProfilePage.tsx"),
     route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),
 
