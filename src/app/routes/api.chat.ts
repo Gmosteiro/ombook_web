@@ -1,31 +1,28 @@
 import { getValidJWTToken } from "~/services/session.server";
 import { apiFetch } from "~/features/auth/utils/methods";
-import { Contacto, Chat, ErrorResponse, EnviarMensajeResponse } from "~/features/chat/types";
-
-// ==========================================
-// Tipos para el sistema de chat
-// ==========================================
-
-
-// ==========================================
-// Métodos de API
-// ==========================================
+import type {
+    ContactoSimpleResponse,
+    ChatSummaryResponse,
+    MensajePrivadoResponse,
+    MensajeCreateRequest
+} from "~/features/chat/types";
 
 /**
- * Obtiene la lista de contactos del usuario actual.
- * Pueden ser estudiantes, profesores o administradores según el rol del usuario.
+ * Obtiene la lista unificada de contactos del usuario actual.
+ * Incluye todos los usuarios con los que se puede iniciar conversación.
+ * Endpoint: GET /mensajes/contactos
  * @param request Request original para obtener JWT
  * @param search Opcional: término de búsqueda para filtrar contactos
- * @returns Lista de contactos
+ * @returns Lista de contactos simples
  */
 export async function obtenerContactos(
     request: Request,
     search?: string
-): Promise<Contacto[]> {
+): Promise<ContactoSimpleResponse[]> {
     const searchParams = new URLSearchParams();
-    if (search) searchParams.append("search", search);
+    if (search) searchParams.append("q", search);
 
-    const url = "/mensajes/contactos/estudiantes" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+    const url = "/mensajes/contactos" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
     const response = await apiFetch(url, {
         method: "GET",
@@ -34,104 +31,99 @@ export async function obtenerContactos(
     });
 
     if (!response.ok) {
-        const errorData = await response.json() as ErrorResponse;
-        throw new Error(errorData.error || "Error al obtener contactos");
+        const errorText = await response.text();
+        console.error(`Error al obtener contactos: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Error al obtener contactos: ${response.status}`);
     }
 
-    return await response.json() as Contacto[];
+    return await response.json() as ContactoSimpleResponse[];
 }
 
 /**
- * Obtiene todos los chats del usuario actual.
- * Retorna una lista de conversaciones con el último mensaje de cada una.
+ * Obtiene el resumen de todos los chats del usuario actual.
+ * Retorna una lista de conversaciones con el último mensaje y contador de no leídos.
+ * Endpoint: GET /mensajes/chats
  * @param request Request original para obtener JWT
- * @returns Lista de chats con información del contacto y último mensaje
+ * @param search Opcional: término de búsqueda para filtrar chats
+ * @returns Lista de resúmenes de chats
  */
 export async function obtenerChats(
-    request: Request
-): Promise<Chat[]> {
-    const response = await apiFetch("/chats", {
+    request: Request,
+    search?: string
+): Promise<ChatSummaryResponse[]> {
+    const searchParams = new URLSearchParams();
+    if (search) searchParams.append("q", search);
+
+    const url = "/mensajes/chats" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+
+    const response = await apiFetch(url, {
         method: "GET",
         secure: true,
         jwtToken: await getValidJWTToken(request),
     });
 
     if (!response.ok) {
-        const errorData = await response.json() as ErrorResponse;
-        throw new Error(errorData.error || "Error al obtener chats");
+        const errorText = await response.text();
+        console.error(`Error al obtener chats: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Error al obtener chats: ${response.status}`);
     }
 
-    return await response.json() as Chat[];
+    return await response.json() as ChatSummaryResponse[];
 }
 
 /**
  * Obtiene la conversación completa con un contacto específico.
+ * Endpoint: GET /mensajes/chats/{partnerId}
  * @param request Request original para obtener JWT
- * @param contactoId ID del contacto con el que se quiere ver la conversación
- * @returns Chat completo con el contacto incluyendo todos los mensajes
+ * @param partnerId ID del contacto con el que se quiere ver la conversación
+ * @returns Lista de mensajes con el contacto
  */
-export async function obtenerChatPorId(
+export async function obtenerMensajesCon(
     request: Request,
-    contactoId: number
-): Promise<Chat> {
-    const response = await apiFetch(`/chats/${contactoId}`, {
+    partnerId: number
+): Promise<MensajePrivadoResponse[]> {
+    const response = await apiFetch(`/mensajes/chats/${partnerId}`, {
         method: "GET",
         secure: true,
         jwtToken: await getValidJWTToken(request),
     });
 
     if (!response.ok) {
-        const errorData = await response.json() as ErrorResponse;
-        throw new Error(errorData.error || "Error al obtener chat");
+        const errorText = await response.text();
+        console.error(`Error al obtener mensajes: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Error al obtener mensajes: ${response.status}`);
     }
 
-    return await response.json() as Chat;
+    return await response.json() as MensajePrivadoResponse[];
 }
 
 /**
  * Envía un mensaje a un contacto.
+ * Endpoint: POST /mensajes
  * @param request Request original para obtener JWT
  * @param destinatarioId ID del usuario destinatario
  * @param contenido Contenido del mensaje
- * @returns Mensaje creado con su ID y timestamp
+ * @returns Mensaje creado con su información completa
  */
 export async function enviarMensaje(
     request: Request,
     destinatarioId: number,
     contenido: string
-): Promise<EnviarMensajeResponse> {
+): Promise<MensajePrivadoResponse> {
+    const body: MensajeCreateRequest = { destinatarioId, contenido };
+
     const response = await apiFetch("/mensajes", {
         method: "POST",
         secure: true,
         jwtToken: await getValidJWTToken(request),
-        body: JSON.stringify({ destinatarioId, contenido }),
+        body: JSON.stringify(body),
     });
 
     if (!response.ok) {
-        const errorData = await response.json() as ErrorResponse;
-        throw new Error(errorData.error || "Error al enviar mensaje");
+        const errorText = await response.text();
+        console.error(`Error al enviar mensaje: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Error al enviar mensaje: ${response.status}`);
     }
 
-    return await response.json() as EnviarMensajeResponse;
-}
-
-/**
- * Marca un mensaje como leído.
- * @param request Request original para obtener JWT
- * @param mensajeId ID del mensaje a marcar como leído
- */
-export async function marcarMensajeComoLeido(
-    request: Request,
-    mensajeId: number
-): Promise<void> {
-    const response = await apiFetch(`/mensajes/${mensajeId}/leer`, {
-        method: "PATCH",
-        secure: true,
-        jwtToken: await getValidJWTToken(request),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json() as ErrorResponse;
-        throw new Error(errorData.error || "Error al marcar mensaje como leído");
-    }
+    return await response.json() as MensajePrivadoResponse;
 }

@@ -2,8 +2,8 @@ import { useMemo, useState, useEffect } from "react"
 import { useLoaderData, useFetcher, useSearchParams } from "react-router"
 import type { LoaderFunctionArgs } from "react-router"
 import "../styles/chat.css"
-import type { Contacto, Chat } from "~/features/chat/types/index"
-import { obtenerContactos, obtenerChatPorId } from "~/routes/api.chat"
+import type { ChatSummaryResponse, MensajePrivadoResponse } from "~/features/chat/types/index"
+import { obtenerChats, obtenerMensajesCon } from "~/routes/api.chat"
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader"
 import { UserRole } from "~/features/auth/types"
 import type { Contact, Message } from "../types"
@@ -20,64 +20,59 @@ export const loader = async (args: LoaderFunctionArgs) => {
   const search = url.searchParams.get("search") || undefined;
   const chatId = url.searchParams.get("chatId") || undefined;
 
-  const contactos = await obtenerContactos(args.request, search);
+  // Obtener resumen de chats con búsqueda
+  const chats = await obtenerChats(args.request, search);
 
-  let chat: Chat | null = null;
+  // Obtener mensajes si hay un chat seleccionado
+  let mensajes: MensajePrivadoResponse[] = [];
   if (chatId) {
     try {
-      chat = await obtenerChatPorId(args.request, Number(chatId));
+      mensajes = await obtenerMensajesCon(args.request, Number(chatId));
     } catch (error) {
-      console.error("Error loading chat:", error);
+      console.error("Error loading messages:", error);
     }
   }
 
-  return { contactos, chat, selectedChatId: chatId };
+  return { chats, mensajes, selectedChatId: chatId };
 };
 
-// Intenta formatear si viene ISO; si ya viene "10:30" o "Ayer", lo deja.
-const prettyTs = (ts: string) => {
+// Formatea timestamps ISO a formato HH:MM
+const prettyTs = (ts?: string | null) => {
   if (!ts) return ""
-  if (ts === "Ayer" || /^\d{2}:\d{2}$/.test(ts)) return ts
   const d = new Date(ts)
   if (isNaN(d.getTime())) return ts
   return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
 }
 
 const ChatInterface = () => {
-  const { contactos, chat, selectedChatId } = useLoaderData<typeof loader>();
+  const { chats, mensajes, selectedChatId } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const messageFetcher = useFetcher();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
 
-  // Transformar Contacto del backend a Contact del frontend
-  const transformContacto = (contacto: Contacto): Contact => ({
-    id: contacto.id.toString(),
-    name: `${contacto.nombre} ${contacto.apellido}`,
-    lastMessage: contacto.ultimoMensaje || "Sin mensajes",
-    timestamp: contacto.timestampUltimoMensaje ? prettyTs(contacto.timestampUltimoMensaje) : "",
-    isOnline: contacto.enLinea,
-    unreadCount: contacto.mensajesNoLeidos,
+  // Transformar ChatSummaryResponse a Contact del frontend
+  const transformChat = (chat: ChatSummaryResponse): Contact => ({
+    id: chat.partnerId?.toString() || "",
+    name: `${chat.partnerNombre || ""} ${chat.partnerApellido || ""}`.trim(),
+    lastMessage: chat.ultimoMensaje || "Sin mensajes",
+    timestamp: prettyTs(chat.fechaUltimoMensaje),
+    isOnline: false, // El backend no provee esta info
+    unreadCount: chat.unreadCount,
   })
 
-  const contacts = useMemo(() => contactos.map(transformContacto), [contactos])
+  const contacts = useMemo(() => chats.map(transformChat), [chats])
 
+  // Transformar mensajes del backend a formato UI
   const messages: Message[] = useMemo(() => {
-    if (!chat || !chat.mensajes) return []
-
-    // Obtener el ID del usuario actual (el que NO es el contacto seleccionado)
-    const currentUserId = chat.mensajes.length > 0
-      ? chat.mensajes.find(m => m.remitenteId.toString() === selectedChatId)?.destinatarioId
-      : null
-
-    return chat.mensajes.map((m) => ({
-      id: m.id.toString(),
-      senderId: m.remitenteId.toString(),
-      content: m.contenido,
-      timestamp: prettyTs(m.timestamp),
-      isOwn: currentUserId ? m.remitenteId === currentUserId : false,
+    return mensajes.map((m) => ({
+      id: m.id?.toString() || "",
+      senderId: m.senderId?.toString() || "",
+      content: m.contenido || "",
+      timestamp: prettyTs(m.fechaCreacion),
+      isOwn: m.sentByRequester || false,
     }))
-  }, [chat, selectedChatId])
+  }, [mensajes])
 
   // Actualizar búsqueda en URL con debounce
   useEffect(() => {

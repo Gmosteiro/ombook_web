@@ -1,3 +1,12 @@
+import type { components } from "../../../../types/openapi";
+
+// Tipos del OpenAPI backend
+export type ContactoSimpleResponse = components["schemas"]["ContactoSimpleResponse"];
+export type ChatSummaryResponse = components["schemas"]["ChatSummaryResponse"];
+export type MensajePrivadoResponse = components["schemas"]["MensajePrivadoResponse"];
+export type MensajeCreateRequest = components["schemas"]["MensajeCreateRequest"];
+
+// Tipos del frontend para UI
 export interface Contact {
     id: string
     name: string
@@ -7,56 +16,10 @@ export interface Contact {
     unreadCount?: number
 }
 
-export interface Message { //TODO revisar duplicado
+export interface Message {
     id: string
     senderId: string
     content: string
     timestamp: string
     isOwn: boolean
-}
-
-
-
-export interface Contacto {
-    id: number;
-    nombre: string;
-    apellido: string;
-    rol: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
-    fotoPerfilUrl?: string;
-    ultimoMensaje?: string;
-    timestampUltimoMensaje?: string;
-    enLinea: boolean;
-    mensajesNoLeidos?: number;
-}
-
-export interface Mensaje {
-    id: number;
-    remitenteId: number;
-    destinatarioId: number;
-    contenido: string;
-    timestamp: string;
-    leido: boolean;
-}
-
-export interface Chat {
-    contacto: Contacto;
-    mensajes: Mensaje[];
-}
-
-export interface EnviarMensajeRequest {
-    destinatarioId: number;
-    contenido: string;
-}
-
-export interface EnviarMensajeResponse {
-    id: number;
-    remitenteId: number;
-    destinatarioId: number;
-    contenido: string;
-    timestamp: string;
-    leido: boolean;
-}
-
-export interface ErrorResponse {
-    error: string;
 }
