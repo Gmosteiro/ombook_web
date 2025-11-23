@@ -3,7 +3,7 @@ import { useLoaderData, useFetcher, useSearchParams, useRevalidator } from "reac
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router"
 import "../styles/chat.css"
 import type { MensajePrivadoResponse } from "~/features/chat/types/index"
-import { obtenerContactos, obtenerMensajesCon, enviarMensaje } from "~/routes/api.chat"
+import { obtenerChats, obtenerMensajesCon, enviarMensaje } from "~/routes/api.chat"
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader"
 import { UserRole } from "~/features/auth/types"
 import { ContactList } from "../components/ContactList"
@@ -23,7 +23,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
   const search = url.searchParams.get("search") || undefined;
   const chatId = url.searchParams.get("chatId") || undefined;
 
-  const contactos = await obtenerContactos(args.request, search);
+  const chats = await obtenerChats(args.request, search);
 
   let mensajes: MensajePrivadoResponse[] = [];
   if (chatId) {
@@ -34,7 +34,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
     }
   }
 
-  return { contactos, mensajes, selectedChatId: chatId };
+  return { chats, mensajes, selectedChatId: chatId };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -72,7 +72,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 const ChatInterface = () => {
-  const { contactos, mensajes, selectedChatId } = useLoaderData<typeof loader>();
+  const { chats, mensajes, selectedChatId } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const messageFetcher = useFetcher();
   const revalidator = useRevalidator();
@@ -102,7 +102,13 @@ const ChatInterface = () => {
     }
   }, [messageFetcher.state, messageFetcher.data, revalidator])
 
-  const selectedContactData = contactos.find((c) => c.id?.toString() === selectedChatId)
+  const selectedChat = chats.find((c) => c.partnerId?.toString() === selectedChatId)
+  const selectedContactData = selectedChat ? {
+    id: selectedChat.partnerId,
+    nombre: selectedChat.partnerNombre,
+    apellido: selectedChat.partnerApellido,
+    fotoPerfilUrl: selectedChat.partnerFoto
+  } : undefined
 
   const selectContact = (contactId: string) => {
     const params = new URLSearchParams(searchParams)
@@ -127,7 +133,7 @@ const ChatInterface = () => {
   return (
     <div className="chat-container flex bg-gray-50">
       <ContactList
-        contacts={contactos}
+        chats={chats}
         selectedContactId={selectedChatId}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
