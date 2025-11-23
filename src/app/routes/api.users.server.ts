@@ -16,13 +16,13 @@ export type UsuarioDetalleResponse = {
     apellido?: string;
     cedula?: string;
     correo?: string;
-    estado?: "ACTIVO" | "INACTIVO" | "BLOQUEADO";
+    estado?: UserStatus
     fotoPerfilUrl?: string;
     fechaNacimiento?: string;
     fechaCreacion?: string;
     ultimoLogin?: string | null;
     intentosFallidos?: number;
-    rol?: "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE";
+    rol?: UserRole;
 };
 
 /**

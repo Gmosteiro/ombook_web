@@ -1,4 +1,4 @@
-import { useOutletContext, useNavigate, useLoaderData, LoaderFunctionArgs } from "react-router";
+import { useOutletContext, useLoaderData, LoaderFunctionArgs } from "react-router";
 import { useState } from "react";
 import { Course, CreatePaginaRequest, PaginaTematica as PaginaTematicaType } from "../../types/types";
 import { PaginaTematica } from "../PaginaTematica";
@@ -57,7 +57,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 type Ctx = { course: Course };
 
 export default function CourseGeneral() {
-  const navigate = useNavigate();
   const context = useOutletContext<Ctx>();
   const course = context?.course;
   const [showNewPage, setShowNewPage] = useState(false);

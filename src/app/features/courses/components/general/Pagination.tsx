@@ -1,13 +1,10 @@
 export const Pagination = ({ currentPage, totalPages, onPageChange }: any) => {
-  console.log("Pagination - currentPage:", currentPage, "totalPages:", totalPages);
 
   const handlePrevious = () => {
-    console.log("Anterior clicked, going from", currentPage, "to", currentPage - 1);
     onPageChange(currentPage - 1);
   };
 
   const handleNext = () => {
-    console.log("Siguiente clicked, going from", currentPage, "to", currentPage + 1);
     onPageChange(currentPage + 1);
   };
 
