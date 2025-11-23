@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Form, redirect, Link, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
-import { createUserSession, getUserId } from "~/services/session.server";
 import { API_URL } from "../../common/utils/Utils";
 import { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
 
@@ -12,6 +11,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
+    const { getUserId } = await import("~/services/session.server");
     const userId = await getUserId(request);
     if (userId) {
         return redirect("/");
@@ -52,6 +52,7 @@ export async function action({ request }: Route.ActionArgs) {
         let rol = data.contrasenaInicialCambiada === false ? UserRole.SIN_VERIFICAR : data.rol as UserRole;
 
         // Guardar tokens, rol y exp en la sesión
+        const { createUserSession } = await import("~/services/session.server");
         response = await createUserSession({
             request,
             remember: true,

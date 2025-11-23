@@ -1,4 +1,4 @@
-import { UsuarioListaResponse } from "../../../../routes/api.users";
+import { UsuarioListaResponse } from "../../../../routes/api.users.server";
 import { useState, useEffect } from "react";
 
 export type Filters = {

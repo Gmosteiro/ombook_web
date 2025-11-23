@@ -1,5 +1,4 @@
 import { type MetaFunction } from "react-router";
-import { getUserId, getUserRole } from "~/services/session.server";
 import { redirect } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/common/pages/+types/Home";
 import Layout from "../components/Layout";
@@ -16,6 +15,7 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: Route.LoaderArgs) {
     await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
 
+    const { getUserId, getUserRole } = await import("~/services/session.server");
     const userId = await getUserId(request);
     if (!userId) {
         throw redirect("/login");

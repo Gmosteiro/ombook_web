@@ -4,13 +4,14 @@ import { EnrollUserResponse, EnrollMasivaUserData, Course } from "../types/types
 import EntityCreate from "../../common/components/EntityCreate";
 import UnenrollIndividualForm from "../components/enroll/UnenrollIndividualForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
-import { getUsuariosVinculadosByCurso } from "../../../routes/api.users";
-import { unenrollUser, unenrollUsersMassive } from "../../../routes/api.matricula";
 import React, { useCallback } from "react";
 
 export const loader = requireRoleLoader([UserRole.PROFESOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
+    const { getUsuariosVinculadosByCurso } = await import("../../../routes/api.users.server");
+    const { unenrollUser, unenrollUsersMassive } = await import("../../../routes/api.matricula.server");
+
     const formData = await request.formData();
     const intent = formData.get("intent");
 

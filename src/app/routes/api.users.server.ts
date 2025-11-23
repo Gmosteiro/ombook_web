@@ -1,4 +1,3 @@
-import { getValidJWTToken } from "~/services/session.server";
 import { apiFetch } from "~/features/auth/utils/methods";
 import type { components } from "../../types/openapi";
 import { UserRole, UserStatus } from "~/features/auth/types";
@@ -27,17 +26,18 @@ export type UsuarioDetalleResponse = {
 };
 
 /**
- * Crea un usuario individualmente.
+ * Cria um usuário individualmente.
  * @param request Request original (para JWT)
- * @param data Datos del usuario a crear
+ * @param data Dados do usuario a criar
  * @returns void (no hay cuerpo de respuesta)
  */
 export async function crearUsuario(request: Request, data: AltaUsuarioRequest): Promise<void> {
-
+    const { getValidJWTToken } = await import("../services/session.server");
+    const jwtToken = await getValidJWTToken(request);
     const response = await apiFetch("/usuarios", {
         method: "POST",
         secure: true,
-        jwtToken: await getValidJWTToken(request),
+        jwtToken,
         body: JSON.stringify(data)
     });
 
@@ -72,11 +72,12 @@ export async function getUsers(
     }
     const url = "/usuarios" + (searchParams.toString() ? `?${searchParams.toString()}` : "");
 
-
+    const { getValidJWTToken } = await import("../services/session.server");
+    const jwtToken = await getValidJWTToken(request);
     const response = await apiFetch(url, {
         method: "GET",
         secure: true,
-        jwtToken: await getValidJWTToken(request),
+        jwtToken,
     });
 
     if (!response.ok) throw new Error("Error al obtener usuarios");
@@ -91,10 +92,12 @@ export const getUserById = async (
     request: Request,
     userId: number
 ): Promise<UsuarioDetalleResponse> => {
+    const { getValidJWTToken } = await import("../services/session.server");
+    const jwtToken = await getValidJWTToken(request);
     const response = await apiFetch(`/usuarios/${userId}`, {
         method: "GET",
         secure: true,
-        jwtToken: await getValidJWTToken(request),
+        jwtToken,
     });
 
     if (!response.ok) throw new Error("Error al obtener el usuario");
@@ -125,10 +128,13 @@ export const getEstudiantesByCurso = async (
     request: Request,
     cursoId: number
 ): Promise<UsuarioListaResponse[]> => {
+
+    const { getValidJWTToken } = await import("../services/session.server");
+    const jwtToken = await getValidJWTToken(request);
     const response = await apiFetch(`/cursos/${cursoId}/usuarios-vinculados?rol=ESTUDIANTE`, {
         method: "GET",
         secure: true,
-        jwtToken: await getValidJWTToken(request),
+        jwtToken,
     });
 
     if (!response.ok) throw new Error("Error al obtener estudiantes del curso");
@@ -161,11 +167,12 @@ export async function getUsuariosVinculadosByCurso(
         if (params.sort) params.sort.forEach(s => searchParams.append("sort", s));
     }
     const url = `/cursos/${cursoId}/usuarios-vinculados${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-
+    const { getValidJWTToken } = await import("../services/session.server");
+    const jwtToken = await getValidJWTToken(request);
     const response = await apiFetch(url, {
         method: "GET",
         secure: true,
-        jwtToken: await getValidJWTToken(request),
+        jwtToken,
     });
 
     if (!response.ok) throw new Error("Error al obtener usuarios vinculados al curso");

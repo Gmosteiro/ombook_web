@@ -1,14 +1,16 @@
 import { useLoaderData, useOutletContext, useSearchParams, useNavigate } from "react-router";
 import { Course } from "../types/types";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
-import { getUsuariosVinculadosByCurso, UsuarioListaResponse } from "../../../routes/api.users";
+import type { UsuarioListaResponse } from "../../../routes/api.users.server";
 import { UserRole } from "../../auth/types";
 import { useState, useEffect } from "react";
-import { getUserRole } from "../../../services/session.server"; // Asegúrate de importar esto
 
 type Ctx = { course: Course };
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
+  const { getUsuariosVinculadosByCurso } = await import("../../../routes/api.users.server");
+  const { getUserRole } = await import("../../../services/session.server");
+
   const { id } = params;
   const url = new URL(request.url);
   const q = url.searchParams.get("search") || "";

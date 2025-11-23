@@ -1,5 +1,5 @@
 import { useLoaderData, useFetcher, useRevalidator, Link } from "react-router";
-import { getPerfil, actualizarPerfil, actualizarAvatar, UsuarioBasicoResponse } from "../../../routes/api.profile";
+import type { UsuarioBasicoResponse } from "../../../routes/api.profile.server";
 import { useEffect, useState } from "react";
 import { formatFecha } from "../utils/Utils";
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
@@ -9,6 +9,7 @@ import { UserRole } from "~/features/auth/types";
 export const loader = async ({ request }: { request: Request }) => {
     await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
 
+    const { getPerfil } = await import("../../../routes/api.profile.server");
     const perfil = await getPerfil(request);
     return { perfil };
 };
@@ -22,6 +23,8 @@ export function meta() {
 
 // Action para actualizar perfil y avatar
 export const action = async ({ request }: { request: Request }) => {
+    const { actualizarPerfil, actualizarAvatar } = await import("../../../routes/api.profile.server");
+
     const formData = await request.formData();
     const intent = formData.get("intent");
 

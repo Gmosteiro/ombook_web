@@ -4,8 +4,7 @@ import EntityCreate from "../../common/components/EntityCreate";
 import UserIndividualForm from "../components/UserForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { CreateUserData, CreateUserResponse, ImportUsersResponse } from "../types";
-import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
-import { crearUsuario } from "../../../routes/api.users";
+import { createCsvImportHelper } from "../../common/utils/csvImportHelper";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
 
@@ -16,6 +15,8 @@ export const meta = () => {
 }
 
 export async function action({ request }: ActionFunctionArgs): Promise<CreateUserResponse> {
+    const { crearUsuario } = await import("../../../routes/api.users.server");
+
     let data: any;
     let intent: string | undefined;
 

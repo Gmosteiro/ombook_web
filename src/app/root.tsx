@@ -9,9 +9,7 @@ import {
 } from "react-router";
 import "./app.css";
 import Navbar from "./features/common/components/Navbar";
-import { getUserId, getUserRole } from "./services/session.server";
 import { User } from "./features/auth/types";
-import { getPerfil } from "./routes/api.profile"; // importa tu función
 
 
 export const links = () => [
@@ -29,6 +27,9 @@ export const links = () => [
 
 // Loader para pasar datos de sesión al layout
 export async function loader({ request }: { request: Request }) {
+  const { getUserId, getUserRole } = await import("./services/session.server");
+  const { getPerfil } = await import("./routes/api.profile.server");
+
   const userEmail = await getUserId(request);
   const userRole = await getUserRole(request);
   let avatarUrl: string | undefined = undefined;

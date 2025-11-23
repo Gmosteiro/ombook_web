@@ -3,9 +3,10 @@ import CourseSidebar from "../components/CourseSidebar";
 import CourseContentLayout from "../components/general/CourseContentLayout";
 import { Course } from "../types/types";
 import { apiFetch } from "../../auth/utils/methods";
-import { getValidJWTToken } from "~/services/session.server";
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
+  const { getValidJWTToken } = await import("~/services/session.server");
+
   const { id } = params;
   try {
     const res = await apiFetch(`/cursos/buscar?id=${id}`, {

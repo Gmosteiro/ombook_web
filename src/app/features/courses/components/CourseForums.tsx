@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLoaderData, useOutletContext, useSubmit, useRevalidator, type ActionFunctionArgs } from "react-router";
-import { getValidJWTToken, getUserRole, getUserId } from "~/services/session.server";
 import { apiFetch } from "../../auth/utils/methods";
 import type { Course } from "../types/types";
 import { UserRole } from "~/features/auth/types";
@@ -27,6 +26,8 @@ type Publicacion = {
 };
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
+  const { getValidJWTToken, getUserRole, getUserId } = await import("~/services/session.server");
+
   const { id } = params;
   try {
     const jwtToken = await getValidJWTToken(request);

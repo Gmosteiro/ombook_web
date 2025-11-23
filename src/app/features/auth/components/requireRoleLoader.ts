@@ -1,9 +1,9 @@
 import { LoaderFunctionArgs, redirect } from "react-router";
-import { getUserRole, requireValidSession } from "~/services/session.server";
 import { UserRole } from "../types";
 
 export function requireRoleLoader(allowedRoles: UserRole[]) {
     return async ({ request }: LoaderFunctionArgs) => {
+        const { requireValidSession, getUserRole } = await import("~/services/session.server");
         // This will automatically redirect to login if session is expired
         await requireValidSession(request);
 

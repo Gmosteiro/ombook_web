@@ -2,17 +2,18 @@ import { useOutletContext, useNavigate, useLoaderData, LoaderFunctionArgs } from
 import { useState } from "react";
 import { Course, CreatePaginaRequest, PaginaTematica as PaginaTematicaType } from "../../types/types";
 import { PaginaTematica } from "../PaginaTematica";
-import { getValidJWTToken, getUserRole } from "~/services/session.server";
 import { apiFetch } from "../../../auth/utils/methods";
 import { usePaginasTematicas } from "../../hooks/usePaginasTematicas";
 
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
+  const { getValidJWTToken, getUserRole } = await import("~/services/session.server");
+
   const { id } = params;
   try {
     const jwtToken = await getValidJWTToken(request);
     const userRole = await getUserRole(request);
-    
+
     const res = await apiFetch(`/cursos/${id}/paginas`, {
       method: 'GET',
       secure: true,
@@ -35,11 +36,11 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
         return { ...pagina, recursos };
       })
     );
-    
+
     const paginasOrdenadas = paginasConRecursos.sort((a, b) => a.id - b.id);
-    
-    return { 
-      paginas: paginasOrdenadas, 
+
+    return {
+      paginas: paginasOrdenadas,
       jwtToken,
       isProfesor: userRole === 'PROFESOR'
     };
@@ -66,15 +67,15 @@ export default function CourseGeneral() {
     fechaProgramada: ""
   });
 
-  const loaderData = useLoaderData() as { 
-    paginas: PaginaTematicaType[]; 
+  const loaderData = useLoaderData() as {
+    paginas: PaginaTematicaType[];
     jwtToken: string;
     isProfesor: boolean;
   };
   const paginas = loaderData?.paginas || [];
   const jwtToken = loaderData?.jwtToken || '';
   const isProfesor = loaderData?.isProfesor || false;
-  
+
   const {
     createPagina,
     uploadRecurso,
@@ -90,7 +91,7 @@ export default function CourseGeneral() {
     e.preventDefault();
     if (!course.id || !newPage.titulo || !newPage.descripcion) return;
 
-    const fechaProgramada = newPage.fechaProgramada 
+    const fechaProgramada = newPage.fechaProgramada
       ? new Date(newPage.fechaProgramada).toISOString().slice(0, 19)
       : null;
 
