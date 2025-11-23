@@ -27,11 +27,15 @@ export const links = () => [
 
 // Loader para pasar datos de sesión al layout
 export async function loader({ request }: { request: Request }) {
+  console.log("[root loader] called");
   const { getUserId, getUserRole } = await import("./services/session.server");
   const { getPerfil } = await import("./routes/api.profile.server");
 
+  console.log("[root loader] Before getUserId/getUserRole");
   const userEmail = await getUserId(request);
   const userRole = await getUserRole(request);
+  console.log("[root loader] After getUserId/getUserRole", { userEmail, userRole });
+
   let avatarUrl: string | undefined = undefined;
   if (userEmail) {
     try {
@@ -44,6 +48,8 @@ export async function loader({ request }: { request: Request }) {
     }
   }
   const notificationCount = 0;
+
+  console.log("Loader data in root:", { userEmail, userRole, avatarUrl, notificationCount });
   return { userEmail, userRole, notificationCount, avatarUrl };
 }
 

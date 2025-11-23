@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLoaderData, Form, useActionData, useNavigation } from 'react-router';
 import { validatePasswordStrength } from '../utils/methods';
 
@@ -89,17 +89,6 @@ const ResetPassword: React.FC = () => {
 
     const isSubmitting = navigation.state === 'submitting';
     const tokenValid = loaderData.tokenValid;
-
-    // Redirigir al login si el action fue exitoso
-    useEffect(() => {
-        if (actionData?.success) {
-            const timer = setTimeout(() => {
-                window.location.href = '/login';
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-        return undefined;
-    }, [actionData]);
 
     return (
         <div className="max-w-md mx-auto mt-8 p-8 border border-gray-200 rounded-lg bg-white shadow">

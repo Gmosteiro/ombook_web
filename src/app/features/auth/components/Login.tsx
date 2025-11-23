@@ -3,7 +3,6 @@ import { Form, redirect, Link, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
 import { API_URL } from "../../common/utils/Utils";
 import { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
-import { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
 
 export const meta: MetaFunction = () => {
     return [
@@ -14,7 +13,9 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: Route.LoaderArgs) {
     const { getUserId } = await import("~/services/session.server");
     const userId = await getUserId(request);
+    console.log("[Login loader] userId:", userId);
     if (userId) {
+        console.log("[Login loader] Redirecting to /");
         return redirect("/");
     }
     return null;
@@ -27,7 +28,10 @@ export async function action({ request }: Route.ActionArgs) {
         const email = formData.get("email")?.toString();
         const password = formData.get("password")?.toString();
 
+        console.log("[Login action] email:", email);
+
         if (!email || !password) {
+            console.log("[Login action] Missing email or password");
             throw new Error("Email and password are required");
         }
 
@@ -42,13 +46,16 @@ export async function action({ request }: Route.ActionArgs) {
             headers: { "Content-Type": "application/json" }
         });
 
+        console.log("[Login action] API response status:", res.status);
 
         if (!res.ok) {
             const errorMessage = await res.text();
+            console.log("[Login action] Error response:", errorMessage);
             throw new Error(errorMessage || "Credenciales inválidas");
         }
 
         const data: LoginResponse = await res.json();
+        console.log("[Login action] LoginResponse data:", data);
 
         let rol = data.contrasenaInicialCambiada === false ? UserRole.SIN_VERIFICAR : data.rol as UserRole;
 
@@ -65,17 +72,23 @@ export async function action({ request }: Route.ActionArgs) {
             },
         });
 
+        console.log("[Login action] Session created, response:", response);
+
         if (!response) {
+            console.log("[Login action] Failed to create session");
             throw new Error("An error occurred while creating the session");
         }
     } catch (error) {
         if (error instanceof Error) {
+            console.log("[Login action] Caught error:", error.message);
             return { error: error.message };
         }
 
+        console.log("[Login action] Unknown error");
         return { error: "An unknown error occurred" };
     }
 
+    console.log("[Login action] Throwing response for redirect");
     throw response;
 };
 

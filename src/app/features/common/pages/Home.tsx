@@ -13,11 +13,16 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
+    console.log("Home loader called");
+    console.log("Cookie header in Home loader:", request.headers.get("Cookie"));
     await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
 
     const { getUserId, getUserRole } = await import("~/services/session.server");
     const userId = await getUserId(request);
+    console.log("User ID in Home loader:", userId);
+
     if (!userId) {
+        console.log("[Home loader] Redirecting to /login because userId is falsy:", userId);
         throw redirect("/login");
     }
 

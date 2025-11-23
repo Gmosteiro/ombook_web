@@ -219,8 +219,10 @@ export async function requireValidSession(request: Request): Promise<void> {
     const session = await getUserSession(request);
     const userId = session.get(USER_SESSION_KEY);
     const token = session.get("token");
+    console.log("[requireValidSession] userId:", userId, "token:", token);
 
     if (!userId || !token) {
+        console.log("[requireValidSession] Redirecting to /login because userId or token is missing:", { userId, token });
         throw redirect("/login", {
             headers: {
                 "Set-Cookie": await sessionStorage.destroySession(session),
