@@ -1,4 +1,4 @@
-import { Search, MoreVertical } from "lucide-react"
+import { Search, MessageSquarePlus } from "lucide-react"
 import type { ChatSummaryResponse } from "../types"
 
 interface ContactListProps {
@@ -7,6 +7,7 @@ interface ContactListProps {
     searchQuery: string
     onSearchChange: (query: string) => void
     onSelectContact: (contactId: string) => void
+    onNewChat: () => void
 }
 
 export const ContactList: React.FC<ContactListProps> = ({
@@ -15,14 +16,19 @@ export const ContactList: React.FC<ContactListProps> = ({
     searchQuery,
     onSearchChange,
     onSelectContact,
+    onNewChat,
 }) => {
     return (
         <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
             <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-xl font-semibold text-gray-900">Chats</h1>
-                    <button className="p-2 hover:bg-gray-100 rounded-full" title="Más">
-                        <MoreVertical className="w-5 h-5 text-gray-600" />
+                    <button
+                        onClick={onNewChat}
+                        className="p-2 hover:bg-gray-100 rounded-full"
+                        title="Nuevo chat"
+                    >
+                        <MessageSquarePlus className="w-5 h-5 text-gray-600" />
                     </button>
                 </div>
                 <div className="relative">

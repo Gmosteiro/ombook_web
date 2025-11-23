@@ -3,7 +3,7 @@ import { useLoaderData, useFetcher, useSearchParams, useRevalidator } from "reac
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router"
 import "../styles/chat.css"
 import type { MensajePrivadoResponse } from "~/features/chat/types/index"
-import { obtenerChats, obtenerMensajesCon, enviarMensaje } from "~/routes/api.chat"
+import { obtenerChats, obtenerMensajesCon, enviarMensaje, obtenerContactos } from "~/routes/api.chat"
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader"
 import { UserRole } from "~/features/auth/types"
 import { ContactList } from "../components/ContactList"
@@ -11,6 +11,7 @@ import { ChatHeader } from "../components/ChatHeader"
 import { MessageList } from "../components/MessageList"
 import { MessageInput } from "../components/MessageInput"
 import { EmptyChat } from "../components/EmptyChat"
+import { NewChatModal } from "../components/NewChatModal"
 
 export function meta() {
   return [{ title: 'Ombook | Chat' }];
@@ -24,6 +25,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
   const chatId = url.searchParams.get("chatId") || undefined;
 
   const chats = await obtenerChats(args.request, search);
+  const contactos = await obtenerContactos(args.request);
 
   let mensajes: MensajePrivadoResponse[] = [];
   if (chatId) {
@@ -34,7 +36,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
     }
   }
 
-  return { chats, mensajes, selectedChatId: chatId };
+  return { chats, contactos, mensajes, selectedChatId: chatId };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -72,12 +74,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 const ChatInterface = () => {
-  const { chats, mensajes, selectedChatId } = useLoaderData<typeof loader>();
+  const { chats, contactos, mensajes, selectedChatId } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const messageFetcher = useFetcher();
   const revalidator = useRevalidator();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
+  const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
+  const [newChatSearchQuery, setNewChatSearchQuery] = useState("")
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -103,12 +107,14 @@ const ChatInterface = () => {
   }, [messageFetcher.state, messageFetcher.data, revalidator])
 
   const selectedChat = chats.find((c) => c.partnerId?.toString() === selectedChatId)
+
+  // Si no hay chat existente pero hay un chatId seleccionado, buscar en contactos
   const selectedContactData = selectedChat ? {
     id: selectedChat.partnerId,
     nombre: selectedChat.partnerNombre,
     apellido: selectedChat.partnerApellido,
     fotoPerfilUrl: selectedChat.partnerFoto
-  } : undefined
+  } : selectedChatId ? contactos.find(c => c.id?.toString() === selectedChatId) : undefined
 
   const selectContact = (contactId: string) => {
     const params = new URLSearchParams(searchParams)
@@ -130,6 +136,14 @@ const ChatInterface = () => {
 
   const isSending = messageFetcher.state === "submitting"
 
+  const filteredContacts = contactos.filter(contact => {
+    const searchLower = newChatSearchQuery.toLowerCase()
+    return (
+      contact.nombre?.toLowerCase().includes(searchLower) ||
+      contact.apellido?.toLowerCase().includes(searchLower)
+    )
+  })
+
   return (
     <div className="chat-container flex bg-gray-50">
       <ContactList
@@ -138,6 +152,7 @@ const ChatInterface = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSelectContact={selectContact}
+        onNewChat={() => setIsNewChatModalOpen(true)}
       />
 
       <div className="flex-1 flex flex-col min-h-0">
@@ -151,6 +166,18 @@ const ChatInterface = () => {
           <EmptyChat />
         )}
       </div>
+
+      <NewChatModal
+        isOpen={isNewChatModalOpen}
+        onClose={() => {
+          setIsNewChatModalOpen(false)
+          setNewChatSearchQuery("")
+        }}
+        contacts={filteredContacts}
+        onSelectContact={selectContact}
+        searchQuery={newChatSearchQuery}
+        onSearchChange={setNewChatSearchQuery}
+      />
     </div>
   )
 }
