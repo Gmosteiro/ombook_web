@@ -5,5 +5,5 @@ export default {
   appDirectory: "app",
   buildDirectory: "build",
   ssr: true,
-  prerender: ["/", "/about"],
+  prerender: ["/login"],
 } satisfies Config;

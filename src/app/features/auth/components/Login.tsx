@@ -3,7 +3,6 @@ import { Form, redirect, Link, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
 import { API_URL } from "../../common/utils/Utils";
 import { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
-import { LoginRequest, LoginResponse, UserRole } from "../../auth/types";
 
 export const meta: MetaFunction = () => {
     return [
