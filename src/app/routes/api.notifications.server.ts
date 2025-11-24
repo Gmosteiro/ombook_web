@@ -25,5 +25,8 @@ export async function obtenerNotificaciones(request: Request): Promise<Notificat
         throw new Error('Failed to fetch notifications');
     }
 
-    return response.json();
+    const res = await response.json();
+    console.log('Notificaciones obtenidas:', res);
+
+    return res;
 }

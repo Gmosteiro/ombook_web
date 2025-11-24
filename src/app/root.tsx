@@ -62,6 +62,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
     notifications: any[];
   };
 
+
+  console.log('Layout notifications:', notifications);
   // Component to initialize polling inside NotificationProvider
   function PollingInitializer() {
     useNotificationPolling(Boolean(userEmail));

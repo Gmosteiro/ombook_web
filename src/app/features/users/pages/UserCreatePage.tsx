@@ -37,7 +37,6 @@ export async function action({ request }: ActionFunctionArgs): Promise<CreateUse
             nombre: data.nombre,
             apellido: data.apellido,
             correo: data.correo,
-            contrasena: data.contrasena,
             cedula,
             fechaNacimiento: data.fechaNacimiento,
             rol: data.rol as UserRole,
