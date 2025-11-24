@@ -26,11 +26,9 @@ export type UserFormValues = {
     nombre: string;
     apellido: string;
     correo: string;
-    contrasena: string;
     cedula: string;
     fechaNacimiento: string;
     rol: UserRole;
-    confirmarContrasena: string; // Campo adicional solo para el formulario
 };
 
 // Tipo para crear usuario (igual que AltaUsuarioRequest pero con UserRole tipado)
@@ -38,11 +36,11 @@ export type CreateUserData = {
     nombre: string;
     apellido: string;
     correo: string;
-    contrasena: string;
     cedula: string;
     fechaNacimiento: string;
     rol: UserRole;
 };
+
 
 // Tipos para respuestas de la API
 export type CreateUserResponse = {

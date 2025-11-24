@@ -1,7 +1,6 @@
 import { redirect } from "react-router";
 import { Form } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
-import { logout, getValidJWTToken } from "~/services/session.server";
 import { API_URL } from "../../common/utils/Utils";
 import type { CerrarSesionRequest } from "../../auth/types";
 
@@ -15,6 +14,7 @@ import type { CerrarSesionRequest } from "../../auth/types";
  * @see https://reactrouter.com/en/dev/route/action
  */
 export async function action({ request }: Route.ActionArgs) {
+    const { getValidJWTToken, logout } = await import("~/services/session.server");
     try {
         // Get the JWT token from the session
         const token = await getValidJWTToken(request);
@@ -82,7 +82,7 @@ export default function Logout({
         <Form method="post" action="/logout" className={className}>
             <button
                 type="submit"
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition font-medium"
+                className="w-full ombook-btn ombook-btn-secondary text-sm"
             >
                 {buttonText}
             </button>

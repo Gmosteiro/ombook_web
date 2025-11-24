@@ -9,9 +9,10 @@ import {
 } from "react-router";
 import "./app.css";
 import Navbar from "./features/common/components/Navbar";
-import { getUserId, getUserRole } from "./services/session.server";
+import Footer from "./features/common/components/Footer";
+import { NotificationProvider } from "./features/common/contexts/NotificationContext";
+import { useNotificationPolling } from "./features/common/hooks/useSSENotifications";
 import { User } from "./features/auth/types";
-import { getPerfil } from "./routes/api.profile"; // importa tu función
 
 
 export const links = () => [
@@ -29,30 +30,44 @@ export const links = () => [
 
 // Loader para pasar datos de sesión al layout
 export async function loader({ request }: { request: Request }) {
-  const userEmail = await getUserId(request);
+  const { getUserId, getUserRole } = await import("./services/session.server");
+  const { getPerfil } = await import("./routes/api.profile.server");
+  const { obtenerNotificaciones } = await import("./routes/resource.notifications.server");
+
+  const userId = await getUserId(request);
   const userRole = await getUserRole(request);
   let avatarUrl: string | undefined = undefined;
-  if (userEmail) {
+  let notifications: any[] = [];
+
+  if (userId) {
     try {
       const perfil = await getPerfil(request);
       avatarUrl = perfil.fotoPerfil
         ? `${perfil.fotoPerfil}?v=${Date.now()}`
         : undefined;
+
+      // Fetch notifications from backend server-side
+      notifications = await obtenerNotificaciones(request);
     } catch {
-      // Si falla, deja avatarUrl como undefined
+      // Si falla, deja valores por defecto
     }
   }
-  const notificationCount = 0;
-  return { userEmail, userRole, notificationCount, avatarUrl };
+  return { userId, userRole, avatarUrl, notifications };
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { userEmail, userRole, notificationCount, avatarUrl } = useLoaderData() as {
-    userEmail: string;
+  const { userId, userRole, avatarUrl, notifications } = useLoaderData() as {
+    userId: string;
     userRole: User['rol']
-    notificationCount: number;
     avatarUrl: string | undefined;
+    notifications: any[];
   };
+
+  // Component to initialize polling inside NotificationProvider
+  function PollingInitializer() {
+    useNotificationPolling(Boolean(userId));
+    return null;
+  }
 
   return (
     <html lang="en">
@@ -63,17 +78,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="">
-        <Navbar
-          userEmail={userEmail}
-          userRole={userRole}
-          notificationCount={notificationCount}
-          avatarUrl={avatarUrl}
-        />
-        <div className="bg-gray-50 min-h-screen pt-20">
-          {children}
-          <ScrollRestoration />
-          <Scripts />
-        </div>
+        <NotificationProvider initialNotifications={notifications}>
+          <PollingInitializer />
+          <Navbar
+            userRole={userRole}
+            avatarUrl={avatarUrl}
+          />
+          <div className="bg-gray-50 min-h-screen pt-20 flex flex-col">
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <ScrollRestoration />
+            <Scripts />
+          </div>
+        </NotificationProvider>
       </body>
     </html>
   );

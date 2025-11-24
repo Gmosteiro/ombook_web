@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRecursosPorPagina } from '../hooks/useRecursosPorPagina';
-import { PaginaTematica, Recurso } from '../types/types';
+import { PaginaTematica } from '../types/types';
 import { UploadResourceDialog } from './UploadResourceDialog';
 
 interface Props {
@@ -13,14 +13,14 @@ interface Props {
   isProfesor: boolean;
 }
 
-export const SeccionTematica = ({ 
-  pagina, 
+export const SeccionTematica = ({
+  pagina,
   cursoId,
   jwtToken,
-  onUploadRecurso, 
+  onUploadRecurso,
   onDeleteRecurso,
   onDownloadRecurso,
-  isProfesor 
+  isProfesor
 }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -61,10 +61,9 @@ export const SeccionTematica = ({
   return (
     <div className={`border rounded-lg mb-4 overflow-hidden ${isHidden ? 'bg-gray-100' : 'bg-white'}`}>
       {/* Cabecera de la sección */}
-      <div 
-        className={`p-4 flex justify-between items-center cursor-pointer ${
-          isHidden ? 'bg-gray-200 hover:bg-gray-300' : 'bg-gray-50 hover:bg-gray-100'
-        }`}
+      <div
+        className={`p-4 flex justify-between items-center cursor-pointer ${isHidden ? 'bg-gray-200 hover:bg-gray-300' : 'bg-gray-50 hover:bg-gray-100'
+          }`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className={isHidden ? 'opacity-70' : ''}>
@@ -91,22 +90,22 @@ export const SeccionTematica = ({
             </div>
           </div>
         </div>
-        <button 
-          className="p-2" 
+        <button
+          className="p-2"
           title={isExpanded ? "Contraer sección" : "Expandir sección"}
           aria-label={isExpanded ? "Contraer sección" : "Expandir sección"}
         >
-          <svg 
+          <svg
             className={`w-6 h-6 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-            fill="none" 
-            stroke="currentColor" 
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M19 9l-7 7-7-7" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
             />
           </svg>
         </button>
@@ -145,8 +144,8 @@ export const SeccionTematica = ({
                   <div className="text-gray-400">No hay recursos para esta sección.</div>
                 ) : (
                   recursos.map((recurso) => (
-                    <div 
-                      key={recurso.id} 
+                    <div
+                      key={recurso.id}
                       className="flex items-center justify-between p-2 bg-gray-50 rounded"
                     >
                       <div className="flex items-center space-x-2">

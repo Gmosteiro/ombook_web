@@ -48,8 +48,8 @@ export default function CourseSidebar({ course }: Props) {
             to={link.path}
             className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
               ${location.pathname === link.path
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-700 hover:bg-gray-100"}
+                ? "bg-green-50 ombook-text-green"
+                : "ombook-text-gray hover:bg-gray-100"}
             `}
           >
             {link.icon}
@@ -61,8 +61,8 @@ export default function CourseSidebar({ course }: Props) {
             to={`${base}/enrollment`}
             className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors mt-2
               ${location.pathname === `${base}/enrollment`
-                ? "bg-blue-100 text-blue-700"
-                : "text-blue-700 hover:bg-blue-50"}
+                ? "bg-green-50 ombook-text-green"
+                : "ombook-text-green hover:bg-green-50"}
             `}
           >
             <UserPlusIcon className={iconClasses} />

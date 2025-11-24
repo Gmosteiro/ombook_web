@@ -5,7 +5,6 @@ import UserIndividualForm from "../components/UserForm";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { CreateUserData, CreateUserResponse, ImportUsersResponse } from "../types";
 import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
-import { crearUsuario } from "../../../routes/api.users";
 
 export const loader = requireRoleLoader([UserRole.ADMINISTRADOR]);
 
@@ -16,6 +15,8 @@ export const meta = () => {
 }
 
 export async function action({ request }: ActionFunctionArgs): Promise<CreateUserResponse> {
+    const { crearUsuario } = await import("../../../routes/api.users.server");
+
     let data: any;
     let intent: string | undefined;
 
@@ -36,14 +37,16 @@ export async function action({ request }: ActionFunctionArgs): Promise<CreateUse
             nombre: data.nombre,
             apellido: data.apellido,
             correo: data.correo,
-            contrasena: data.contrasena,
             cedula,
             fechaNacimiento: data.fechaNacimiento,
-            rol: data.rol,
+            rol: data.rol as UserRole,
         };
 
         try {
-            await crearUsuario(request, userData);
+            await crearUsuario(request, {
+                ...userData,
+                rol: userData.rol as "ADMINISTRADOR" | "PROFESOR" | "ESTUDIANTE"
+            });
             return { success: true, message: "Usuario creado exitosamente" };
         } catch (error: any) {
             return {

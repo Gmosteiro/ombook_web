@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ConfirmationDialog from "../../../common/components/ui/ConfirmationDialog";
 import { useNavigate, useFetcher, useLoaderData } from "react-router";
-import { CursoListadoResponse } from "../../../../routes/api.courses";
+import { CursoListadoResponse } from "../../../../routes/api.courses.server";
 import { UserRole } from "../../../auth/types"; // Asegúrate de importar esto
 
 interface CourseCardProps {
@@ -41,66 +41,62 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case "ACTIVO":
-        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+        return "ombook-badge-green";
       case "INACTIVO":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
+        return "bg-yellow-100 text-yellow-800";
       case "ELIMINADO":
-        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
+        return "ombook-badge-brown";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
+        return "bg-gray-100 ombook-text-gray";
     }
   };
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
+      <div className="ombook-card p-0 overflow-hidden">
 
         <img
           src={course.imagenUrl}
           alt={course.nombre}
-          className="w-full h-48 object-cover rounded-t-xl"
+          className="w-full h-48 object-cover"
         />
 
         <div className="p-4">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+            <h3 className="ombook-heading ombook-heading-sm ombook-text-gray">
               {course.nombre}
             </h3>
-            <span
-              className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                course.estadoCurso
-              )}`}
-            >
+            <span className={`ombook-badge ${getStatusColor(course.estadoCurso)}`}>
               {course.estadoCurso}
             </span>
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+          <p className="text-sm ombook-text-gray mb-1">
             <span className="font-medium">Código:</span> {course.codigo}
           </p>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+          <p className="text-sm ombook-text-gray mb-2">
             <span className="font-medium">Período:</span> {course.periodoAcademico}
           </p>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+          <p className="text-sm ombook-text-gray mb-3">
             <span className="font-medium">Profesores:</span> {course.docentesAsignados ? course.docentesAsignados.map(p => p.nombre).join(', ') : 'N/A'}
           </p>
 
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+          <p className="text-sm ombook-text-gray mb-4 line-clamp-2">
             <span className="font-medium">Descripcion:</span> {course.descripcion}
 
           </p>
 
           {error && (
-            <div className="mb-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-2 rounded">
+            <div className="mb-3 text-sm bg-red-50 p-2 rounded text-red-600">
               {error}
             </div>
           )}
 
           <div className="flex gap-2">
             <button
-              className="flex-1 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm"
+              className="flex-1 ombook-btn ombook-btn-primary text-sm"
               onClick={() => navigate(`/courses/${course.id}/general`)}
             >
               Ver Detalles
@@ -108,7 +104,7 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
 
             {userRole === UserRole.ADMINISTRADOR && (
               <button
-                className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="ombook-btn ombook-btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isDeleting || course.estadoCurso === "ELIMINADO"}
               >

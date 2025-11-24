@@ -72,6 +72,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cursos/{cursoId}/calificaciones-finales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar calificaciones finales del curso (vista profesor) */
+        get: operations["listar"];
+        /** Guardar calificaciones finales en modo borrador */
+        put: operations["guardar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cursos/{cursoId}/anuncios/{anuncioId}": {
         parameters: {
             query?: never;
@@ -111,7 +129,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar"];
+        get: operations["listar_1"];
         put?: never;
         /** Registrar un nuevo usuario individualmente */
         post: operations["altaIndividual"];
@@ -227,7 +245,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lista cursos con filtros y paginado. Admin: todos (puede filtrar por profesor). Prof/Est: solo sus cursos. */
-        get: operations["listar_1"];
+        get: operations["listar_2"];
         put?: never;
         /** Registrar un nuevo curso individualmente */
         post: operations["crearCurso"];
@@ -281,7 +299,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lista recursos */
-        get: operations["listar_2"];
+        get: operations["listar_3"];
         put?: never;
         /** Sube un archivo al curso */
         post: operations["subir"];
@@ -385,6 +403,40 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["crearMensaje"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/calificaciones-finales/publicacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publicar calificaciones finales del curso */
+        post: operations["publicar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/calificaciones-finales/importacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Importar calificaciones finales mediante archivo CSV (modo borrador) */
+        post: operations["importarCalificacionesCSV"];
         delete?: never;
         options?: never;
         head?: never;
@@ -561,7 +613,8 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /** Eliminar una tarea de un curso (soft delete). Elimina recursos asociados y marca las entregas como eliminadas. */
+        delete: operations["eliminarTarea"];
         options?: never;
         head?: never;
         patch: operations["editarTarea"];
@@ -584,32 +637,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mensajes/contactos/profesores": {
+    "/mensajes/contactos": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Devuelve los profesores de los cursos en los que el estudiante autenticado está matriculado (solo rol ESTUDIANTE) */
-        get: operations["contactosProfesores"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/mensajes/contactos/estudiantes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Devuelve los estudiantes de los cursos donde el profesor autenticado es responsable (solo rol PROFESOR) */
-        get: operations["contactosEstudiantes"];
+        /** Devuelve contactos que comparten curso con el usuario autenticado (si sos estudiante => profesores; si sos profesor => estudiantes). */
+        get: operations["contactosUnificados"];
         put?: never;
         post?: never;
         delete?: never;
@@ -625,7 +661,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Obtiene la lista de chats del usuario autenticado con el último mensaje e incluye filtro opcional por nombre/apellido */
+        /** Obtiene la lista de chats del usuario autenticado. */
         get: operations["listarChats"];
         put?: never;
         post?: never;
@@ -642,7 +678,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Devuelve el historial de mensajes entre el usuario autenticado y el partner indicado, ordenados de más antiguos a más nuevos */
+        /** Devuelve el historial de mensajes entre el usuario autenticado y el partner indicado. */
         get: operations["listarMensajesCon"];
         put?: never;
         post?: never;
@@ -803,6 +839,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cursos/{cursoId}/calificaciones-finales/mi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ver mi calificación final publicada del curso */
+        get: operations["verMiCalificacion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cursos/listar": {
         parameters: {
             query?: never;
@@ -875,6 +928,13 @@ export interface components {
     schemas: {
         ForoUpdateRequest: {
             contenido: string;
+        };
+        CalificacionFinalRequest: {
+            /** Format: int64 */
+            estudianteId?: number;
+            /** Format: double */
+            nota?: number;
+            observacion?: string;
         };
         AnuncioUpdateRequest: {
             titulo?: string;
@@ -1209,6 +1269,8 @@ export interface components {
             partnerFoto?: string;
             ultimoMensaje?: string;
             fechaUltimoMensaje?: string;
+            /** Format: int32 */
+            unreadCount?: number;
         };
         Pageable: {
             /** Format: int32 */
@@ -1322,6 +1384,31 @@ export interface components {
             fechaSubida?: string;
             /** Format: int64 */
             subidoPorUsuarioId?: number;
+        };
+        CalificacionFinalResponse: {
+            /** Format: int64 */
+            estudianteId?: number;
+            nombreEstudiante?: string;
+            /** Format: double */
+            nota?: number;
+            observacion?: string;
+            /** @enum {string} */
+            estado?: "BORRADOR" | "PUBLICADA";
+        };
+        CalificacionFinalEstudianteResponse: {
+            /** Format: int64 */
+            cursoId?: number;
+            /** Format: double */
+            calificacionFinal?: number;
+            estado?: string;
+            notasAsociadas?: components["schemas"]["NotaAsociadaResponse"][];
+        };
+        NotaAsociadaResponse: {
+            /** Format: int64 */
+            tareaId?: number;
+            tituloTarea?: string;
+            /** Format: double */
+            calificacion?: number;
         };
         DesactivarTokenRequest: {
             token?: string;
@@ -1517,6 +1604,52 @@ export interface operations {
             };
         };
     };
+    listar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CalificacionFinalResponse"][];
+                };
+            };
+        };
+    };
+    guardar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalificacionFinalRequest"][];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     actualizar_1: {
         parameters: {
             query?: never;
@@ -1585,7 +1718,7 @@ export interface operations {
             };
         };
     };
-    listar: {
+    listar_1: {
         parameters: {
             query?: {
                 q?: string;
@@ -1804,7 +1937,7 @@ export interface operations {
             };
         };
     };
-    listar_1: {
+    listar_2: {
         parameters: {
             query: {
                 q?: string;
@@ -1954,7 +2087,7 @@ export interface operations {
             };
         };
     };
-    listar_2: {
+    listar_3: {
         parameters: {
             query?: {
                 ownerRecurso?: "PAGINA" | "TAREA" | "ENTREGA";
@@ -2185,6 +2318,55 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MensajeResponse"];
+                };
+            };
+        };
+    };
+    publicar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    importarCalificacionesCSV: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResumenCargaMasiva"];
                 };
             };
         };
@@ -2475,6 +2657,27 @@ export interface operations {
             };
         };
     };
+    eliminarTarea: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                tareaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tarea eliminada correctamente */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     editarTarea: {
         parameters: {
             query?: never;
@@ -2524,29 +2727,11 @@ export interface operations {
             };
         };
     };
-    contactosProfesores: {
+    contactosUnificados: {
         parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ContactoSimpleResponse"][];
-                };
+            query?: {
+                q?: string;
             };
-        };
-    };
-    contactosEstudiantes: {
-        parameters: {
-            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -2836,6 +3021,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PublicacionResponse"][];
+                };
+            };
+        };
+    };
+    verMiCalificacion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CalificacionFinalEstudianteResponse"];
                 };
             };
         };

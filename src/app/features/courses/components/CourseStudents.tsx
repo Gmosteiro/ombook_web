@@ -1,14 +1,16 @@
 import { useLoaderData, useOutletContext, useSearchParams, useNavigate } from "react-router";
 import { Course } from "../types/types";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
-import { getUsuariosVinculadosByCurso, UsuarioListaResponse } from "../../../routes/api.users";
+import type { UsuarioListaResponse } from "../../../routes/api.users.server";
 import { UserRole } from "../../auth/types";
 import { useState, useEffect } from "react";
-import { getUserRole } from "../../../services/session.server"; // Asegúrate de importar esto
 
 type Ctx = { course: Course };
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
+  const { getUsuariosVinculadosByCurso } = await import("../../../routes/api.users.server");
+  const { getUserRole } = await import("../../../services/session.server");
+
   const { id } = params;
   const url = new URL(request.url);
   const q = url.searchParams.get("search") || "";
@@ -105,21 +107,21 @@ export default function CourseStudents() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Usuarios vinculados al curso</h1>
+        <h1 className="ombook-heading ombook-heading-lg ombook-text-green">Usuarios vinculados al curso</h1>
         <UserActionsMenu options={actions} />
       </div>
 
       {/* Filtros */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-6 flex flex-wrap gap-3 items-center">
+      <div className="ombook-card mb-6 flex flex-wrap gap-3 items-center">
         <input
           type="text"
           placeholder="Buscar por nombre o correo (mín. 3 caracteres)..."
-          className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
+          className="ombook-input flex-1 min-w-[220px]"
           value={searchInput}
           onChange={e => handleFilterChange("search", e.target.value)}
         />
         <select
-          className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+          className="ombook-input w-auto"
           value={rol}
           onChange={e => handleFilterChange("rol", e.target.value)}
         >
@@ -130,48 +132,48 @@ export default function CourseStudents() {
       </div>
 
       {/* Total de resultados */}
-      <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+      <div className="mb-4 text-sm ombook-text-gray">
         Total de resultados: {users.length}
       </div>
 
       {users.length === 0 ? (
-        <div className="text-center text-gray-500 mt-12">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+        <div className="text-center ombook-text-gray mt-12">
+          <h3 className="ombook-heading ombook-heading-md mb-2">
             No se encontraron usuarios vinculados
           </h3>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="ombook-card p-0 overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="ombook-bg-gray-light">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                   Nombre
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                   Apellido
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                   Correo Electrónico
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                   Rol
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="ombook-border-gray divide-y">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <tr key={user.id} className="hover:bg-green-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                     {user.nombre}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                     {user.apellido}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                     {user.correo}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                     {user.rol}
                   </td>
                 </tr>

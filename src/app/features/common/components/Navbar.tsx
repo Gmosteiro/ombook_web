@@ -1,18 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import Logout from "../../auth/components/Logout";
-import NotificationBell from "./NotificationBell";
+import { NotificationsDropdown } from "./NotificationsDropdown";
 import { getNavbarLinks } from "../utils/Navbar";
 import { UserRole } from "~/features/auth/types";
 
 interface NavbarProps {
-    userEmail?: string;
     userRole?: UserRole;
-    notificationCount?: number;
     avatarUrl?: string;
 }
 
-export default function Navbar({ userEmail, userRole, notificationCount = 0, avatarUrl }: NavbarProps) {
+export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -33,36 +31,35 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
         };
     }, [isUserMenuOpen]);
 
-    const getInitials = (email: string) => {
-        return email.split('@')[0].substring(0, 2).toUpperCase();
-    };
-
-    const handleNotificationClick = () => {
-        console.log('Notificaciones clicked');
-    };
-
     const styles = {
-        link: "text-gray-600 hover:text-blue-600 font-medium transition-colors",
+        link: "ombook-text-gray ombook-hover-blue font-medium transition-colors text-[20px]",
     }
 
     const links = getNavbarLinks(userRole);
 
-    let isLoggedIn = Boolean(userEmail);
+    let isLoggedIn = Boolean(userRole);
 
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white ombook-border-gray border-b px-6 py-4 shadow">
             <div className="flex items-center">
-
-                {/* Logo */}
-                <Link to="/" className="flex items-center space-x-2">
-                    <span className="text-2xl font-semibold text-blue-700 ">Ombook</span>
+                <Link to="/" className="flex items-center">
+                    <img
+                        src="/ombook_logo_horizontal.png"
+                        alt="Ombook"
+                        className="w-32 h-10 object-cover object-left"
+                    />
                 </Link>
 
-                {/* Si no está logeado, no mostrar nada más */}
-                {!isLoggedIn ? null : (
-                    <div className="flex items-center ml-auto mr-5 space-x-8">
+                <div className="ml-12 flex items-center space-x-8">
+                    <Link to="/" className={styles.link}>
+                        Home
+                    </Link>
+                </div>
+
+                {isLoggedIn && (
+                    <div className="flex items-center ml-auto space-x-6">
                         {/* Navigation Links */}
-                        <div className="hidden md:flex items-center space-x-8">
+                        <div className="hidden md:flex items-center space-x-6">
                             {links.map((link) => (
                                 <Link
                                     key={link.to}
@@ -74,30 +71,20 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
                             ))}
                         </div>
 
-                        {/* Campana y Perfil juntos */}
-                        <div className="relative flex items-center space-x-2" ref={menuRef}>
-                            <NotificationBell
-                                count={notificationCount}
-                                onClick={handleNotificationClick}
-                            />
+                        <div className="relative flex items-center space-x-2 cursor-pointer" ref={menuRef}>
+                            <NotificationsDropdown />
                             <button
                                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                                className="flex items-center focus:outline-none cursor-pointer ml-4"
+                                className="flex items-center focus:outline-none cursor-pointer ml-4 hover:opacity-80 transition-opacity"
                                 aria-label="Abrir menú de usuario"
                                 type="button"
                             >
-                                {avatarUrl ? (
+                                {avatarUrl && (
                                     <img
                                         src={avatarUrl}
                                         alt="Avatar"
                                         className="w-10 h-10 rounded-full object-cover"
                                     />
-                                ) : (
-                                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white font-medium text-sm">
-                                            {getInitials(userEmail ?? "")}
-                                        </span>
-                                    </div>
                                 )}
                                 <svg
                                     className="w-4 h-4 text-gray-400 ml-1"
@@ -113,32 +100,24 @@ export default function Navbar({ userEmail, userRole, notificationCount = 0, ava
                                     />
                                 </svg>
                             </button>
-                            {/* Dropdown Menu */}
+
                             <div
-                                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50"
+                                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg ombook-border-gray border z-50"
                                 style={{ display: isUserMenuOpen ? "block" : "none" }}
                             >
                                 <div className="py-1">
                                     <Link
                                         to="/profile"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        className="block px-4 py-2 text-[18px] ombook-text-gray hover:ombook-bg-light transition-colors "
                                         onClick={() => setIsUserMenuOpen(false)}
                                     >
                                         Mi Perfil
                                     </Link>
 
-                                    {/* <Link
-                                        to="/configuracion"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                        onClick={() => setIsUserMenuOpen(false)}
-                                    >
-                                        Configuración
-                                    </Link> */}
-
                                     <hr className="my-1" />
                                     <div className="px-4 py-2">
                                         <Logout
-                                            className="w-full"
+                                            className="w-full text-[18px]"
                                             buttonText="Cerrar Sesión"
                                         />
                                     </div>

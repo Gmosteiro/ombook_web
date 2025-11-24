@@ -1,7 +1,5 @@
 import { Form, redirect, useActionData, useNavigation } from "react-router";
 import { validatePasswordStrength } from "../../auth/utils/methods";
-import { getUserRole, requireValidSession, forceTokenRefresh } from "../../../services/session.server";
-import { cambiarContrasena, type CambiarContrasenaRequest } from "../../../routes/api.auth";
 import { UserRole } from "~/features/auth/types";
 
 
@@ -12,6 +10,7 @@ export function meta() {
 }
 
 export async function loader({ request }: { request: Request }) {
+    const { requireValidSession } = await import("../../../services/session.server");
     await requireValidSession(request);
     return {};
 }
@@ -40,13 +39,16 @@ export async function action({ request }: { request: Request }) {
         };
     }
 
-    const data: CambiarContrasenaRequest = {
+    const data = {
         contrasenaActual,
         nuevaContrasena,
         confirmarContrasena
     };
 
     try {
+        const { getUserRole, forceTokenRefresh } = await import("../../../services/session.server");
+        const { cambiarContrasena } = await import("../../../routes/api.auth.server");
+
         const userRoleBeforeChange = await getUserRole(request);
         const response = await cambiarContrasena(request, data);
 

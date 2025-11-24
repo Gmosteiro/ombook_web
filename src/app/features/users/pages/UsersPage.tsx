@@ -1,15 +1,17 @@
 import { useNavigate, useLoaderData, useSearchParams, useFetcher } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole, UserStatus } from "../../auth/types";
-import { getUsers, PaginatorResponseUsuarioListaResponse, UsuarioListaResponse, UsuarioDetalleResponse } from "../../../routes/api.users";
+import { PaginatorResponseUsuarioListaResponse, UsuarioListaResponse, UsuarioDetalleResponse } from "../../../routes/api.users.server";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
-import { getUserRole } from "../../../services/session.server";
 import { useState, useEffect } from "react";
 import UserDetailModal from "../components/UserDetailModal";
 import { Pagination } from "../../courses/components/general/Pagination";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR])(args);
+
+  const { getUsers } = await import("../../../routes/api.users.server");
+  const { getUserRole } = await import("../../../services/session.server");
 
   const url = new URL(args.request.url);
   const searchParam = url.searchParams.get("search") || undefined;
@@ -36,7 +38,7 @@ export const action = async ({ request }: { request: Request }) => {
   const userId = formData.get("userId") as string;
 
   if (intent === "getUserDetail" && userId) {
-    const { getUserById } = await import("../../../routes/api.users");
+    const { getUserById } = await import("../../../routes/api.users.server");
     try {
       const user = await getUserById(request, Number(userId));
       return { user };

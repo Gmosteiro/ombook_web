@@ -3,6 +3,17 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Ombook Brand Colors - Basados en el logo real */
+  --color-ombook-green: #7BA428;
+  --color-ombook-green-dark: #628520;
+  --color-ombook-green-light: #94c13d;
+  --color-ombook-brown: #8B3A3A;
+  --color-ombook-brown-dark: #6d2e2e;
+  --color-ombook-brown-light: #a04848;
+  --color-ombook-gray: #4a5568;
+  --color-ombook-gray-light: #e2e8f0;
+  --color-ombook-bg: #f7fafc;
 }
 
 html,
@@ -12,4 +23,260 @@ body {
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+}
+
+/* ============================================
+   OMBOOK BRAND SYSTEM - Utility Classes
+   ============================================ */
+
+/* Text Colors */
+.ombook-text-green {
+  color: var(--color-ombook-green);
+}
+
+.ombook-text-brown {
+  color: var(--color-ombook-brown);
+}
+
+.ombook-text-gray {
+  color: var(--color-ombook-gray);
+}
+
+/* Background Colors */
+.ombook-bg-green {
+  background-color: var(--color-ombook-green);
+}
+
+.ombook-bg-brown {
+  background-color: var(--color-ombook-brown);
+}
+
+.ombook-bg-light {
+  background-color: var(--color-ombook-bg);
+}
+
+.ombook-bg-gray-light {
+  background-color: var(--color-ombook-gray-light);
+}
+
+/* Border Colors */
+.ombook-border-green {
+  border-color: var(--color-ombook-green);
+}
+
+.ombook-border-brown {
+  border-color: var(--color-ombook-brown);
+}
+
+.ombook-border-gray {
+  border-color: var(--color-ombook-gray-light);
+}
+
+/* Hover Effects */
+.ombook-hover-green:hover {
+  color: var(--color-ombook-green);
+}
+
+.ombook-hover-brown:hover {
+  color: var(--color-ombook-brown);
+}
+
+.ombook-hover-blue:hover {
+  color: var(--color-ombook-green);
+}
+
+.ombook-hover-bg-green:hover {
+  background-color: var(--color-ombook-green);
+}
+
+.ombook-hover-bg-brown:hover {
+  background-color: var(--color-ombook-brown);
+}
+
+/* Buttons */
+.ombook-btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.ombook-btn-primary {
+  background-color: var(--color-ombook-green);
+  color: white;
+}
+
+.ombook-btn-primary:hover {
+  background-color: var(--color-ombook-green-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(123, 164, 40, 0.3);
+}
+
+.ombook-btn-secondary {
+  background-color: var(--color-ombook-brown);
+  color: white;
+}
+
+.ombook-btn-secondary:hover {
+  background-color: var(--color-ombook-brown-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 58, 58, 0.3);
+}
+
+.ombook-btn-outline {
+  background-color: transparent;
+  color: var(--color-ombook-green);
+  border: 2px solid var(--color-ombook-green);
+}
+
+.ombook-btn-outline:hover {
+  background-color: var(--color-ombook-green);
+  color: white;
+}
+
+/* Links */
+.ombook-link {
+  color: var(--color-ombook-green);
+  transition: color 0.2s;
+  text-decoration: none;
+}
+
+.ombook-link:hover {
+  color: var(--color-ombook-green-dark);
+  text-decoration: underline;
+}
+
+/* Cards */
+.ombook-card {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s;
+}
+
+.ombook-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ombook-card-header {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-ombook-gray-light);
+}
+
+/* Badges */
+.ombook-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ombook-badge-blue {
+  background-color: rgba(123, 164, 40, 0.1);
+  color: var(--color-ombook-green-dark);
+}
+
+.ombook-badge-green {
+  background-color: rgba(123, 164, 40, 0.1);
+  color: var(--color-ombook-green-dark);
+}
+
+.ombook-badge-brown {
+  background-color: rgba(139, 58, 58, 0.1);
+  color: var(--color-ombook-brown-dark);
+}
+
+/* Alerts */
+.ombook-alert {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid;
+}
+
+.ombook-alert-info {
+  background-color: rgba(123, 164, 40, 0.1);
+  border-color: var(--color-ombook-green);
+  color: var(--color-ombook-green-dark);
+}
+
+.ombook-alert-success {
+  background-color: rgba(123, 164, 40, 0.1);
+  border-color: var(--color-ombook-green);
+  color: var(--color-ombook-green-dark);
+}
+
+/* Form Elements */
+.ombook-input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--color-ombook-gray-light);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.ombook-input:focus {
+  outline: none;
+  border-color: var(--color-ombook-green);
+  box-shadow: 0 0 0 3px rgba(123, 164, 40, 0.1);
+}
+
+.ombook-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ombook-gray);
+  margin-bottom: 0.5rem;
+}
+
+/* Dividers */
+.ombook-divider {
+  border: none;
+  border-top: 1px solid var(--color-ombook-gray-light);
+  margin: 1.5rem 0;
+}
+
+/* Containers */
+.ombook-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.ombook-section {
+  padding: 3rem 0;
+}
+
+/* Typography */
+.ombook-heading {
+  font-weight: 700;
+  color: var(--color-ombook-gray);
+  line-height: 1.2;
+}
+
+.ombook-heading-xl {
+  font-size: 2.25rem;
+}
+
+.ombook-heading-lg {
+  font-size: 1.875rem;
+}
+
+.ombook-heading-md {
+  font-size: 1.5rem;
+}
+
+.ombook-heading-sm {
+  font-size: 1.25rem;
 }

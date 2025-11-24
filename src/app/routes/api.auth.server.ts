@@ -1,5 +1,4 @@
 import { API_URL } from "~/features/common/utils/Utils";
-import { getValidJWTToken } from "~/services/session.server";
 import { apiFetch } from "~/features/auth/utils/methods";
 
 // ==========================================
@@ -127,7 +126,7 @@ export async function cambiarContrasena(
     if (data.nuevaContrasena !== data.confirmarContrasena) {
         throw new Error("Las contraseñas no coinciden.");
     }
-
+    const { getValidJWTToken } = await import("../services/session.server");
     const jwtToken = await getValidJWTToken(request);
 
     const response = await apiFetch(`/auth/password`, {

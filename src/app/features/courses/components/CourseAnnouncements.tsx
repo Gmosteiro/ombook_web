@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLoaderData, useOutletContext, useSubmit, useRevalidator, type ActionFunctionArgs } from "react-router";
-import { getValidJWTToken, getUserRole, getUserId } from "~/services/session.server";
 import { apiFetch } from "../../auth/utils/methods";
 import type { Course } from "../types/types";
 import { UserRole } from "~/features/auth/types";
@@ -18,6 +17,8 @@ type Anuncio = {
 };
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
+  const { getValidJWTToken, getUserRole, getUserId } = await import("~/services/session.server");
+
   const { id } = params;
   try {
     const jwtToken = await getValidJWTToken(request);
@@ -48,6 +49,8 @@ export async function loader({ params, request }: { params: { id: string }, requ
 }
 
 export async function action({ params, request }: ActionFunctionArgs) {
+  const { getValidJWTToken } = await import("~/services/session.server");
+
   const { id } = params;
   const formData = await request.formData();
   const actionType = formData.get("actionType") as string;
@@ -214,70 +217,95 @@ export default function CourseAnnouncements() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Anuncios del Curso</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="ombook-heading ombook-heading-lg ombook-text-green">Anuncios del Curso</h1>
         {isProfesor && (
-          <button onClick={() => setShowNew(s => !s)} className="px-3 py-2 bg-blue-600 text-white rounded-md">
-            {showNew ? 'Cancelar' : 'Crear Anuncio'}
+          <button
+            onClick={() => setShowNew(true)}
+            className="ombook-btn ombook-btn-primary"
+          >
+            Nuevo Anuncio
           </button>
         )}
       </div>
 
       {showNew && (
-        <form onSubmit={handleCreate} className="mb-6 bg-white p-4 rounded-md shadow">
-          <div className="mb-2">
-            <label htmlFor="anuncio-titulo" className="block text-sm font-medium">Título</label>
-            <input id="anuncio-titulo" placeholder="Título del anuncio" value={titulo} onChange={e => setTitulo(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" required />
-          </div>
-          <div className="mb-2">
-            <label htmlFor="anuncio-contenido" className="block text-sm font-medium">Contenido</label>
-            <textarea id="anuncio-contenido" placeholder="Escribe el contenido del anuncio" value={contenido} onChange={e => setContenido(e.target.value)} rows={4} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" required />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="anuncio-fechaProgramada" className="block text-sm font-medium">Fecha programada (opcional)</label>
-            <input id="anuncio-fechaProgramada" type="datetime-local" value={fechaProgramada} onChange={e => setFechaProgramada(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setShowNew(false);
-                setTitulo('');
-                setContenido('');
-                setFechaProgramada('');
-              }}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar
-            </button>
-            <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-              {isSubmitting ? 'Creando...' : 'Crear'}
-            </button>
+        <form onSubmit={handleCreate} className="ombook-card mb-6">
+          <div className="space-y-4">
+            <div>
+              <label className="ombook-label">Título</label>
+              <input
+                type="text"
+                className="ombook-input"
+                value={titulo}
+                onChange={e => setTitulo(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="ombook-label">Contenido</label>
+              <textarea
+                className="ombook-input"
+                rows={4}
+                value={contenido}
+                onChange={e => setContenido(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="ombook-label">Fecha Programada (opcional)</label>
+              <input
+                type="datetime-local"
+                className="ombook-input"
+                value={fechaProgramada}
+                onChange={e => setFechaProgramada(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="ombook-btn ombook-btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creando...' : 'Crear Anuncio'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowNew(false)}
+                className="ombook-btn ombook-btn-outline"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </form>
       )}
 
       <div className="space-y-4">
-        {anuncios.length === 0 && <div className="text-gray-500">No hay anuncios.</div>}
+        {anuncios.length === 0 && (
+          <div className="ombook-card text-center ombook-text-gray py-8">
+            <p>No hay anuncios.</p>
+          </div>
+        )}
         {anuncios.map(a => (
-          <div key={a.id} className="bg-white p-4 rounded-md shadow">
+          <div key={a.id} className="ombook-card">
             {editingAnuncioId === a.id ? (
               <div className="space-y-2">
                 <div>
-                  <label htmlFor={`edit-titulo-${a.id}`} className="block text-sm font-medium mb-1">Título</label>
+                  <label htmlFor={`edit-titulo-${a.id}`} className="ombook-label">Título</label>
                   <input
                     id={`edit-titulo-${a.id}`}
                     defaultValue={a.titulo}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    className="ombook-input"
                   />
                 </div>
                 <div>
-                  <label htmlFor={`edit-contenido-${a.id}`} className="block text-sm font-medium mb-1">Contenido</label>
+                  <label htmlFor={`edit-contenido-${a.id}`} className="ombook-label">Contenido</label>
                   <textarea
                     id={`edit-contenido-${a.id}`}
                     defaultValue={a.contenido}
                     rows={3}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    className="ombook-input"
                   />
                 </div>
                 <div>

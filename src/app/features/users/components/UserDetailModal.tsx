@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { UsuarioDetalleResponse } from '../../../routes/api.users';
+import { UsuarioDetalleResponse } from '../../../routes/api.users.server';
 
 interface UserDetailModalProps {
     open: boolean;

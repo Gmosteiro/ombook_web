@@ -9,8 +9,6 @@ const UserIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submittin
         nombre: "",
         apellido: "",
         correo: "",
-        contrasena: "",
-        confirmarContrasena: "",
         cedula: "",
         fechaNacimiento: "",
         rol: "" as UserRole,
@@ -34,22 +32,6 @@ const UserIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submittin
             newErrors.cedula = "Cédula inválida";
         }
 
-        // Validación específica de contraseña según el backend
-        if (!values.contrasena) {
-            newErrors.contrasena = "Contraseña es requerida";
-        } else if (values.contrasena.length < 8) {
-            newErrors.contrasena = "La contraseña debe tener al menos 8 caracteres";
-        } else if (values.contrasena.length > 100) {
-            newErrors.contrasena = "La contraseña no puede tener más de 100 caracteres";
-        }
-
-        // Validación de confirmación de contraseña
-        if (!values.confirmarContrasena) {
-            newErrors.confirmarContrasena = "Confirmar contraseña es requerido";
-        } else if (values.contrasena !== values.confirmarContrasena) {
-            newErrors.confirmarContrasena = "Las contraseñas no coinciden";
-        }
-
         // Validación de email
         if (values.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.correo)) {
             newErrors.correo = "Formato de correo inválido";
@@ -68,9 +50,8 @@ const UserIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submittin
         e.preventDefault();
 
         if (validateForm()) {
-            // No enviar el campo confirmarContrasena al backend
-            const { confirmarContrasena, ...dataToSend } = values;
-            onSubmit(dataToSend);
+
+            onSubmit(values);
         }
     };
 
@@ -147,39 +128,6 @@ const UserIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submittin
                     disabled={submitting}
                 />
                 {errors.fechaNacimiento && <p className="text-red-500 text-xs mt-1">{errors.fechaNacimiento}</p>}
-            </div>
-
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contraseña *
-                </label>
-                <input
-                    type="password"
-                    className={`w-full border rounded px-3 py-2 ${errors.contrasena ? 'border-red-500' : 'border-gray-300'}`}
-                    value={values.contrasena}
-                    onChange={e => setValues(v => ({ ...v, contrasena: e.target.value }))}
-                    minLength={8}
-                    maxLength={100}
-                    disabled={submitting}
-                />
-                {errors.contrasena && <p className="text-red-500 text-xs mt-1">{errors.contrasena}</p>}
-                <p className="text-gray-500 text-xs mt-1">Mínimo 8 caracteres, máximo 100</p>
-            </div>
-
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirmar Contraseña *
-                </label>
-                <input
-                    type="password"
-                    className={`w-full border rounded px-3 py-2 ${errors.confirmarContrasena ? 'border-red-500' : 'border-gray-300'}`}
-                    value={values.confirmarContrasena}
-                    onChange={e => setValues(v => ({ ...v, confirmarContrasena: e.target.value }))}
-                    minLength={8}
-                    maxLength={100}
-                    disabled={submitting}
-                />
-                {errors.confirmarContrasena && <p className="text-red-500 text-xs mt-1">{errors.confirmarContrasena}</p>}
             </div>
 
             <div className="mb-4">

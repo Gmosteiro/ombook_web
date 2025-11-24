@@ -1,8 +1,6 @@
 import { type MetaFunction } from "react-router";
-import { getUserId, getUserRole } from "~/services/session.server";
-import { redirect } from "react-router";
+import { Link } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/common/pages/+types/Home";
-import Layout from "../components/Layout";
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
 import { UserRole } from "~/features/auth/types";
 
@@ -16,37 +14,158 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: Route.LoaderArgs) {
     await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
 
-    const userId = await getUserId(request);
-    if (!userId) {
-        throw redirect("/login");
-    }
+    const { /*getUserId,*/ getUserRole } = await import("~/services/session.server");
+    const { getPerfil } = await import("../../../routes/api.profile.server");
+
+    // const userId = await getUserId(request); // Creo que esto ya no es necesario
+    // if (!userId) {
+    //     throw redirect("/login");
+    // }
 
     const userRole = await getUserRole(request);
+    const perfil = await getPerfil(request);
 
     return {
-        userId,
-        userRole
+        userRole,
+        perfil
     };
 }
 
 export default function Index({ loaderData }: Route.ComponentProps) {
+    const { userRole, perfil } = loaderData;
+
+    // Quick action cards basadas en el rol
+    const quickActions = [
+        {
+            title: "Mis Cursos",
+            description: "Accede a todos tus cursos",
+            icon: "📚",
+            link: "/courses",
+            roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]
+        },
+        {
+            title: "Chat",
+            description: "Comunícate con estudiantes y profesores",
+            icon: "💬",
+            link: "/chat",
+            roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]
+        },
+        {
+            title: "Crear Curso",
+            description: "Crea un nuevo curso",
+            icon: "➕",
+            link: "/courses/create",
+            roles: [UserRole.ADMINISTRADOR]
+        },
+        {
+            title: "Gestión de Usuarios",
+            description: "Administra estudiantes y profesores",
+            icon: "👥",
+            link: "/users",
+            roles: [UserRole.ADMINISTRADOR]
+        },
+        {
+            title: "Mi Perfil",
+            description: "Ver y editar tu información",
+            icon: "👤",
+            link: "/profile",
+            roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]
+        }
+    ];
+
+    const filteredActions = quickActions.filter(action =>
+        action.roles.includes(userRole as UserRole)
+    );
+
     return (
-        <Layout
-            userEmail={loaderData.userId as any}
-            userRole={loaderData.userRole}
-            notificationCount={5} // Ejemplo: 5 notificaciones //TODO obtener el conteo real
-        >
-            <div className="p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
-                <div className="bg-white rounded-lg shadow p-6">
-                    <p className="text-gray-600">
-                        Bienvenido a Ombook, {loaderData.userId}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                        Rol: {loaderData.userRole}
-                    </p>
+        <div className="ombook-container ombook-section">
+            {/* Hero Section */}
+            <div className="mb-8">
+                <h1 className="ombook-heading ombook-heading-xl ombook-text-green mb-2">
+                    ¡Bienvenido a Ombook {perfil.nombre + " " + perfil.apellido}! 👋
+                </h1>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="mb-8">
+                <h2 className="ombook-heading ombook-heading-lg ombook-text-brown mb-4">
+                    Acceso Rápido
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredActions.map((action) => (
+                        <Link
+                            key={action.link}
+                            to={action.link}
+                            className="ombook-card group cursor-pointer transition-all duration-200 hover:scale-105"
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className="text-4xl">{action.icon}</div>
+                                <div className="flex-1">
+                                    <h3 className="ombook-heading ombook-heading-sm ombook-text-gray mb-2 group-hover:ombook-text-green transition-colors">
+                                        {action.title}
+                                    </h3>
+                                    <p className="ombook-text-gray text-sm">
+                                        {action.description}
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
                 </div>
             </div>
-        </Layout>
+
+            {/* Info Alerts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Tips Card */}
+                <div className="ombook-card">
+                    <h3 className="ombook-heading ombook-heading-sm ombook-text-brown mb-4">
+                        💡 Consejos Útiles
+                    </h3>
+                    <ul className="space-y-3 ombook-text-gray text-sm">
+                        <li className="flex items-start gap-2">
+                            <span className="ombook-text-green mt-1">✓</span>
+                            <span>Revisa tus notificaciones regularmente para estar al día</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="ombook-text-green mt-1">✓</span>
+                            <span>Utiliza el chat para comunicarte con profesores y compañeros</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="ombook-text-green mt-1">✓</span>
+                            <span>Mantén tu perfil actualizado con tu información de contacto</span>
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Help Card */}
+                <div className="ombook-card ombook-bg-light">
+                    <h3 className="ombook-heading ombook-heading-sm ombook-text-brown mb-4">
+                        ❓ ¿Necesitas Ayuda?
+                    </h3>
+                    <p className="ombook-text-gray text-sm mb-4">
+                        Si tienes alguna pregunta o problema, estamos aquí para ayudarte.
+                    </p>
+                    <div className="space-y-2">
+                        <a
+                            href="mailto:soporte@ombook.com"
+                            className="ombook-link text-sm block"
+                        >
+                            📧 soporte@ombook.com
+                        </a>
+                        <Link to="/terms" className="ombook-link text-sm block">
+                            📄 Términos y Condiciones
+                        </Link>
+                        <Link to="/privacy" className="ombook-link text-sm block">
+                            🔒 Política de Privacidad
+                        </Link>
+                    </div>
+                </div>
+            </div>
+            <img
+                src="/ombook_logo.png"
+                style={{ maxWidth: "20%", height: "auto", marginLeft: "40%" }}
+                alt="Ombook Logo"
+            />
+        </div>
     );
 }

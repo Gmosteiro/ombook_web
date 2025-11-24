@@ -2,16 +2,19 @@ import { useNavigate, useLoaderData, useSearchParams } from "react-router";
 import { useRevalidator } from "react-router";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import { UserRole } from "../../auth/types";
-import { getCursos, deleteCurso, PaginatorResponseCursoListadoResponse, CourseStatus, CursoListadoResponse } from "../../../routes/api.courses";
-import { getProfesores, UsuarioListaResponse } from "../../../routes/api.users";
+import { PaginatorResponseCursoListadoResponse, CourseStatus, CursoListadoResponse } from "../../../routes/api.courses.server";
+import { UsuarioListaResponse } from "../../../routes/api.users.server";
 import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { FilterBar, Filters } from "../components/general/FilterBar";
 import { CourseCard } from "../components/general/CourseCard";
 import { Pagination } from "../components/general/Pagination";
-import { getUserRole } from "../../../services/session.server";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
+
+  const { getCursos } = await import("../../../routes/api.courses.server");
+  const { getProfesores } = await import("../../../routes/api.users.server");
+  const { getUserRole } = await import("../../../services/session.server");
 
   const url = new URL(args.request.url);
   const searchParam = url.searchParams.get("search") || undefined;
@@ -52,6 +55,8 @@ export const loader = async (args: any) => {
 };
 
 export const action = async ({ request }: { request: Request }) => {
+  const { deleteCurso } = await import("../../../routes/api.courses.server");
+
   const formData = await request.formData();
   const courseId = formData.get("courseId");
   if (!courseId) return null;

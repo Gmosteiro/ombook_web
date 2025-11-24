@@ -8,7 +8,6 @@ import {
     Form,
     redirect,
 } from "react-router";
-import { desbloquearCuenta } from "~/routes/api.auth";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const url = new URL(request.url);
@@ -25,6 +24,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+    const { desbloquearCuenta } = await import("~/routes/api.auth.server");
+
     const formData = await request.formData();
     const token = formData.get("token") as string;
 

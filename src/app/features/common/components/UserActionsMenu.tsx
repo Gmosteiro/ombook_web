@@ -41,12 +41,12 @@ export default function UserActionsMenu({ options }: Props) {
         <div className="relative" ref={ref}>
             <button
                 onClick={() => setOpen((o) => !o)}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                className="ombook-btn ombook-btn-primary"
             >
                 Acciones
             </button>
             <div
-                className={`absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 transition ${open ? "block" : "hidden"}`}
+                className={`absolute right-0 mt-2 w-48 bg-white ombook-border-gray border rounded-md shadow-lg z-50 transition ${open ? "block" : "hidden"}`}
             >
                 {visibleOptions.map((opt, idx) => (
                     <button
@@ -55,7 +55,7 @@ export default function UserActionsMenu({ options }: Props) {
                             opt.onClick();
                             setOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
+                        className="w-full text-left px-4 py-2 hover:bg-green-50 ombook-text-gray"
                     >
                         {opt.label}
                     </button>

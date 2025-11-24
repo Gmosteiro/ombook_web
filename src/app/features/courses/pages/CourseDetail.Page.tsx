@@ -3,9 +3,10 @@ import CourseSidebar from "../components/CourseSidebar";
 import CourseContentLayout from "../components/general/CourseContentLayout";
 import { Course } from "../types/types";
 import { apiFetch } from "../../auth/utils/methods";
-import { getValidJWTToken } from "~/services/session.server";
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
+  const { getValidJWTToken } = await import("~/services/session.server");
+
   const { id } = params;
   try {
     const res = await apiFetch(`/cursos/buscar?id=${id}`, {
@@ -25,28 +26,26 @@ export async function loader({ params, request }: { params: { id: string }, requ
 
 
 export function meta() {
-  const course = useLoaderData() as Course;
+  // const course = useLoaderData() as Course;
 
   return [
-    { title: `Ombook | ${course.nombre ? course.nombre : 'Cursos'}` }
+    { title: `Ombook | Cursos` }
   ];
 }
 
 export default function CourseDetailPage() {
   const course = useLoaderData() as Course;
-
-  console.log("Loaded course data:", course);
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
+    <div className="min-h-screen ombook-bg-light">
 
       <div className="w-full h-56 bg-gray-200 flex items-end justify-start relative">
         <img
-          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" //TODO
+          src={course.imagenUrl}
           alt="Banner curso"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: "center" }}
         />
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
         <div className="relative z-10 p-10">
           <h1 className="text-5xl font-bold text-white drop-shadow-lg">
             {course.nombre || "Curso"}
@@ -58,7 +57,7 @@ export default function CourseDetailPage() {
         <CourseSidebar course={course} />
         <main className="flex-1 flex flex-col">
           <div className="ml-8 mr-8">
-            <div className="bg-white rounded-xl shadow p-8">
+            <div className="ombook-card">
               <CourseContentLayout course={course} />
             </div>
           </div>

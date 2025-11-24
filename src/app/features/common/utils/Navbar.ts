@@ -20,10 +20,12 @@ export const getNavbarLinks = (role: UserRole | undefined): Links[] | [] => {
             case UserRole.PROFESOR:
                 return [
                     { to: "/courses", label: "Mis Cursos" },
+                    { to: "/chat", label: "Chat" },
                 ];
             case UserRole.ESTUDIANTE:
                 return [
                     { to: "/courses", label: "Mis Cursos" },
+                    { to: "/chat", label: "Chat" },
                 ];
 
             case UserRole.SIN_VERIFICAR:
