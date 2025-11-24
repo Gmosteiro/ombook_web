@@ -145,7 +145,7 @@ const ChatInterface = () => {
   })
 
   return (
-    <div className="chat-container flex bg-gray-50">
+    <div className="chat-container flex ombook-bg-light">
       <ContactList
         chats={chats}
         selectedContactId={selectedChatId}

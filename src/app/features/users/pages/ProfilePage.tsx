@@ -80,26 +80,26 @@ export default function ProfilePage() {
 
     if (isUpdating) {
         return (
-            <div className="max-w-xl mx-auto mt-12 bg-white rounded-2xl shadow p-8 flex items-center justify-center min-h-[300px]">
-                <svg className="animate-spin h-6 w-6 text-blue-600 mr-3" viewBox="0 0 24 24">
+            <div className="max-w-xl mx-auto mt-12 ombook-card flex items-center justify-center min-h-[300px]">
+                <svg className="animate-spin h-6 w-6 ombook-text-green mr-3" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                 </svg>
-                <span className="text-blue-600 font-medium text-lg">Actualizando...</span>
+                <span className="ombook-text-green font-medium text-lg">Actualizando...</span>
             </div>
         );
     }
 
     return (
-        <div className="max-w-xl mx-auto mt-12 bg-white rounded-2xl shadow p-8">
+        <div className="max-w-xl mx-auto mt-12 ombook-card">
             <div className="flex justify-between items-baseline mb-8">
-                <h1 className="text-3xl font-bold mb-6 text-gray-900">Mi Perfil</h1>
+                <h1 className="ombook-heading ombook-heading-xl ombook-text-green mb-6">Mi Perfil</h1>
                 {fetcher.data?.error && (
                     <div className="text-red-600 mt-4">{fetcher.data.error}</div>
                 )}
                 {!edit && (
                     <button
-                        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
+                        className="ombook-btn ombook-btn-primary"
                         onClick={() => setEdit(true)}
                     >
                         Editar
@@ -143,7 +143,7 @@ export default function ProfilePage() {
                                 type="file"
                                 name="archivo"
                                 accept="image/png, image/jpeg"
-                                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                className="block w-full text-sm ombook-text-gray file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                 onChange={e => {
                                     const file = e.target.files?.[0] ?? null;
                                     setAvatarFile(file);
@@ -163,7 +163,7 @@ export default function ProfilePage() {
                             {avatarFile && !avatarError && (
                                 <button
                                     type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                                    className="ombook-btn ombook-btn-primary"
                                 >
                                     Actualizar Avatar
                                 </button>
@@ -183,43 +183,43 @@ export default function ProfilePage() {
                 >
                     <input type="hidden" name="intent" value="updateProfile" />
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <label className="ombook-label">Nombre</label>
                         <input
                             name="nombre"
                             defaultValue={perfil.nombre}
-                            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                            className="ombook-input"
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+                        <label className="ombook-label">Apellido</label>
                         <input
                             name="apellido"
                             defaultValue={perfil.apellido}
-                            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                            className="ombook-input"
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
+                        <label className="ombook-label">Fecha de nacimiento</label>
                         <input
                             name="fechaNacimiento"
                             type="date"
                             defaultValue={formatFecha(perfil.fechaNacimiento)}
-                            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                            className="ombook-input"
                         />
                     </div>
                     <div className="flex gap-2 justify-end">
                         <button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
+                            className="ombook-btn ombook-btn-primary"
                             disabled={isUpdating}
                         >
                             Guardar
                         </button>
                         <button
                             type="button"
-                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg transition"
+                            className="ombook-btn ombook-btn-outline"
                             onClick={() => setEdit(false)}
                             disabled={isUpdating}
                         >
@@ -227,7 +227,7 @@ export default function ProfilePage() {
                         </button>
                         <Link
                             to="/profile/change-password"
-                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg transition inline-flex items-center justify-center"
+                            className="ombook-btn ombook-btn-outline"
                         >
                             Cambiar Contraseña
                         </Link>
@@ -236,16 +236,16 @@ export default function ProfilePage() {
             ) : (
                 <div className="space-y-2">
                     <div>
-                        <span className="font-semibold text-gray-800">Nombre:</span> {perfil.nombre}
+                        <span className="font-semibold ombook-text-brown">Nombre:</span> <span className="ombook-text-gray">{perfil.nombre}</span>
                     </div>
                     <div>
-                        <span className="font-semibold text-gray-800">Apellido:</span> {perfil.apellido}
+                        <span className="font-semibold ombook-text-brown">Apellido:</span> <span className="ombook-text-gray">{perfil.apellido}</span>
                     </div>
                     <div>
-                        <span className="font-semibold text-gray-800">Correo:</span> {perfil.correo}
+                        <span className="font-semibold ombook-text-brown">Correo:</span> <span className="ombook-text-gray">{perfil.correo}</span>
                     </div>
                     <div>
-                        <span className="font-semibold text-gray-800">Fecha de nacimiento:</span> {formatFecha(perfil.fechaNacimiento)}
+                        <span className="font-semibold ombook-text-brown">Fecha de nacimiento:</span> <span className="ombook-text-gray">{formatFecha(perfil.fechaNacimiento)}</span>
                     </div>
                 </div>
             )}
