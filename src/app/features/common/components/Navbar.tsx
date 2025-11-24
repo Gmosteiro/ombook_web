@@ -32,7 +32,7 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
     }, [isUserMenuOpen]);
 
     const styles = {
-        link: "text-gray-600 ombook-hover-primary font-medium transition-colors",
+        link: "ombook-text-gray ombook-hover-blue font-medium transition-colors text-[20px]",
     }
 
     const links = getNavbarLinks(userRole);
@@ -40,7 +40,7 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
     let isLoggedIn = Boolean(userRole);
 
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white ombook-border-gray border-b px-6 py-4 shadow">
             <div className="flex items-center">
                 <Link to="/" className="flex items-center">
                     <img
@@ -51,7 +51,7 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
                 </Link>
 
                 <div className="ml-12 flex items-center space-x-8">
-                    <Link to="/" className="ombook-link font-medium">
+                    <Link to="/" className={styles.link}>
                         Home
                     </Link>
                 </div>
@@ -71,7 +71,7 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
                             ))}
                         </div>
 
-                        <div className="relative flex items-center space-x-2" ref={menuRef}>
+                        <div className="relative flex items-center space-x-2 cursor-pointer" ref={menuRef}>
                             <NotificationsDropdown />
                             <button
                                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -102,13 +102,13 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
                             </button>
 
                             <div
-                                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50"
+                                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg ombook-border-gray border z-50"
                                 style={{ display: isUserMenuOpen ? "block" : "none" }}
                             >
                                 <div className="py-1">
                                     <Link
                                         to="/profile"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        className="block px-4 py-2 text-[18px] ombook-text-gray hover:ombook-bg-light transition-colors "
                                         onClick={() => setIsUserMenuOpen(false)}
                                     >
                                         Mi Perfil
@@ -117,7 +117,7 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
                                     <hr className="my-1" />
                                     <div className="px-4 py-2">
                                         <Logout
-                                            className="w-full"
+                                            className="w-full text-[18px]"
                                             buttonText="Cerrar Sesión"
                                         />
                                     </div>

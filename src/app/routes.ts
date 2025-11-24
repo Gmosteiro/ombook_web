@@ -42,6 +42,10 @@ const routes: RouteConfig = [
     route("/profile", "./features/users/pages/ProfilePage.tsx"),
     route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),
 
+    // Legal
+    route("/terms", "./features/common/pages/TermsAndConditions.tsx"),
+    route("/privacy", "./features/common/pages/PrivacyPolicy.tsx"),
+
     // Not Found
     route("*", './features/common/pages/NotFound.tsx'),
 ];

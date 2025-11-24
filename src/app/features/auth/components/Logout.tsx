@@ -82,7 +82,7 @@ export default function Logout({
         <Form method="post" action="/logout" className={className}>
             <button
                 type="submit"
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition font-medium"
+                className="w-full ombook-btn ombook-btn-secondary text-sm"
             >
                 {buttonText}
             </button>

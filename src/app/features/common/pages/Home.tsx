@@ -30,15 +30,19 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function Index({ loaderData }: Route.ComponentProps) {
     return (
-        <div className="max-w-7xl mx-auto px-6 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
-            <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-gray-600">
-                    Bienvenido a Ombook, {loaderData.userId}
+        <div className="ombook-container ombook-section">
+            <h1 className="ombook-heading ombook-heading-xl ombook-text-gray mb-6">Dashboard</h1>
+            <div className="ombook-card">
+                <div className="ombook-card-header">
+                    <h2 className="ombook-heading-md ombook-text-blue">Bienvenido a Ombook</h2>
+                </div>
+                <p className="ombook-text-gray mb-4">
+                    Usuario: <span className="font-semibold">{loaderData.userId}</span>
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
-                    Rol: {loaderData.userRole}
-                </p>
+                <div className="flex items-center gap-2">
+                    <span className="ombook-text-gray text-sm">Rol:</span>
+                    <span className="ombook-badge ombook-badge-blue">{loaderData.userRole}</span>
+                </div>
             </div>
         </div>
     );
