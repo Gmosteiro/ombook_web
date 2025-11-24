@@ -32,7 +32,7 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
     }, [isUserMenuOpen]);
 
     const styles = {
-        link: "text-gray-600 hover:text-blue-600 font-medium transition-colors",
+        link: "text-gray-600 ombook-hover-primary font-medium transition-colors",
     }
 
     const links = getNavbarLinks(userRole);
@@ -42,18 +42,24 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
     return (
         <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">
             <div className="flex items-center">
-                <Link to="/" className="flex items-center space-x-2">
-                    <span className="text-2xl font-semibold text-blue-700 ">Ombook</span>
+                <Link to="/" className="flex items-center">
+                    <img
+                        src="/ombook_logo_horizontal.png"
+                        alt="Ombook"
+                        className="w-32 h-10 object-cover object-left"
+                    />
                 </Link>
 
-                <Link to="/" className="ml-10">
-                    Home
-                </Link>
+                <div className="ml-12 flex items-center space-x-8">
+                    <Link to="/" className="ombook-link font-medium">
+                        Home
+                    </Link>
+                </div>
 
                 {isLoggedIn && (
-                    <div className="flex items-center ml-auto mr-5 space-x-8">
+                    <div className="flex items-center ml-auto space-x-6">
                         {/* Navigation Links */}
-                        <div className="hidden md:flex items-center space-x-8">
+                        <div className="hidden md:flex items-center space-x-6">
                             {links.map((link) => (
                                 <Link
                                     key={link.to}
@@ -69,7 +75,7 @@ export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
                             <NotificationsDropdown />
                             <button
                                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                                className="flex items-center focus:outline-none cursor-pointer ml-4"
+                                className="flex items-center focus:outline-none cursor-pointer ml-4 hover:opacity-80 transition-opacity"
                                 aria-label="Abrir menú de usuario"
                                 type="button"
                             >

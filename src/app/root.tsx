@@ -9,6 +9,7 @@ import {
 } from "react-router";
 import "./app.css";
 import Navbar from "./features/common/components/Navbar";
+import Footer from "./features/common/components/Footer";
 import { NotificationProvider } from "./features/common/contexts/NotificationContext";
 import { useNotificationPolling } from "./features/common/hooks/useSSENotifications";
 import { User } from "./features/auth/types";
@@ -83,8 +84,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
             userRole={userRole}
             avatarUrl={avatarUrl}
           />
-          <div className="bg-gray-50 min-h-screen pt-20">
-            {children}
+          <div className="bg-gray-50 min-h-screen pt-20 flex flex-col">
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
             <ScrollRestoration />
             <Scripts />
           </div>

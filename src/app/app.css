@@ -3,6 +3,14 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Ombook Brand Colors */
+  --color-ombook-primary: #1e40af;
+  --color-ombook-primary-dark: #1e3a8a;
+  --color-ombook-secondary: #3b82f6;
+  --color-ombook-accent: #60a5fa;
+  --color-ombook-light: #dbeafe;
+  --color-ombook-lighter: #eff6ff;
 }
 
 html,
@@ -12,4 +20,63 @@ body {
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+}
+
+/* Ombook Brand Utility Classes */
+.ombook-text-primary {
+  color: var(--color-ombook-primary);
+}
+
+.ombook-text-secondary {
+  color: var(--color-ombook-secondary);
+}
+
+.ombook-bg-primary {
+  background-color: var(--color-ombook-primary);
+}
+
+.ombook-bg-secondary {
+  background-color: var(--color-ombook-secondary);
+}
+
+.ombook-bg-light {
+  background-color: var(--color-ombook-light);
+}
+
+.ombook-bg-lighter {
+  background-color: var(--color-ombook-lighter);
+}
+
+.ombook-border-primary {
+  border-color: var(--color-ombook-primary);
+}
+
+.ombook-hover-primary:hover {
+  color: var(--color-ombook-primary);
+}
+
+.ombook-hover-bg-primary:hover {
+  background-color: var(--color-ombook-primary);
+}
+
+.ombook-btn-primary {
+  background-color: var(--color-ombook-primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.ombook-btn-primary:hover {
+  background-color: var(--color-ombook-primary-dark);
+}
+
+.ombook-link {
+  color: var(--color-ombook-secondary);
+  transition: color 0.2s;
+}
+
+.ombook-link:hover {
+  color: var(--color-ombook-primary-dark);
 }
