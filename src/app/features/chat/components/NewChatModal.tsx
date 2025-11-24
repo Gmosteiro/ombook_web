@@ -43,6 +43,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({
                             onChange={(e) => onSearchChange(e.target.value)}
                             placeholder="Buscar contactos..."
                             className="ombook-input pl-10"
+                            style={{ paddingLeft: "35px" }}
                             autoFocus
                         />
                     </div>

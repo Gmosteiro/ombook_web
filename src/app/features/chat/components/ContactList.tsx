@@ -34,11 +34,13 @@ export const ContactList: React.FC<ContactListProps> = ({
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ombook-text-gray" />
                     <input
+                        name="search"
                         type="text"
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder="Buscar chats..."
-                        className="ombook-input pl-10"
+                        className="ombook-input"
+                        style={{ paddingLeft: "35px" }}
                     />
                 </div>
             </div>

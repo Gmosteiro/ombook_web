@@ -91,21 +91,21 @@ export default function Login({ actionData }: Route.ComponentProps) {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark font-display">
-            <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8">
+        <div className="min-h-screen flex items-center justify-center ombook-bg-light font-sans">
+            <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 ombook-card">
                 <div className="px-2 pt-2 pb-6">
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Iniciar Sesión</h1>
-                    <p className="text-slate-600 dark:text-slate-400">Bienvenido de nuevo a tu cuenta.</p>
+                    <h1 className="ombook-heading ombook-heading-xl ombook-text-green mb-2">Iniciar Sesión</h1>
+                    <p className="ombook-text-gray">Bienvenido de nuevo a tu cuenta.</p>
                 </div>
                 <Form method="post" className="space-y-6 px-2">
-                    {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
+                    {error && <div className="ombook-alert ombook-alert-info text-sm mb-4">{error}</div>}
                     <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">Correo electrónico</label>
+                        <label htmlFor="email" className="ombook-label">Correo electrónico</label>
                         <input
                             id="email"
                             name="email"
                             type="email"
-                            className="form-input w-full rounded-lg border-0 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary h-14 p-4 text-base"
+                            className="ombook-input h-12"
                             placeholder="tucorreo@ejemplo.com"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
@@ -113,12 +113,12 @@ export default function Login({ actionData }: Route.ComponentProps) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-300">Contraseña</label>
+                        <label htmlFor="password" className="ombook-label">Contraseña</label>
                         <input
                             id="password"
                             name="password"
                             type="password"
-                            className="form-input w-full rounded-lg border-0 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary h-14 p-4 text-base"
+                            className="ombook-input h-12"
                             placeholder="Ingresa tu contraseña"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
@@ -128,13 +128,13 @@ export default function Login({ actionData }: Route.ComponentProps) {
                     <div className="pt-4">
                         <button
                             type="submit"
-                            className="w-full h-14 rounded-lg bg-[#137fec] text-white text-base font-bold tracking-wide shadow-lg hover:bg-[#0e6ad1] transition-colors focus:outline-none focus:ring-2 focus:ring-[#137fec]"
+                            className="w-full ombook-btn ombook-btn-primary h-12 text-base font-bold tracking-wide shadow-lg"
                         >
                             Iniciar Sesión
                         </button>
                     </div>
                     <div className="text-center">
-                        <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+                        <Link to="/forgot-password" className="ombook-link text-sm font-medium">
                             ¿Olvidaste tu contraseña?
                         </Link>
                     </div>
