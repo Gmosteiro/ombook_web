@@ -141,15 +141,15 @@ export default function CourseGeneral() {
 
   return (
     <div>
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <h1 className="text-2xl font-semibold mb-4">Información General</h1>
-        <p className="text-gray-700 dark:text-gray-300 mb-4">
+      <div className="ombook-card mb-8">
+        <h1 className="ombook-heading ombook-heading-lg ombook-text-green mb-4">Información General</h1>
+        <p className="ombook-text-gray mb-4">
           <span className="font-medium">Descripción:</span> {course.descripcion}
         </p>
-        <p className="text-gray-700 dark:text-gray-300 mb-2">
+        <p className="ombook-text-gray mb-2">
           <span className="font-medium">Período:</span> {course.periodoAcademico}
         </p>
-        <p className="text-gray-700 dark:text-gray-300 mb-2">
+        <p className="ombook-text-gray mb-2">
           <span className="font-medium">Profesores:</span>{" "}
           {course.docentesAsignados?.map(p => p.nombre).join(", ") || "N/A"}
         </p>
@@ -158,11 +158,11 @@ export default function CourseGeneral() {
       {/* Secciones del curso */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Páginas del Curso</h2>
+          <h2 className="ombook-heading ombook-heading-md ombook-text-brown">Páginas del Curso</h2>
           {isProfesor && (
             <button
               onClick={() => setShowNewPage(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="ombook-btn ombook-btn-primary"
             >
               <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -173,7 +173,7 @@ export default function CourseGeneral() {
         </div>
 
         {showNewPage && (
-          <form onSubmit={handleCreatePage} className="bg-white p-6 rounded-lg shadow-sm mb-6">
+          <form onSubmit={handleCreatePage} className="ombook-card mb-6">
             <div className="space-y-4">
               <div>
                 <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">

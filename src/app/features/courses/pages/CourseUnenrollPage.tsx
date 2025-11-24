@@ -84,7 +84,7 @@ export default function UserUnenrollPage() {
     const success = importResult && importResult.success ? "Usuario desmatriculado correctamente" : fetcher.data?.success ? "Usuario desmatriculado correctamente" : "";
 
     return (
-        <div className="max-w-3xl mx-auto">
+        <div className="ombook-container">
             <EntityCreate
                 entityName="Usuario"
                 title="Desmatricular a un usuario"

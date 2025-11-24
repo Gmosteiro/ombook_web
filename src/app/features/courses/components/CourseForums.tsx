@@ -309,68 +309,66 @@ export default function CourseForums() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Foro del Curso</h1>
+        <h1 className="ombook-heading ombook-heading-lg ombook-text-green">Foro del Curso</h1>
         <button
-          onClick={() => setShowNewThread(s => !s)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+          onClick={() => setShowNewThread(true)}
+          className="ombook-btn ombook-btn-primary"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          {showNewThread ? 'Cancelar' : 'Nuevo Hilo'}
+          Nuevo Hilo
         </button>
       </div>
 
       {showNewThread && (
-        <form onSubmit={handleCreateThread} className="mb-6 bg-white p-4 rounded-md shadow">
-          <div className="mb-4">
-            <label htmlFor="thread-contenido" className="block text-sm font-medium mb-1">Contenido del hilo</label>
-            <textarea
-              id="thread-contenido"
-              placeholder="Escribe tu pregunta o comentario"
-              value={newThreadContent}
-              onChange={e => setNewThreadContent(e.target.value)}
-              rows={4}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-              required
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setShowNewThread(false)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {isSubmitting ? 'Creando...' : 'Crear Hilo'}
-            </button>
+        <form onSubmit={handleCreateThread} className="ombook-card mb-6">
+          <div className="space-y-4">
+            <div>
+              <label className="ombook-label">Contenido del hilo</label>
+              <textarea
+                className="ombook-input"
+                rows={4}
+                value={newThreadContent}
+                onChange={e => setNewThreadContent(e.target.value)}
+                required
+                placeholder="Escribe el contenido del nuevo hilo..."
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="ombook-btn ombook-btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creando...' : 'Crear Hilo'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowNewThread(false)}
+                className="ombook-btn ombook-btn-outline"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </form>
       )}
 
       <div className="space-y-4">
         {publicaciones.length === 0 && (
-          <div className="text-center text-gray-500 py-8">
+          <div className="ombook-card text-center ombook-text-gray py-8">
             <p>No hay hilos de conversación aún.</p>
           </div>
         )}
 
         {publicaciones.map(pub => (
-          <div key={pub.id} className="bg-white rounded-lg shadow overflow-hidden">
+          <div key={pub.id} className="ombook-card p-0 overflow-hidden">
             {/* Header del hilo (clickeable para expandir) */}
             <button
               onClick={() => setExpandedThreadId(expandedThreadId === pub.id ? null : pub.id)}
-              className="w-full text-left p-4 hover:bg-gray-50 transition border-b"
+              className="w-full text-left p-4 hover:bg-gray-50 transition ombook-border-gray border-b"
             >
               <div className="flex gap-3">
                 <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-sm font-medium text-white">
+                  <div className="h-10 w-10 rounded-full ombook-bg-green flex items-center justify-center text-sm font-medium text-white">
                     {pub.autorNombre ? pub.autorNombre.charAt(0) : 'U'}{pub.autorApellido ? pub.autorApellido.charAt(0) : ''}
                   </div>
                 </div>
@@ -392,13 +390,13 @@ export default function CourseForums() {
                     <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => setEditingThreadId(editingThreadId === pub.id ? null : pub.id)}
-                        className="text-blue-500 text-sm hover:text-blue-700 font-medium"
+                        className="ombook-link text-sm font-medium"
                       >
                         {editingThreadId === pub.id ? 'Cancelar' : 'Editar'}
                       </button>
                       <button
                         onClick={() => handleDeleteThread(pub.id)}
-                        className="text-red-500 text-sm hover:text-red-700 font-medium"
+                        className="text-sm font-medium ombook-text-brown hover:underline"
                       >
                         Eliminar
                       </button>
@@ -409,8 +407,8 @@ export default function CourseForums() {
             </button>
 
             {editingThreadId === pub.id && (
-              <div className="p-4 bg-blue-50 border-b">
-                <label htmlFor={`edit-thread-${pub.id}`} className="block text-sm font-medium mb-2">Editar contenido</label>
+              <div className="p-4 ombook-bg-light ombook-border-gray border-b">
+                <label htmlFor={`edit-thread-${pub.id}`} className="ombook-label">Editar contenido</label>
                 <textarea
                   id={`edit-thread-${pub.id}`}
                   defaultValue={pub.contenido}
@@ -420,12 +418,12 @@ export default function CourseForums() {
                     }
                   }}
                   rows={3}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="ombook-input"
                 />
                 <div className="flex justify-end gap-2 mt-2">
                   <button
                     onClick={() => setEditingThreadId(null)}
-                    className="px-2 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm"
+                    className="ombook-btn ombook-btn-outline text-sm"
                   >
                     Cancelar
                   </button>
@@ -437,7 +435,7 @@ export default function CourseForums() {
                       }
                     }}
                     disabled={isSubmitting}
-                    className="px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm"
+                    className="ombook-btn ombook-btn-primary text-sm"
                   >
                     Guardar
                   </button>
@@ -446,10 +444,10 @@ export default function CourseForums() {
             )}
 
             {expandedThreadId === pub.id && (
-              <div className="border-t">
+              <div className="ombook-border-gray border-t">
                 {pub.respuestas && pub.respuestas.length > 0 && (
-                  <div className="p-4 space-y-4 border-b bg-gray-50">
-                    <div className="text-sm font-semibold text-gray-700">Respuestas ({pub.respuestas.length})</div>
+                  <div className="p-4 space-y-4 ombook-border-gray border-b ombook-bg-light">
+                    <div className="text-sm font-semibold ombook-text-brown">Respuestas ({pub.respuestas.length})</div>
                     {pub.respuestas.map(msg => (
                       <div key={msg.id} className="bg-white p-3 rounded-md border border-gray-200">
                         {editingReplyId === msg.id ? (
@@ -500,13 +498,13 @@ export default function CourseForums() {
                               <div className="flex gap-1 ml-2">
                                 <button
                                   onClick={() => setEditingReplyId(editingReplyId === msg.id ? null : msg.id)}
-                                  className="text-blue-500 text-xs hover:text-blue-700 font-medium"
+                                  className="ombook-link text-xs font-medium"
                                 >
                                   Editar
                                 </button>
                                 <button
                                   onClick={() => handleDeleteReply(pub.id, msg.id)}
-                                  className="text-red-500 text-xs hover:text-red-700 font-medium"
+                                  className="text-xs font-medium ombook-text-brown hover:underline"
                                 >
                                   Eliminar
                                 </button>
@@ -520,8 +518,8 @@ export default function CourseForums() {
                 )}
 
                 {/* Formulario de respuesta */}
-                <div className="p-4 bg-gray-50 border-t">
-                  <label htmlFor={`reply-${pub.id}`} className="block text-sm font-medium mb-2">Responder</label>
+                <div className="p-4 ombook-bg-light ombook-border-gray border-t">
+                  <label htmlFor={`reply-${pub.id}`} className="ombook-label">Responder</label>
                   <div className="flex gap-2">
                     <textarea
                       id={`reply-${pub.id}`}
@@ -529,12 +527,12 @@ export default function CourseForums() {
                       value={replyContent[pub.id] || ''}
                       onChange={e => setReplyContent({ ...replyContent, [pub.id]: e.target.value })}
                       rows={2}
-                      className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      className="ombook-input flex-1"
                     />
                     <button
                       onClick={() => handleCreateReply(pub.id)}
                       disabled={isSubmitting || !replyContent[pub.id]}
-                      className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm font-medium self-start"
+                      className="ombook-btn ombook-btn-primary text-sm self-start"
                     >
                       Enviar
                     </button>

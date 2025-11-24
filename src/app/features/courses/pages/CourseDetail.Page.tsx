@@ -36,7 +36,7 @@ export function meta() {
 export default function CourseDetailPage() {
   const course = useLoaderData() as Course;
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
+    <div className="min-h-screen ombook-bg-light">
 
       <div className="w-full h-56 bg-gray-200 flex items-end justify-start relative">
         <img
@@ -45,7 +45,7 @@ export default function CourseDetailPage() {
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: "center" }}
         />
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
         <div className="relative z-10 p-10">
           <h1 className="text-5xl font-bold text-white drop-shadow-lg">
             {course.nombre || "Curso"}
@@ -57,7 +57,7 @@ export default function CourseDetailPage() {
         <CourseSidebar course={course} />
         <main className="flex-1 flex flex-col">
           <div className="ml-8 mr-8">
-            <div className="bg-white rounded-xl shadow p-8">
+            <div className="ombook-card">
               <CourseContentLayout course={course} />
             </div>
           </div>

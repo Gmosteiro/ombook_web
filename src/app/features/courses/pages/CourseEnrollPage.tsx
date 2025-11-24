@@ -82,7 +82,7 @@ export default function UserEnrollPage() {
     const success = importResult && importResult.success ? "Usuario matriculado correctamente" : fetcher.data?.success ? "Usuario matriculado correctamente" : "";
 
     return (
-        <div className="max-w-3xl mx-auto">
+        <div className="ombook-container">
             <EntityCreate
                 entityName="Usuario"
                 title="Matricular a un usuario"
