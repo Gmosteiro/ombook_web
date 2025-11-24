@@ -52,10 +52,13 @@ export function NotificationProvider({ children, initialNotifications = [] }: No
 
         try {
             // Persist to backend
-            const response = await fetch('/api/notifications/mark-read', {
+            const response = await fetch('/resource/notifications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ notificationId: id }),
+                body: new URLSearchParams({
+                    intent: 'markRead',
+                    notificationId: id
+                }),
             });
 
             if (!response.ok) {
@@ -77,8 +80,10 @@ export function NotificationProvider({ children, initialNotifications = [] }: No
 
         try {
             // Persist to backend
-            const response = await fetch('/api/notifications/mark-all-read', {
+            const response = await fetch('/resource/notifications', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ intent: 'markAllRead' }),
             });
 
             if (!response.ok) {

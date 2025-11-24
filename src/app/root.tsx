@@ -31,7 +31,7 @@ export const links = () => [
 export async function loader({ request }: { request: Request }) {
   const { getUserId, getUserRole } = await import("./services/session.server");
   const { getPerfil } = await import("./routes/api.profile.server");
-  const { obtenerNotificaciones } = await import("./routes/api.notifications.server");
+  const { obtenerNotificaciones } = await import("./routes/resource.notifications.server");
 
   const userId = await getUserId(request);
   const userRole = await getUserRole(request);
