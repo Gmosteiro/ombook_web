@@ -33,12 +33,12 @@ export async function loader({ request }: { request: Request }) {
   const { getPerfil } = await import("./routes/api.profile.server");
   const { obtenerNotificaciones } = await import("./routes/api.notifications.server");
 
-  const userEmail = await getUserId(request);
+  const userId = await getUserId(request);
   const userRole = await getUserRole(request);
   let avatarUrl: string | undefined = undefined;
   let notifications: any[] = [];
 
-  if (userEmail) {
+  if (userId) {
     try {
       const perfil = await getPerfil(request);
       avatarUrl = perfil.fotoPerfil
@@ -51,22 +51,20 @@ export async function loader({ request }: { request: Request }) {
       // Si falla, deja valores por defecto
     }
   }
-  return { userEmail, userRole, avatarUrl, notifications };
+  return { userId, userRole, avatarUrl, notifications };
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { userEmail, userRole, avatarUrl, notifications } = useLoaderData() as {
-    userEmail: string;
+  const { userId, userRole, avatarUrl, notifications } = useLoaderData() as {
+    userId: string;
     userRole: User['rol']
     avatarUrl: string | undefined;
     notifications: any[];
   };
 
-
-  console.log('Layout notifications:', notifications);
   // Component to initialize polling inside NotificationProvider
   function PollingInitializer() {
-    useNotificationPolling(Boolean(userEmail));
+    useNotificationPolling(Boolean(userId));
     return null;
   }
 
@@ -82,7 +80,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <NotificationProvider initialNotifications={notifications}>
           <PollingInitializer />
           <Navbar
-            userEmail={userEmail}
             userRole={userRole}
             avatarUrl={avatarUrl}
           />

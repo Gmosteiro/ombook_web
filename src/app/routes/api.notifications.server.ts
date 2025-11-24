@@ -26,7 +26,7 @@ export async function obtenerNotificaciones(request: Request): Promise<Notificat
     }
 
     const res = await response.json();
-    console.log('Notificaciones obtenidas:', res);
+    // console.log('Notificaciones obtenidas:', res);
 
     return res;
 }

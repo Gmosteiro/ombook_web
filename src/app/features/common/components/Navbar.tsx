@@ -6,12 +6,11 @@ import { getNavbarLinks } from "../utils/Navbar";
 import { UserRole } from "~/features/auth/types";
 
 interface NavbarProps {
-    userEmail?: string;
     userRole?: UserRole;
     avatarUrl?: string;
 }
 
-export default function Navbar({ userEmail, userRole, avatarUrl }: NavbarProps) {
+export default function Navbar({ userRole, avatarUrl }: NavbarProps) {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -32,29 +31,26 @@ export default function Navbar({ userEmail, userRole, avatarUrl }: NavbarProps) 
         };
     }, [isUserMenuOpen]);
 
-    const getInitials = (email: string) => {
-        return email.split('@')[0].substring(0, 2).toUpperCase();
-    };
-
     const styles = {
         link: "text-gray-600 hover:text-blue-600 font-medium transition-colors",
     }
 
     const links = getNavbarLinks(userRole);
 
-    let isLoggedIn = Boolean(userEmail);
+    let isLoggedIn = Boolean(userRole);
 
     return (
         <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 px-6 py-4 shadow">
             <div className="flex items-center">
-
-                {/* Logo */}
                 <Link to="/" className="flex items-center space-x-2">
                     <span className="text-2xl font-semibold text-blue-700 ">Ombook</span>
                 </Link>
 
-                {/* Si no está logeado, no mostrar nada más */}
-                {!isLoggedIn ? null : (
+                <Link to="/" className="ml-10">
+                    Home
+                </Link>
+
+                {isLoggedIn && (
                     <div className="flex items-center ml-auto mr-5 space-x-8">
                         {/* Navigation Links */}
                         <div className="hidden md:flex items-center space-x-8">
@@ -69,7 +65,6 @@ export default function Navbar({ userEmail, userRole, avatarUrl }: NavbarProps) 
                             ))}
                         </div>
 
-                        {/* Campana y Perfil juntos */}
                         <div className="relative flex items-center space-x-2" ref={menuRef}>
                             <NotificationsDropdown />
                             <button
@@ -78,18 +73,12 @@ export default function Navbar({ userEmail, userRole, avatarUrl }: NavbarProps) 
                                 aria-label="Abrir menú de usuario"
                                 type="button"
                             >
-                                {avatarUrl ? (
+                                {avatarUrl && (
                                     <img
                                         src={avatarUrl}
                                         alt="Avatar"
                                         className="w-10 h-10 rounded-full object-cover"
                                     />
-                                ) : (
-                                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                                        <span className="text-white font-medium text-sm">
-                                            {getInitials(userEmail ?? "")}
-                                        </span>
-                                    </div>
                                 )}
                                 <svg
                                     className="w-4 h-4 text-gray-400 ml-1"
@@ -105,7 +94,7 @@ export default function Navbar({ userEmail, userRole, avatarUrl }: NavbarProps) 
                                     />
                                 </svg>
                             </button>
-                            {/* Dropdown Menu */}
+
                             <div
                                 className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50"
                                 style={{ display: isUserMenuOpen ? "block" : "none" }}
@@ -118,14 +107,6 @@ export default function Navbar({ userEmail, userRole, avatarUrl }: NavbarProps) 
                                     >
                                         Mi Perfil
                                     </Link>
-
-                                    {/* <Link
-                                        to="/configuracion"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                        onClick={() => setIsUserMenuOpen(false)}
-                                    >
-                                        Configuración
-                                    </Link> */}
 
                                     <hr className="my-1" />
                                     <div className="px-4 py-2">
