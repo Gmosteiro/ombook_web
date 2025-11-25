@@ -27,6 +27,7 @@ export default function CourseSidebar({ course }: Props) {
     { label: "Foro", path: `${base}/forums`, icon: <ChatBubbleLeftRightIcon className={iconClasses} /> },
     { label: "Anuncios", path: `${base}/announcements`, icon: <MegaphoneIcon className={iconClasses} /> },
     { label: "Usuarios", path: `${base}/students`, icon: <UsersIcon className={iconClasses} /> },
+    { label: "Calificaciones", path: `${base}/marks`, icon: <FolderIcon className={iconClasses} /> },
   ];
 
   // visibilidad para Gestión de Matrículas: sólo ADMIN/PROF
