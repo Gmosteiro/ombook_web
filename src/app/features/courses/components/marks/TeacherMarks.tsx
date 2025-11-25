@@ -56,7 +56,7 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
         const formData = new FormData();
         formData.append("intent", "publish");
         // Solo enviar los que tienen nota definida
-        const marksToSend = localMarks.filter(m => typeof m.nota === "number" && !isNaN(m.nota));
+        const marksToSend = localMarks.filter(m => typeof m.nota === "number" && !isNaN(m.nota) && m.estado === "BORRADOR");
         formData.append("marks", JSON.stringify(marksToSend));
         fetcher.submit(formData, { method: "POST" });
     };
