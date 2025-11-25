@@ -27,14 +27,17 @@ export async function listMarks(request: Request, cursoId: string): Promise<Mark
 
 export async function saveMarks(request: Request, cursoId: string, data: any): Promise<SaveMarksResponse> {
     const { getValidJWTToken } = await import("../services/session.server");
-
+    console.log("Saving marks data:", data);
     const res = await apiFetch(`/cursos/${cursoId}/calificaciones-finales`, {
         method: "PUT",
         secure: true,
         jwtToken: await getValidJWTToken(request),
         body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Error al guardar calificaciones");
+    if (!res.ok) {
+        console.log("Failed to save marks, status:", res.status, "body:", await res.text());
+        throw new Error("Error al guardar calificaciones");
+    }
     // Si la respuesta está vacía (204 o sin contenido), no intentes parsear JSON
     if (res.status === 204 || res.headers.get("content-length") === "0") return;
     const text = await res.text();

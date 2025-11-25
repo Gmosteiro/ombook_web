@@ -10,6 +10,7 @@ import { UsuarioListaResponse } from "../../../../routes/api.users.server";
 type Props = { teacherMarks: MarksListResponse, estudiantes: UsuarioListaResponse[] };
 
 export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
+    const [draftSaved, setDraftSaved] = useState(false);
     const fetcher = useFetcher();
     // Generar lista cruzada estudiantes + calificaciones
     const initialMarks: MarksListResponse = estudiantes.map(est => {
@@ -37,7 +38,10 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const handleSave = () => {
         const formData = new FormData();
         formData.append("intent", "save");
-        formData.append("marks", JSON.stringify(localMarks));
+        // Solo enviar los que tienen nota definida
+        const marksToSend = localMarks.filter(m => typeof m.nota === "number" && !isNaN(m.nota));
+        formData.append("marks", JSON.stringify(marksToSend));
+        setDraftSaved(false);
         fetcher.submit(formData, { method: "POST" });
     };
 
@@ -45,6 +49,9 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const handlePublish = () => {
         const formData = new FormData();
         formData.append("intent", "publish");
+        // Solo enviar los que tienen nota definida
+        const marksToSend = localMarks.filter(m => typeof m.nota === "number" && !isNaN(m.nota));
+        formData.append("marks", JSON.stringify(marksToSend));
         fetcher.submit(formData, { method: "POST" });
     };
 
@@ -52,6 +59,11 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const publishing = fetcher.state === "submitting" && fetcher.formData?.get("intent") === "publish";
     const successMsg = fetcher.data?.successMsg;
     const error = fetcher.data?.error;
+
+    // Detectar si el borrador fue guardado exitosamente
+    if (successMsg && !saving && !publishing && !draftSaved) {
+        setDraftSaved(true);
+    }
 
     return (
         <div className="ombook-card ombook-bg-light p-8 shadow-lg rounded-xl border ombook-border-green">
@@ -100,7 +112,7 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
                 </table>
             </div>
             <div className="flex gap-4 justify-start mt-2">
-                {localMarks.some(m => m.estado === "BORRADOR") && (
+                {localMarks.some(m => m.estado === "BORRADOR" && typeof m.nota === "number" && !isNaN(m.nota)) && (
                     <button
                         className="ombook-btn ombook-btn-primary px-6 py-2 text-lg ombook-hover-bg-green"
                         onClick={handleSave}
@@ -109,7 +121,7 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
                         {saving ? "Guardando..." : "Guardar Borrador"}
                     </button>
                 )}
-                {localMarks.some(m => m.estado === "BORRADOR") && (
+                {draftSaved && localMarks.some(m => m.estado === "BORRADOR" && typeof m.nota === "number" && !isNaN(m.nota)) && (
                     <button
                         className="ombook-btn ombook-btn-outline px-6 py-2 text-lg ombook-hover-bg-green"
                         onClick={handlePublish}
