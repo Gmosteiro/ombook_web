@@ -27,7 +27,7 @@ export async function listMarks(request: Request, cursoId: string): Promise<Mark
 
 export async function saveMarks(request: Request, cursoId: string, data: any): Promise<SaveMarksResponse> {
     const { getValidJWTToken } = await import("../services/session.server");
-    console.log("Saving marks data:", data);
+
     const res = await apiFetch(`/cursos/${cursoId}/calificaciones-finales`, {
         method: "PUT",
         secure: true,

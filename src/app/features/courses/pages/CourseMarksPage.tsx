@@ -51,7 +51,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
         if (intent === "publish") {
             await publishMarks(request, courseId);
-            return { successMsg: "Calificaciones publicadas y notificadas a los estudiantes." };
+            // Obtener las calificaciones actualizadas después de publicar
+            const teacherMarks = await listMarks(request, courseId);
+            return {
+                successMsg: "Calificaciones publicadas y notificadas a los estudiantes.",
+                marks: teacherMarks
+            };
         }
 
         return { error: "Intento desconocido" };

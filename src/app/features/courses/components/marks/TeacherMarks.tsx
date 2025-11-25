@@ -1,7 +1,7 @@
 
 
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
 import type { MarksListResponse } from "../../../../routes/api.marks";
 import { UsuarioListaResponse } from "../../../../routes/api.users.server";
@@ -12,6 +12,12 @@ type Props = { teacherMarks: MarksListResponse, estudiantes: UsuarioListaRespons
 export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const [draftSaved, setDraftSaved] = useState(false);
     const fetcher = useFetcher();
+    // Actualizar localMarks si el action retorna marks actualizados tras publicar
+    useEffect(() => {
+        if (fetcher.data?.marks && fetcher.formData?.get("intent") === "publish") {
+            setLocalMarks(fetcher.data.marks);
+        }
+    }, [fetcher.data, fetcher.formData]);
     // Generar lista cruzada estudiantes + calificaciones
     const initialMarks: MarksListResponse = estudiantes.map(est => {
         const mark = teacherMarks.find(m => m.estudianteId === est.id);
