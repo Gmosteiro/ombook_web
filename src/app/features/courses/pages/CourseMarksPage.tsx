@@ -1,43 +1,86 @@
-import { useOutletContext, useLoaderData, LoaderFunctionArgs } from "react-router";
+import { useLoaderData, LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { UserRole } from "~/features/auth/types";
-import { Course } from "../types/types";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import TeacherMarks from "../components/marks/TeacherMarks";
 import StudentMarks from "../components/marks/StudentMarks";
-
+//
+import { getUserRole } from "~/services/session.server";
+import { getMyMarks, listMarks, saveMarks, publishMarks } from "../../../routes/api.marks";
+import { MarksListResponse, CalificacionFinalEstudianteResponse } from "../../../routes/api.marks";
+import { getEstudiantesByCurso, UsuarioListaResponse } from "../../../routes/api.users.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-    await requireRoleLoader([UserRole.PROFESOR, UserRole.ESTUDIANTE]);
-    const { getUserRole } = await import("~/services/session.server");
+    requireRoleLoader([UserRole.PROFESOR, UserRole.ESTUDIANTE]);
     const userRole = await getUserRole(request);
-    let mark = null;
-
-    // Get courseId from params (assuming route is /courses/:id/marks)
     const courseId = params.id;
+
     if (userRole === UserRole.ESTUDIANTE && courseId) {
-        try {
-            const { getMyMark } = await import("../../../routes/api.marks");
-            mark = await getMyMark(courseId);
-        } catch (e) {
-            mark = null;
-        }
+        const studentMarks = await getMyMarks(request, courseId);
+        return { userRole, studentMarks };
     }
-    return { userRole, mark };
+    if (userRole === UserRole.PROFESOR && courseId) {
+
+        const teacherMarks = await listMarks(request, courseId);
+        const estudiantes = await getEstudiantesByCurso(request, Number(courseId));
+
+        console.log("Loader fetched teacher marks:", teacherMarks);
+
+        return { userRole, teacherMarks, estudiantes };
+    }
+    return {};
 }
 
-type Ctx = { course: Course };
+export async function action({ request, params }: ActionFunctionArgs) {
+    // Only professors may save/publish
+    const userRole = await getUserRole(request);
+    if (userRole !== UserRole.PROFESOR) {
+        return { error: "No tiene permisos para esta acción." };
+    }
+
+    const courseId = params.id;
+    if (!courseId) return { error: "Curso no especificado" };
+
+    const form = await request.formData();
+    const intent = form.get("intent");
+
+    try {
+        if (intent === "save") {
+            const marksJson = form.get("marks");
+            const marks = typeof marksJson === "string" ? JSON.parse(marksJson) : marksJson;
+            await saveMarks(request, courseId, marks);
+            return { successMsg: "Calificaciones guardadas correctamente." };
+        }
+
+        if (intent === "publish") {
+            await publishMarks(request, courseId);
+            return { successMsg: "Calificaciones publicadas y notificadas a los estudiantes." };
+        }
+
+        return { error: "Intento desconocido" };
+    } catch (e) {
+        console.error("Action error:", e);
+        return { error: "Error procesando la solicitud" };
+    }
+}
+
+type LoaderData = {
+    userRole: UserRole;
+    studentMarks?: CalificacionFinalEstudianteResponse;
+    teacherMarks?: MarksListResponse;
+    estudiantes?: UsuarioListaResponse[]
+};
 
 export default function CourseMarksPage() {
-    const { userRole, mark } = useLoaderData<{ userRole: UserRole; mark?: any }>();
-    const context = useOutletContext<Ctx>();
-    const course = context?.course;
-
+    const { userRole, studentMarks, teacherMarks, estudiantes } = useLoaderData<LoaderData>();
+    if (!studentMarks && !teacherMarks) {
+        return <div>No autorizado</div>;
+    }
     return (
         <div className="ombook-container">
             {userRole === UserRole.ESTUDIANTE ? (
-                <StudentMarks course={course} mark={mark} />
+                <StudentMarks mark={studentMarks} />
             ) : (
-                <TeacherMarks course={course} />
+                <TeacherMarks teacherMarks={teacherMarks ?? []} estudiantes={estudiantes} />
             )}
         </div>
     );

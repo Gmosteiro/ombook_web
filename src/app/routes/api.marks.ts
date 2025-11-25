@@ -1,51 +1,37 @@
 
 
+import { apiFetch } from "../features/auth/utils/methods";
+import type { components } from "../../types/openapi";
 
-// Types for API responses
-export type MarkResponse = {
-    calificacion: number;
-    comentarios?: string;
-    publicada: boolean;
-};
+// Types generados desde openapi
+export type CalificacionFinalEstudianteResponse = components["schemas"]["CalificacionFinalEstudianteResponse"];
+export type MarksListResponse = components["schemas"]["CalificacionFinalResponse"][];
+export type SaveMarksResponse = void;
+export type PublishMarksResponse = void;
 
-export type MarksListResponse = Array<{
-    usuarioId: number;
-    nombre: string;
-    apellido: string;
-    calificacion: number;
-    comentarios?: string;
-    publicada: boolean;
-}>;
-
-export type SaveMarksResponse = {
-    success: boolean;
-    message?: string;
-};
-
-export type PublishMarksResponse = {
-    success: boolean;
-    notified: boolean;
-    message?: string;
-};
-
-const API_BASE = "/cursos";
+export type MarkStatus = components["schemas"]["CalificacionFinalResponse"]["estado"];
 
 
-export async function listMarks(cursoId: string): Promise<MarksListResponse> {
-    const res = await fetch(`${API_BASE}/${cursoId}/calificaciones-finales`, {
+export async function listMarks(request: Request, cursoId: string): Promise<MarksListResponse> {
+    const { getValidJWTToken } = await import("../services/session.server");
+
+    const res = await apiFetch(`/cursos/${cursoId}/calificaciones-finales`, {
         method: "GET",
-        credentials: "include",
+        secure: true,
+        jwtToken: await getValidJWTToken(request)
     });
     if (!res.ok) throw new Error("Error al listar calificaciones");
     return res.json();
 }
 
 
-export async function saveMarks(cursoId: string, data: any): Promise<SaveMarksResponse> {
-    const res = await fetch(`${API_BASE}/${cursoId}/calificaciones-finales`, {
+export async function saveMarks(request: Request, cursoId: string, data: any): Promise<SaveMarksResponse> {
+    const { getValidJWTToken } = await import("../services/session.server");
+
+    const res = await apiFetch(`/cursos/${cursoId}/calificaciones-finales`, {
         method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
         body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Error al guardar calificaciones");
@@ -53,21 +39,33 @@ export async function saveMarks(cursoId: string, data: any): Promise<SaveMarksRe
 }
 
 
-export async function publishMarks(cursoId: string): Promise<PublishMarksResponse> {
-    const res = await fetch(`${API_BASE}/${cursoId}/calificaciones-finales/publicacion`, {
+export async function publishMarks(request: Request, cursoId: string): Promise<PublishMarksResponse> {
+    const { getValidJWTToken } = await import("../services/session.server");
+
+    const res = await apiFetch(`/cursos/${cursoId}/calificaciones-finales/publicacion`, {
         method: "POST",
-        credentials: "include",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
     });
     if (!res.ok) throw new Error("Error al publicar calificaciones");
     return res.json();
 }
 
 
-export async function getMyMark(cursoId: string): Promise<MarkResponse> {
-    const res = await fetch(`${API_BASE}/${cursoId}/calificaciones-finales/mi`, {
+export async function getMyMarks(request: Request, cursoId: string): Promise<CalificacionFinalEstudianteResponse> {
+    const { getValidJWTToken } = await import("../services/session.server");
+
+    const res = await apiFetch(`/cursos/${cursoId}/calificaciones-finales/mi`, {
         method: "GET",
-        credentials: "include",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
     });
-    if (!res.ok) throw new Error("Error al obtener mi calificación");
-    return res.json();
+    if (!res.ok) {
+        console.log("Failed to fetch my mark, status:", res.status);
+        throw new Error("Error al obtener mi calificación");
+    }
+
+    const response = await res.json();
+
+    return response;
 }
