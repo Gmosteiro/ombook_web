@@ -23,8 +23,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         const teacherMarks = await listMarks(request, courseId);
         const estudiantes = await getEstudiantesByCurso(request, Number(courseId));
 
-        console.log("Loader fetched teacher marks:", teacherMarks);
-
         return { userRole, teacherMarks, estudiantes };
     }
     return {};
@@ -80,7 +78,7 @@ export default function CourseMarksPage() {
             {userRole === UserRole.ESTUDIANTE ? (
                 <StudentMarks mark={studentMarks} />
             ) : (
-                <TeacherMarks teacherMarks={teacherMarks ?? []} estudiantes={estudiantes} />
+                <TeacherMarks teacherMarks={teacherMarks ?? []} estudiantes={estudiantes ?? []} />
             )}
         </div>
     );

@@ -35,7 +35,15 @@ export async function saveMarks(request: Request, cursoId: string, data: any): P
         body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Error al guardar calificaciones");
-    return res.json();
+    // Si la respuesta está vacía (204 o sin contenido), no intentes parsear JSON
+    if (res.status === 204 || res.headers.get("content-length") === "0") return;
+    const text = await res.text();
+    if (!text) return;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return;
+    }
 }
 
 
@@ -48,7 +56,14 @@ export async function publishMarks(request: Request, cursoId: string): Promise<P
         jwtToken: await getValidJWTToken(request),
     });
     if (!res.ok) throw new Error("Error al publicar calificaciones");
-    return res.json();
+    if (res.status === 204 || res.headers.get("content-length") === "0") return;
+    const text = await res.text();
+    if (!text) return;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return;
+    }
 }
 
 
