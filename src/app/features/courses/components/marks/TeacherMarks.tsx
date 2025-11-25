@@ -100,20 +100,24 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
                 </table>
             </div>
             <div className="flex gap-4 justify-start mt-2">
-                <button
-                    className="ombook-btn ombook-btn-primary px-6 py-2 text-lg ombook-hover-bg-green"
-                    onClick={handleSave}
-                    disabled={saving}
-                >
-                    {saving ? "Guardando..." : "Guardar Borrador"}
-                </button>
-                <button
-                    className="ombook-btn ombook-btn-outline px-6 py-2 text-lg ombook-hover-bg-green"
-                    onClick={handlePublish}
-                    disabled={publishing}
-                >
-                    {publishing ? "Publicando..." : "Publicar calificaciones"}
-                </button>
+                {localMarks.some(m => m.estado === "BORRADOR") && (
+                    <button
+                        className="ombook-btn ombook-btn-primary px-6 py-2 text-lg ombook-hover-bg-green"
+                        onClick={handleSave}
+                        disabled={saving}
+                    >
+                        {saving ? "Guardando..." : "Guardar Borrador"}
+                    </button>
+                )}
+                {localMarks.some(m => m.estado === "BORRADOR") && (
+                    <button
+                        className="ombook-btn ombook-btn-outline px-6 py-2 text-lg ombook-hover-bg-green"
+                        onClick={handlePublish}
+                        disabled={publishing}
+                    >
+                        {publishing ? "Publicando..." : "Publicar calificaciones"}
+                    </button>
+                )}
             </div>
         </div>
     );
