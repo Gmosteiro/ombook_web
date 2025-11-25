@@ -2,12 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Recurso, Tarea } from '../types/types';
 import { apiFetch } from '../../auth/utils/methods';
 
-/**
- * Hook to manage tareas and recursos for TAREA owner type.
- * - Provides tasks list and a map `resourcesByTask` keyed by tareaId
- * - Exposes functions to fetch tasks, fetch/upload/delete resources and get download URL
- * - upload/delete use `apiFetch` directly; alternatively you can submit via actions
- */
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const useRecursosPorTasks = (cursoId?: number, jwtToken?: string) => {
@@ -16,7 +11,6 @@ export const useRecursosPorTasks = (cursoId?: number, jwtToken?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-fetch tasks when cursoId and jwtToken are available
   useEffect(() => {
     if (cursoId && jwtToken) {
       getTasks();
@@ -84,14 +78,14 @@ export const useRecursosPorTasks = (cursoId?: number, jwtToken?: string) => {
       formData.append("ownerRecurso", "TAREA");
       formData.append("ownerId", tareaId.toString());
       formData.append("nombre", nombre);
-      formData.append("archivo", file); // archivo real
+      formData.append("archivo", file);
 
       const response = await fetch(
         `${API_URL}/cursos/${cursoId}/recursos`,
         {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${jwtToken}`, // NO Content-Type
+            "Authorization": `Bearer ${jwtToken}`,
           },
           body: formData,
         }
@@ -103,7 +97,6 @@ export const useRecursosPorTasks = (cursoId?: number, jwtToken?: string) => {
 
       const newRecurso: Recurso = await response.json();
 
-      // Actualizar los recursos de la tarea
       setResourcesByTask(prev => ({
         ...prev,
         [tareaId]: [...(prev[tareaId] || []), newRecurso]
@@ -185,6 +178,7 @@ export const useRecursosPorTasks = (cursoId?: number, jwtToken?: string) => {
         fechaInicio: fechaInicio || null,
         fechaFin: fechaFin || null,
       };
+      debugger
       const res = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}`, {
         method: 'PATCH',
         secure: true,
@@ -221,7 +215,6 @@ export const useRecursosPorTasks = (cursoId?: number, jwtToken?: string) => {
     }
   }, [cursoId]);
 
-  // Helpers for manual state updates (useful when mutations are done via actions)
   const addResource = useCallback((tareaId: number, recurso: Recurso) => {
     setResourcesByTask(prev => ({ ...prev, [tareaId]: [...(prev[tareaId] || []), recurso] }));
   }, []);

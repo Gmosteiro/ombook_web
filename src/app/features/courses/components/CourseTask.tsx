@@ -74,6 +74,17 @@ export default function CourseTasks() {
 
   const canEdit = (t: Tarea) => isProfesor || currentUserId === t.creador;
 
+  const getTaskStatus = (t: Tarea) => {
+    if (t.fechaFin) {
+      const now = new Date();
+      const fin = new Date(t.fechaFin);
+      if (fin < now) {
+        return 'overdue';
+      }
+    }
+    return 'pending';
+  };
+
   const toggleExpand = async (t: Tarea) => {
     const next = expandedId === t.id ? null : t.id;
     setExpandedId(next);
@@ -161,7 +172,7 @@ export default function CourseTasks() {
         <h1 className="text-2xl font-semibold">Tareas</h1>
         {isProfesor && (
           <div>
-            <button onClick={() => setShowNewTask(s => !s)} className="px-3 py-1 bg-blue-600 text-white rounded">
+            <button onClick={() => setShowNewTask(s => !s)} className={showNewTask ? "ombook-btn ombook-btn-secondary" : "ombook-btn ombook-btn-primary"}>
               {showNewTask ? 'Cancelar' : 'Crear Tarea'}
             </button>
           </div>
@@ -216,8 +227,8 @@ export default function CourseTasks() {
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setShowNewTask(false)} className="px-3 py-1 border rounded">Cancelar</button>
-              <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded">Crear</button>
+              <button type="button" onClick={() => setShowNewTask(false)} className="ombook-btn ombook-btn-secondary">Cancelar</button>
+              <button type="submit" className="ombook-btn ombook-btn-primary">Crear</button>
             </div>
           </div>
         </form>
@@ -226,32 +237,34 @@ export default function CourseTasks() {
       <div className="space-y-4">
         {tasks.length === 0 && <div className="text-gray-500">No hay tareas.</div>}
         {tasks.map((t: Tarea) => (
-          <div key={t.id} className="bg-white rounded-md shadow overflow-hidden">
+          <div key={t.id} className={`bg-white rounded-md shadow overflow-hidden cursor-pointer ${getTaskStatus(t) === 'overdue' ? 'ombook-border-brown border-l-4' : ''}`} onClick={() => toggleExpand(t)}>
             <div className="p-4 flex justify-between items-start">
-              <div>
-                <div className="text-lg font-semibold">{t.titulo}</div>
-                <div className="text-xs text-gray-500">{t.fechaCreacion ? new Date(t.fechaCreacion).toLocaleString() : ''}</div>
-                <p className="text-sm text-gray-700 mt-2 line-clamp-2">{t.descripcion}</p>
-              </div>
+               <div>
+                 <div className="flex items-center gap-2">
+                   <div className="text-lg font-semibold">{t.titulo}</div>
+                   <span className={`ombook-badge ${getTaskStatus(t) === 'overdue' ? 'ombook-badge-brown' : 'ombook-badge-green'}`}>{getTaskStatus(t) === 'overdue' ? 'Vencida' : 'Pendiente'}</span>
+                 </div>
+                 <div className="text-xs text-gray-500">{t.fechaCreacion ? new Date(t.fechaCreacion).toLocaleString() : ''}</div>
+                 <p className="text-sm text-gray-700 mt-2 line-clamp-2">{t.descripcion}</p>
+               </div>
               <div className="flex flex-col items-end gap-2">
                 <div className="flex gap-2">
                   {canEdit(t) && (
                     <>
-                      <button onClick={() => editingId === t.id ? setEditingId(null) : startEditing(t)} className="text-blue-600 text-sm">{editingId === t.id ? 'Cancelar' : 'Editar'}</button>
+                      <button onClick={(e) => { e.stopPropagation(); editingId === t.id ? setEditingId(null) : startEditing(t); }} className="ombook-text-green text-sm">{editingId === t.id ? 'Cancelar' : 'Editar'}</button>
                     </>
                   )}
                   {isProfesor ? (
-                    <Link to={`tasks/${t.id}/submissions`} className="px-3 py-1 bg-gray-100 rounded text-sm">Detalles de Entregas</Link>
+                    <Link to={`tasks/${t.id}/submissions`} onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm">Detalles de Entregas</Link>
                   ) : (
-                    <button className="px-3 py-1 bg-gray-100 rounded text-sm" disabled>Entregar</button>
+                    <button onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm" disabled>Entregar</button>
                   )}
                 </div>
-                <button onClick={() => toggleExpand(t)} className="text-sm text-gray-500">{expandedId === t.id ? 'Cerrar' : 'Ver detalles'}</button>
               </div>
             </div>
 
             {editingId === t.id && (
-              <form onSubmit={handleUpdateTask} className="p-4 border-t bg-gray-50">
+              <form onSubmit={(e) => { e.stopPropagation(); handleUpdateTask(e); }} onClick={(e) => e.stopPropagation()} className="p-4 border-t bg-gray-50">
                 <div className="space-y-2">
                   <div>
                     <label htmlFor={`edit-titulo-${t.id}`} className="block text-sm font-medium">Título</label>
@@ -297,15 +310,15 @@ export default function CourseTasks() {
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 mt-2">
-                    <button type="button" onClick={() => setEditingId(null)} className="px-3 py-1 border rounded">Cancelar</button>
-                    <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded">Guardar</button>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="ombook-btn ombook-btn-secondary">Cancelar</button>
+                    <button type="submit" className="ombook-btn ombook-btn-primary">Guardar</button>
                   </div>
                 </div>
               </form>
             )}
 
             {expandedId === t.id && (
-              <div className="p-4 border-t space-y-4">
+              <div className="p-4 border-t space-y-4" onClick={(e) => e.stopPropagation()}>
                 <div>
                   <div className="text-sm font-medium">Descripción</div>
                   <div className="text-sm text-gray-700 whitespace-pre-line mt-1">{t.descripcion}</div>
@@ -323,9 +336,9 @@ export default function CourseTasks() {
                       <div key={r.id} className="flex justify-between items-center bg-white border rounded p-2">
                         <div className="text-sm">{r.nombreOriginal}</div>
                         <div className="flex gap-2">
-                          <button onClick={() => handleDownloadResource(r)} className="text-blue-600 text-sm">Descargar</button>
+                          <button onClick={(e) => { e.stopPropagation(); handleDownloadResource(r); }} className="ombook-text-green text-sm">Descargar</button>
                           {isProfesor && (
-                            <button onClick={() => handleDeleteResource(r)} className="text-red-600 text-sm">Eliminar</button>
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteResource(r); }} className="ombook-text-brown-dark text-sm">Eliminar</button>
                           )}
                         </div>
                       </div>
@@ -334,7 +347,7 @@ export default function CourseTasks() {
 
                   {isProfesor && (
                     <div className="mt-3 border-t pt-3">
-                      <button onClick={() => setShowUploadFor(t.id)} className="px-3 py-1 bg-green-600 text-white rounded">Subir recurso</button>
+                      <button onClick={(e) => { e.stopPropagation(); setShowUploadFor(t.id); }} className="ombook-btn ombook-btn-primary">Subir recurso</button>
                       <UploadResourceDialog
                         isOpen={showUploadFor === t.id}
                         onClose={() => setShowUploadFor(null)}
@@ -351,5 +364,7 @@ export default function CourseTasks() {
     </div>
   );
 }
+
+
 
 
