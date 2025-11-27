@@ -1,4 +1,4 @@
-import { useLoaderData, LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
+import { useLoaderData, LoaderFunctionArgs, ActionFunctionArgs, useOutletContext, useFetcher } from "react-router";
 import { UserRole } from "~/features/auth/types";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import TeacherMarks from "../components/marks/TeacherMarks";
@@ -8,6 +8,8 @@ import { getUserRole } from "~/services/session.server";
 import { getMyMarks, listMarks, saveMarks, publishMarks } from "../../../routes/api.marks";
 import { MarksListResponse, CalificacionFinalEstudianteResponse } from "../../../routes/api.marks";
 import { getEstudiantesByCurso, UsuarioListaResponse } from "../../../routes/api.users.server";
+import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
+import { Course, ImportMarksData } from "../types/types";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
     requireRoleLoader([UserRole.PROFESOR, UserRole.ESTUDIANTE]);
@@ -73,11 +75,42 @@ type LoaderData = {
     estudiantes?: UsuarioListaResponse[]
 };
 
+type Ctx = { course: Course };
+
+
 export default function CourseMarksPage() {
     const { userRole, studentMarks, teacherMarks, estudiantes } = useLoaderData<LoaderData>();
+    const context = useOutletContext<Ctx>();
+    const course = context?.course;
+    const importFetcher = useFetcher<ImportMarksData>();
+
+
     if (!studentMarks && !teacherMarks) {
         return <div>No autorizado</div>;
     }
+
+    const marksImport = createCsvImportHandler({
+        allowedRoles: [UserRole.PROFESOR],
+        backendEndpoint: `/cursos/${course.id}/calificaciones-finales/importacion`,
+        successMessage: "Estudiantes Matriculados Correctamente",
+    });
+
+
+    const handleImportMarks = async (file: File) => {
+        try {
+            const { payload, action } = await marksImport(file);
+
+            importFetcher.submit(payload, {
+                method: "POST",
+                action,
+                encType: "application/json"
+            });
+        } catch (error) {
+            console.error('Error preparing import:', error);
+        }
+    };
+
+
     return (
         <div className="ombook-container">
             {userRole === UserRole.ESTUDIANTE ? (

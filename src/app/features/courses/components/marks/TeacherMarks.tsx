@@ -2,16 +2,78 @@
 
 
 import { useState, useEffect } from "react";
+import { useParams } from "react-router";
+import { createCsvImportHandler } from "../../../common/utils/csvImportHelper";
+import { useFetcher } from "react-router";
+import { useOutletContext } from "react-router";
+import { Course } from "../../pages/types/types";
+import { useRef } from "react";
 import { useFetcher } from "react-router";
 import type { MarksListResponse } from "../../../../routes/api.marks";
 import { UsuarioListaResponse } from "../../../../routes/api.users.server";
+import { UserRole } from "../../../auth/types";
 // MarksListResponse = CalificacionFinalResponse[]
 
 type Props = { teacherMarks: MarksListResponse, estudiantes: UsuarioListaResponse[] };
 
-export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
-    const [draftSaved, setDraftSaved] = useState(false);
+    const { id: courseId } = useParams<{ id: string }>();
     const fetcher = useFetcher();
+    const importFetcher = useFetcher();
+    const context = useOutletContext<{ course: Course }>();
+    const course = context?.course;
+    const [csvResult, setCsvResult] = useState<string | null>(null);
+
+    // Usar el import masivo si el contexto de curso existe
+    const marksImport = createCsvImportHandler({
+        allowedRoles: [UserRole.PROFESOR],
+        backendEndpoint: course ? `/matricula/alta/masiva?cursoId=${course.id}` : `/cursos/${courseId}/calificaciones-finales/importacion`,
+        successMessage: course ? "Estudiantes Matriculados Correctamente" : "Calificaciones importadas"
+    });
+
+    const handleCsvImport = async (file: File) => {
+        if (!file) return;
+        try {
+            const { payload, action } = await marksImport(file);
+            importFetcher.submit(payload, {
+                method: "POST",
+                action,
+                encType: "application/json"
+            });
+            setCsvResult("Procesando archivo...");
+        } catch (err) {
+            console.error("Error al importar CSV:", err);
+            setCsvResult("Error al procesar el archivo");
+        }
+    };
+
+    useEffect(() => {
+        if (fetcher.data?.message && fetcher.formData?.get("intent") === undefined) {
+            setCsvResult(fetcher.data.message);
+        } else if (fetcher.data?.error && fetcher.formData?.get("intent") === undefined) {
+            setCsvResult(fetcher.data.error);
+        }
+    }, [fetcher.data, fetcher.formData]);
+
+    useEffect(() => {
+        if (csvResult && csvResult.toLowerCase().includes("importadas")) {
+            setLocalMarks(
+                estudiantes.map(est => {
+                    const mark = teacherMarks.find(m => m.estudianteId === est.id);
+                    return mark ?? {
+                        estudianteId: est.id,
+                        nombreEstudiante: `${est.nombre} ${est.apellido}`,
+                        nota: undefined,
+                        observacion: "",
+                        estado: "BORRADOR"
+                    };
+                })
+            );
+        }
+    }, [csvResult, teacherMarks, estudiantes]);
+    // Ref para el input file
+    const csvInputRef = useRef<HTMLInputElement>(null);
+    const [draftSaved, setDraftSaved] = useState(false);
+    // Removed duplicate fetcher declaration
     // Actualizar localMarks si el action retorna marks actualizados tras publicar
     useEffect(() => {
         if (fetcher.data?.marks && fetcher.formData?.get("intent") === "publish") {
@@ -73,7 +135,39 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
 
     return (
         <div className="ombook-card ombook-bg-light p-8 shadow-lg rounded-xl border ombook-border-green">
-            <h2 className="ombook-heading ombook-heading-md mb-6 text-center ombook-text-green">Calificaciones finales</h2>
+            <div className="flex items-center mb-6">
+                {localMarks.some(m => typeof m.nota !== "number" || isNaN(m.nota)) && (
+                    <button
+                        type="button"
+                        className="ombook-btn ombook-btn-outline px-4 py-2 mr-4 ombook-hover-bg-green"
+                        onClick={() => csvInputRef.current?.click()}
+                    >
+                        Importar CSV
+                    </button>
+                )}
+                <h2 className="ombook-heading ombook-heading-md text-center ombook-text-green flex-1">Calificaciones finales</h2>
+            </div>
+            <div className="mb-2">
+                <input
+                    type="file"
+                    accept=".csv"
+                    ref={csvInputRef}
+                    onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleCsvImport(file);
+                    }}
+                    style={{ display: "none" }}
+                />
+                <a
+                    href="/plantillas/calificaciones.csv"
+                    download
+                    className="ombook-link ombook-text-green underline ml-2"
+                    style={{ display: "inline-block", marginTop: "8px" }}
+                >
+                    Descargar modelo CSV
+                </a>
+                {csvResult && <div className="ombook-alert ombook-alert-info mt-2">{csvResult}</div>}
+            </div>
             {successMsg && <div className="ombook-alert ombook-alert-success mb-4 text-center font-semibold">{successMsg}</div>}
             {error && <div className="ombook-alert ombook-alert-info mb-4 text-center font-semibold">{error}</div>}
             <div className="overflow-x-auto">
