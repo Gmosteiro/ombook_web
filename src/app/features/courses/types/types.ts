@@ -70,6 +70,11 @@ export interface CreateCourseResponse {
   data?: Course;
 }
 
+export type ImportMarksData = {
+  csvFile: File;
+  cursoId: number;
+};
+
 export type EnrollMasivaUserData = {
   csvFile: File;
   cursoId: number;
