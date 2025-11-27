@@ -7,7 +7,7 @@ import { getUserRole } from "~/services/session.server";
 import { getMyMarks, listMarks, saveMarks, publishMarks } from "../../../routes/api.marks";
 import { MarksListResponse, CalificacionFinalEstudianteResponse } from "../../../routes/api.marks";
 import { getEstudiantesByCurso, UsuarioListaResponse } from "../../../routes/api.users.server";
-import { fileToBase64 } from "../../common/utils/csvImportHelper";
+
 import { apiFetch } from "~/features/auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
 
@@ -98,13 +98,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
                 }
             );
 
-            console.log("Import response status:" + response.status, "Body: " + await response.clone().text());
-
             if (!response.ok) {
                 return { error: "Error importando el archivo CSV." };
             }
 
-            return { successMsg: "Importación realizada correctamente." };
+            return { successMsg: await response.text() };
         }
 
         return { error: "Intento desconocido" };
@@ -124,31 +122,6 @@ type LoaderData = {
 export default function CourseMarksPage() {
     const { userRole, studentMarks, teacherMarks, estudiantes } = useLoaderData<LoaderData>();
 
-    // El submit se hace al action de la página usando FormData
-    const handleImportMarks = async (file: File) => {
-        try {
-            const base64Content = await fileToBase64(file);
-
-            // Usamos FormData para enviar al action
-            const formData = new FormData();
-            formData.append("intent", "import");
-            formData.append("fileName", file.name);
-            formData.append("fileSize", file.size.toString());
-            formData.append("fileType", file.type);
-            formData.append("fileContent", base64Content);
-
-            // Usamos fetch para enviar al action de la ruta actual
-            await fetch(window.location.pathname, {
-                method: "POST",
-                body: formData,
-            });
-
-            // Puedes agregar lógica para mostrar mensajes de éxito/error si lo necesitas
-        } catch (error) {
-            // Maneja el error si lo necesitas
-        }
-    };
-
     return (
         <div className="ombook-container">
             {userRole === UserRole.ESTUDIANTE ? (
@@ -157,7 +130,6 @@ export default function CourseMarksPage() {
                 <TeacherMarks
                     teacherMarks={teacherMarks ?? []}
                     estudiantes={estudiantes ?? []}
-                    handleImportMarks={handleImportMarks}
                 />
             )}
         </div>

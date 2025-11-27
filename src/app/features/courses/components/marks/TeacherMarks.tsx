@@ -6,7 +6,6 @@ import { UsuarioListaResponse } from "../../../../routes/api.users.server";
 type Props = {
     teacherMarks: MarksListResponse;
     estudiantes: UsuarioListaResponse[];
-    handleImportMarks: (file: File) => void;
 };
 
 function getInitialMarks(estudiantes: UsuarioListaResponse[], teacherMarks: MarksListResponse): MarksListResponse {
@@ -24,7 +23,7 @@ function getInitialMarks(estudiantes: UsuarioListaResponse[], teacherMarks: Mark
     });
 }
 
-export default function TeacherMarks({ teacherMarks, estudiantes, handleImportMarks }: Props) {
+export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const fetcher = useFetcher();
     const csvInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,8 +48,11 @@ export default function TeacherMarks({ teacherMarks, estudiantes, handleImportMa
     // Mensajes de resultado de importación CSV
     useEffect(() => {
         if (fetcher.data?.message && !fetcher.formData?.get("intent")) {
+
+            debugger
             setCsvResult(fetcher.data.message);
         } else if (fetcher.data?.error && !fetcher.formData?.get("intent")) {
+            debugger
             setCsvResult(fetcher.data.error);
         }
     }, [fetcher.data]);
@@ -90,11 +92,31 @@ export default function TeacherMarks({ teacherMarks, estudiantes, handleImportMa
         fetcher.submit(formData, { method: "POST" });
     }, [localMarks, fetcher]);
 
+    // Nueva función para importar usando fetcher
+    const handleImportMarks = useCallback(async (file: File) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64Content = reader.result as string;
+            const formData = new FormData();
+            formData.append("intent", "import");
+            formData.append("fileName", file.name);
+            formData.append("fileSize", file.size.toString());
+            formData.append("fileType", file.type);
+            formData.append("fileContent", base64Content);
+            fetcher.submit(formData, { method: "POST" });
+        };
+        reader.readAsDataURL(file);
+    }, [fetcher]);
+
     // Estados de envío
     const saving = fetcher.state === "submitting" && fetcher.formData?.get("intent") === "save";
     const publishing = fetcher.state === "submitting" && fetcher.formData?.get("intent") === "publish";
-    const successMsg = fetcher.data?.successMsg;
-    const error = fetcher.data?.error;
+
+
+    if (fetcher.data?.successMsg) {
+        debugger
+    }
+
 
     return (
         <div className="ombook-card ombook-bg-light p-8 shadow-lg rounded-xl border ombook-border-green">
@@ -135,16 +157,14 @@ export default function TeacherMarks({ teacherMarks, estudiantes, handleImportMa
                     <div className="ombook-alert ombook-alert-info mt-2">{csvResult}</div>
                 )}
             </div>
-            {successMsg && (
-                <div className="ombook-alert ombook-alert-success mb-4 text-center font-semibold">
-                    {successMsg}
-                </div>
-            )}
-            {error && (
-                <div className="ombook-alert ombook-alert-info mb-4 text-center font-semibold">
-                    {error}
-                </div>
-            )}
+            <div className="mb-2">
+                {fetcher.data?.successMsg && (
+                    <div className="ombook-alert ombook-alert-success mt-2">{fetcher.data.successMsg}</div>
+                )}
+                {fetcher.data?.error && (
+                    <div className="ombook-alert ombook-alert-info mt-2">{fetcher.data.error}</div>
+                )}
+            </div>
             <div className="overflow-x-auto">
                 <table className="w-full mb-6 border-separate border-spacing-y-2">
                     <thead>
@@ -175,8 +195,8 @@ export default function TeacherMarks({ teacherMarks, estudiantes, handleImportMa
                                             handleChange(idx, "nota", parseFloat(e.target.value))
                                         }
                                         className={`ombook-input w-20 text-center ombook-border-green ${m.estado === "PUBLICADA"
-                                                ? "bg-gray-200 cursor-not-allowed"
-                                                : ""
+                                            ? "bg-gray-200 cursor-not-allowed"
+                                            : ""
                                             }`}
                                         disabled={m.estado === "PUBLICADA"}
                                     />
@@ -189,16 +209,16 @@ export default function TeacherMarks({ teacherMarks, estudiantes, handleImportMa
                                             handleChange(idx, "observacion", e.target.value)
                                         }
                                         className={`ombook-input w-full text-center ${m.estado === "PUBLICADA"
-                                                ? "ombook-border-green bg-gray-200 cursor-not-allowed"
-                                                : ""
+                                            ? "ombook-border-green bg-gray-200 cursor-not-allowed"
+                                            : ""
                                             }`}
                                         disabled={m.estado === "PUBLICADA"}
                                     />
                                 </td>
                                 <td
                                     className={`px-4 py-2 text-center font-semibold ${m.estado === "PUBLICADA"
-                                            ? "ombook-text-green"
-                                            : "ombook-text-gray"
+                                        ? "ombook-text-green"
+                                        : "ombook-text-gray"
                                         }`}
                                 >
                                     {m.estado}
