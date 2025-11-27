@@ -23,6 +23,25 @@ function getInitialMarks(estudiantes: UsuarioListaResponse[], teacherMarks: Mark
     });
 }
 
+const formatResponseMessage = (message: string) => {
+    try {
+        const data = JSON.parse(message);
+        let summary = `Importados: ${data.correctos} / ${data.total}`;
+        if (data.errores > 0 && Array.isArray(data.detalleErrores)) {
+            summary += "\nErrores:";
+            summary += data.detalleErrores
+                .map(
+                    (err: { linea: number; motivo: string }) =>
+                        `\n• Línea ${err.linea}: ${err.motivo}`
+                )
+                .join("");
+        }
+        return summary;
+    } catch {
+        return message;
+    }
+}
+
 export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const fetcher = useFetcher();
     const csvInputRef = useRef<HTMLInputElement>(null);
@@ -30,7 +49,6 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const [localMarks, setLocalMarks] = useState<MarksListResponse>(() =>
         getInitialMarks(estudiantes, teacherMarks)
     );
-    const [csvResult, setCsvResult] = useState<string | null>(null);
     const [draftSaved, setDraftSaved] = useState(false);
 
     // Actualiza localMarks si teacherMarks o estudiantes cambian
@@ -42,18 +60,6 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     useEffect(() => {
         if (fetcher.data?.marks && fetcher.formData?.get("intent") === "publish") {
             setLocalMarks(fetcher.data.marks);
-        }
-    }, [fetcher.data]);
-
-    // Mensajes de resultado de importación CSV
-    useEffect(() => {
-        if (fetcher.data?.message && !fetcher.formData?.get("intent")) {
-
-            debugger
-            setCsvResult(fetcher.data.message);
-        } else if (fetcher.data?.error && !fetcher.formData?.get("intent")) {
-            debugger
-            setCsvResult(fetcher.data.error);
         }
     }, [fetcher.data]);
 
@@ -113,10 +119,7 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
     const publishing = fetcher.state === "submitting" && fetcher.formData?.get("intent") === "publish";
 
 
-    if (fetcher.data?.successMsg) {
-        debugger
-    }
-
+    const importResponse = fetcher.data?.successMsg && formatResponseMessage(fetcher.data?.successMsg)
 
     return (
         <div className="ombook-card ombook-bg-light p-8 shadow-lg rounded-xl border ombook-border-green">
@@ -153,13 +156,10 @@ export default function TeacherMarks({ teacherMarks, estudiantes }: Props) {
                 >
                     Descargar modelo CSV
                 </a>
-                {csvResult && (
-                    <div className="ombook-alert ombook-alert-info mt-2">{csvResult}</div>
-                )}
             </div>
             <div className="mb-2">
-                {fetcher.data?.successMsg && (
-                    <div className="ombook-alert ombook-alert-success mt-2">{fetcher.data.successMsg}</div>
+                {importResponse && (
+                    <div className="ombook-alert ombook-alert-success mt-2">{importResponse}</div>
                 )}
                 {fetcher.data?.error && (
                     <div className="ombook-alert ombook-alert-info mt-2">{fetcher.data.error}</div>
