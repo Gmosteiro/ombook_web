@@ -100,6 +100,8 @@ export default function CourseMarksPage() {
         try {
             const { payload, action } = await marksImport(file);
 
+            console.log('Import payload prepared:', payload, 'Action URL:', action);
+
             importFetcher.submit(payload, {
                 method: "POST",
                 action,
@@ -116,7 +118,11 @@ export default function CourseMarksPage() {
             {userRole === UserRole.ESTUDIANTE ? (
                 <StudentMarks mark={studentMarks} />
             ) : (
-                <TeacherMarks teacherMarks={teacherMarks ?? []} estudiantes={estudiantes ?? []} />
+                <TeacherMarks
+                    teacherMarks={teacherMarks ?? []}
+                    estudiantes={estudiantes ?? []}
+                    handleImportMarks={handleImportMarks}
+                />
             )}
         </div>
     );
