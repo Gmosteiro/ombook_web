@@ -126,3 +126,4 @@ export interface Tarea {
 
 // Interfaces para entregas
 export type Entrega = components["schemas"]["EntregaListadoResponse"];
+export type EntregaDetalle = components["schemas"]["EntregaDetalleResponse"];

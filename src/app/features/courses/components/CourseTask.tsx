@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLoaderData, useOutletContext, Link } from "react-router";
 import { getValidJWTToken, getUserRole } from "~/services/session.server";
 import { UploadResourceDialog } from "./UploadResourceDialog";
+import { SubmissionDetailModal } from "./SubmissionDetailModal";
 import useRecursosPorTasks from "../hooks/useRecursosPorTasks";
 import type { Course, Tarea, Recurso, Entrega } from "../types/types";
 
@@ -34,7 +35,7 @@ export default function CourseTasks() {
 
   // Hook that centralizes tareas and recursos per tarea
   const recursosHook = useRecursosPorTasks(course?.id as number | undefined, jwtToken || undefined);
-  const { tasks, resourcesByTask, getRecursosForTask, removeResource, getRecursoUrl, uploadRecursoForTask, deleteRecursoForTask, createTask, updateTask } = recursosHook;
+  const { tasks, resourcesByTask, getRecursosForTask, getRecursoUrl, uploadRecursoForTask, deleteRecursoForTask, createTask, updateTask } = recursosHook;
 
   // NOTE: upload/delete action handlers are registered below (after state declarations)
 
@@ -46,6 +47,10 @@ export default function CourseTasks() {
   const [showUploadFor, setShowUploadFor] = useState<number | null>(null);
   const [submissionsByTask, setSubmissionsByTask] = useState<Record<number, Entrega[]>>({});
   const [showUploadSubmissionFor, setShowUploadSubmissionFor] = useState<number | null>(null);
+  const [uploadSubmissionError, setUploadSubmissionError] = useState<string>('');
+  const [showSubmissionDetailModal, setShowSubmissionDetailModal] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<Entrega | null>(null);
+  const [selectedTareaId, setSelectedTareaId] = useState<number | null>(null);
 
   // Form states
   const [newTaskData, setNewTaskData] = useState({
@@ -133,6 +138,15 @@ export default function CourseTasks() {
   const handleUploadSubmission = async (file: File) => {
     const tareaId = showUploadSubmissionFor;
     if (!tareaId || !course?.id) return;
+
+    // Validate file extension
+    const allowedExtensions = ['.txt', '.doc', '.docx', '.pdf', '.zip', '.rar'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    if (!allowedExtensions.includes(fileExtension)) {
+      setUploadSubmissionError('Formato de archivo no permitido. Los formatos permitidos son: .txt, .doc, .docx, .pdf, .zip, .rar');
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('archivo', file);
@@ -148,13 +162,20 @@ export default function CourseTasks() {
       });
 
       if (response.ok) {
+        setUploadSubmissionError('');
         setShowUploadSubmissionFor(null);
         getSubmissionsForTask(tareaId);
       } else {
-        console.error('Error uploading submission:', response.statusText);
+        try {
+          const errorData = await response.json();
+          setUploadSubmissionError(errorData.message || 'Error al subir la entrega');
+        } catch {
+          setUploadSubmissionError('Error al subir la entrega');
+        }
       }
     } catch (err) {
       console.error('Error uploading submission:', err);
+      setUploadSubmissionError('Error de conexión al subir la entrega');
     }
   };
 
@@ -435,7 +456,7 @@ export default function CourseTasks() {
                       {(submissionsByTask[t.id] || []).length === 0 ? (
                         <div>
                           <div className="text-gray-500">No hay entregas</div>
-                          <button onClick={(e) => { e.stopPropagation(); setShowUploadSubmissionFor(t.id); }} className="ombook-btn ombook-btn-primary mt-2">Entregar</button>
+                          <button onClick={(e) => { e.stopPropagation(); setUploadSubmissionError(''); setShowUploadSubmissionFor(t.id); }} className="ombook-btn ombook-btn-primary mt-2">Entregar</button>
                         </div>
                       ) : (
                         (submissionsByTask[t.id] || []).map(entrega => (
@@ -445,7 +466,7 @@ export default function CourseTasks() {
                             {entrega.calificacion !== undefined && <div className="text-sm">Calificación: {entrega.calificacion}</div>}
                             <div className="flex gap-2 mt-2">
                               <button onClick={(e) => { e.stopPropagation(); handleDownloadSubmission(t.id, entrega); }} className="ombook-text-green text-sm">Descargar</button>
-                              <button className="ombook-text-blue text-sm">Ver más detalles</button>
+                              <button onClick={(e) => { e.stopPropagation(); setSelectedSubmission(entrega); setSelectedTareaId(t.id); setShowSubmissionDetailModal(true); }} className="ombook-text-blue text-sm">Ver más detalles</button>
                             </div>
                           </div>
                         ))
@@ -458,12 +479,24 @@ export default function CourseTasks() {
                     onUpload={(nombre, file) => handleUploadSubmission(file)}
                     showNombre={false}
                   />
+                  {uploadSubmissionError && <div className="text-red-500 text-sm mt-2">{uploadSubmissionError}</div>}
                 </div>
               </div>
             )}
           </div>
         ))}
       </div>
+
+      {showSubmissionDetailModal && selectedSubmission && (
+        <SubmissionDetailModal
+          isOpen={showSubmissionDetailModal}
+          onClose={() => setShowSubmissionDetailModal(false)}
+          submission={selectedSubmission}
+          cursoId={course?.id}
+          tareaId={selectedTareaId || undefined}
+          jwtToken={jwtToken}
+        />
+      )}
     </div>
   );
 }
