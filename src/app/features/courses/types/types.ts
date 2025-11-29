@@ -123,3 +123,6 @@ export interface Tarea {
   cursoId?: number;
   creador?: number; // user id
 }
+
+// Interfaces para entregas
+export type Entrega = components["schemas"]["EntregaListadoResponse"];

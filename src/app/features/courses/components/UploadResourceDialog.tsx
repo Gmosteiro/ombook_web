@@ -4,20 +4,21 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onUpload: (nombre: string, file: File) => Promise<void>;
+  showNombre?: boolean;
 }
 
-export const UploadResourceDialog = ({ isOpen, onClose, onUpload }: Props) => {
+export const UploadResourceDialog = ({ isOpen, onClose, onUpload, showNombre = true }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [nombre, setNombre] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !nombre) return;
+    if (!file || (showNombre && !nombre)) return;
 
     setIsUploading(true);
     try {
-      await onUpload(nombre, file);
+      await onUpload(showNombre ? nombre : '', file);
       onClose();
     } finally {
       setIsUploading(false);
@@ -48,20 +49,22 @@ export const UploadResourceDialog = ({ isOpen, onClose, onUpload }: Props) => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-900">Subir Recurso</h2>
-              
-              <div>
-                <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                  Nombre del recurso
-                </label>
-                <input
-                  type="text"
-                  id="nombre"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  required
-                />
-              </div>
+
+              {showNombre && (
+                <div>
+                  <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                    Nombre del recurso
+                  </label>
+                  <input
+                    type="text"
+                    id="nombre"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    required
+                  />
+                </div>
+              )}
 
               <div>
                 <label htmlFor="archivo" className="block text-sm font-medium text-gray-700">
@@ -79,7 +82,7 @@ export const UploadResourceDialog = ({ isOpen, onClose, onUpload }: Props) => {
               <div className="mt-5 flex flex-row-reverse gap-3">
                 <button
                   type="submit"
-                  disabled={isUploading || !file || !nombre}
+                  disabled={isUploading || !file || (showNombre && !nombre)}
                   className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUploading ? (

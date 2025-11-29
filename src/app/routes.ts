@@ -20,7 +20,9 @@ const routes: RouteConfig = [
     // Course Detail
     route("/courses/:id", "./features/courses/pages/CourseDetail.Page.tsx", [
         route("general", "./features/courses/components/general/CourseGeneral.tsx"),
-        route("tasks", "./features/courses/components/CourseTask.tsx"),
+        route("tasks", "./features/courses/components/CourseTask.tsx", [
+            route(":tareaId/submissions", "./features/courses/components/CourseTaskSubmissions.tsx"),
+        ]),
         route("forums", "./features/courses/components/CourseForums.tsx"),
         route("announcements", "./features/courses/components/CourseAnnouncements.tsx"),
         route("students", "./features/courses/components/CourseStudents.tsx"),

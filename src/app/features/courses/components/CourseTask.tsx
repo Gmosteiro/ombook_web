@@ -3,7 +3,7 @@ import { useLoaderData, useOutletContext, Link } from "react-router";
 import { getValidJWTToken, getUserRole } from "~/services/session.server";
 import { UploadResourceDialog } from "./UploadResourceDialog";
 import useRecursosPorTasks from "../hooks/useRecursosPorTasks";
-import type { Course, Tarea, Recurso } from "../types/types";
+import type { Course, Tarea, Recurso, Entrega } from "../types/types";
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
   const { id } = params;
@@ -44,6 +44,8 @@ export default function CourseTasks() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [showNewTask, setShowNewTask] = useState(false);
   const [showUploadFor, setShowUploadFor] = useState<number | null>(null);
+  const [submissionsByTask, setSubmissionsByTask] = useState<Record<number, Entrega[]>>({});
+  const [showUploadSubmissionFor, setShowUploadSubmissionFor] = useState<number | null>(null);
 
   // Form states
   const [newTaskData, setNewTaskData] = useState({
@@ -92,9 +94,29 @@ export default function CourseTasks() {
       // load recursos for this tarea via hook
       try {
         await getRecursosForTask(t.id);
+        await getSubmissionsForTask(t.id);
       } catch (err) {
         console.error('Error fetching recursos for tarea', t.id, err);
       }
+    }
+  };
+
+  const getSubmissionsForTask = async (tareaId: number) => {
+    if (!course?.id) return;
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/cursos/${course.id}/tareas/${tareaId}/entregas`, {
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`,
+        },
+      });
+      if (response.ok) {
+        const data: Entrega[] = await response.json();
+        setSubmissionsByTask(prev => ({ ...prev, [tareaId]: data }));
+      } else {
+        console.error('Error fetching submissions:', response.statusText);
+      }
+    } catch (err) {
+      console.error('Error fetching submissions:', err);
     }
   };
 
@@ -108,6 +130,34 @@ export default function CourseTasks() {
     }
   };
 
+  const handleUploadSubmission = async (file: File) => {
+    const tareaId = showUploadSubmissionFor;
+    if (!tareaId || !course?.id) return;
+    try {
+      const formData = new FormData();
+      formData.append('archivo', file);
+      console.log("Upload → curso:", course?.id, "tarea:", tareaId, "file:", file);
+      console.log("URL usada:", `${import.meta.env.VITE_API_URL}/cursos/${course?.id}/tareas/${tareaId}/entregas`);
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/cursos/${course.id}/tareas/${tareaId}/entregas`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        setShowUploadSubmissionFor(null);
+        getSubmissionsForTask(tareaId);
+      } else {
+        console.error('Error uploading submission:', response.statusText);
+      }
+    } catch (err) {
+      console.error('Error uploading submission:', err);
+    }
+  };
+
   const handleDownloadResource = async (recurso: Recurso) => {
     if (!course?.id) return;
     try {
@@ -115,6 +165,25 @@ export default function CourseTasks() {
       if (url) window.open(url, '_blank');
     } catch (err) {
       console.error('Error getting download url:', err);
+    }
+  };
+
+  const handleDownloadSubmission = async (tareaId: number, entrega: Entrega) => {
+    if (!course?.id) return;
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/cursos/${course.id}/tareas/${tareaId}/entregas/estudiantes/${entrega.estudianteId}/archivo`, {
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.url) window.open(data.url, '_blank');
+      } else {
+        console.error('Error getting submission download url:', response.statusText);
+      }
+    } catch (err) {
+      console.error('Error getting submission download url:', err);
     }
   };
 
@@ -355,6 +424,40 @@ export default function CourseTasks() {
                       />
                     </div>
                   )}
+                </div>
+
+                <div>
+                  <div className="text-sm font-semibold mb-2">Entrega</div>
+                  {isProfesor ? (
+                    <Link to={`tasks/${t.id}/submissions`} onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm">Ver Entregas</Link>
+                  ) : (
+                    <div className="space-y-2">
+                      {(submissionsByTask[t.id] || []).length === 0 ? (
+                        <div>
+                          <div className="text-gray-500">No hay entregas</div>
+                          <button onClick={(e) => { e.stopPropagation(); setShowUploadSubmissionFor(t.id); }} className="ombook-btn ombook-btn-primary mt-2">Entregar</button>
+                        </div>
+                      ) : (
+                        (submissionsByTask[t.id] || []).map(entrega => (
+                          <div key={entrega.id} className="bg-white border rounded p-2">
+                            <div className="text-sm">Entregado el {entrega.fechaEnvio ? new Date(entrega.fechaEnvio).toLocaleString() : '-'}</div>
+                            <div className="text-sm">Estado: {entrega.estado}</div>
+                            {entrega.calificacion !== undefined && <div className="text-sm">Calificación: {entrega.calificacion}</div>}
+                            <div className="flex gap-2 mt-2">
+                              <button onClick={(e) => { e.stopPropagation(); handleDownloadSubmission(t.id, entrega); }} className="ombook-text-green text-sm">Descargar</button>
+                              <button className="ombook-text-blue text-sm">Ver más detalles</button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                  <UploadResourceDialog
+                    isOpen={showUploadSubmissionFor === t.id}
+                    onClose={() => setShowUploadSubmissionFor(null)}
+                    onUpload={(nombre, file) => handleUploadSubmission(file)}
+                    showNombre={false}
+                  />
                 </div>
               </div>
             )}
