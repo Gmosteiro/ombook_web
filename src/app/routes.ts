@@ -29,6 +29,7 @@ const routes: RouteConfig = [
         route("students", "./features/courses/components/CourseStudents.tsx"),
         route("enroll", "./features/courses/pages/CourseEnrollPage.tsx"),
         route("unenroll", "./features/courses/pages/CourseUnenrollPage.tsx"),
+        route("marks", "./features/courses/pages/CourseMarksPage.tsx")
 
     ]),
 
