@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/common/pages/+types/Home";
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
 import { UserRole } from "~/features/auth/types";
+import { MaterialIcon } from "~/features/common/components/ui/MaterialIcon";
 
 export const meta: MetaFunction = () => {
     return [
@@ -39,42 +40,42 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         {
             title: "Mis Cursos",
             description: "Accede a todos tus cursos",
-            icon: "📚",
+            icon: <MaterialIcon name="school" color="var(--color-ombook-green)" size={36} />,
             link: "/courses",
             roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]
         },
         {
             title: "Chat",
             description: "Comunícate con estudiantes y profesores",
-            icon: "💬",
+            icon: <MaterialIcon name="chat" color="var(--color-ombook-green)" size={36} />,
             link: "/chat",
             roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]
         },
         {
             title: "Crear Curso",
             description: "Crea un nuevo curso",
-            icon: "➕",
+            icon: <MaterialIcon name="add" color="var(--color-ombook-green)" size={36} />,
             link: "/courses/create",
             roles: [UserRole.ADMINISTRADOR]
         },
         {
             title: "Gestión de Usuarios",
             description: "Administra estudiantes y profesores",
-            icon: "👥",
+            icon: <MaterialIcon name="group" color="var(--color-ombook-green)" size={36} />,
             link: "/users",
             roles: [UserRole.ADMINISTRADOR]
         },
         {
             title: "Auditoria",
             description: "Revisa las actividades del sistema",
-            icon: "🕵️‍♂️",
+            icon: <MaterialIcon name="search" color="var(--color-ombook-green)" size={36} />,
             link: "/audit",
             roles: [UserRole.ADMINISTRADOR]
         },
         {
             title: "Mi Perfil",
             description: "Ver y editar tu información",
-            icon: "👤",
+            icon: <MaterialIcon name="person" color="var(--color-ombook-green)" size={36} />,
             link: "/profile",
             roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]
         }
