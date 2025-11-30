@@ -1,11 +1,9 @@
 import { useLoaderData, useOutletContext, useParams, Link } from "react-router";
+import { useState } from "react";
 import type { Course, EntregaDetalle } from "../types/types";
 import { API_URL } from "../../common/utils/Utils";
 import type { UsuarioDetalleResponse } from "../../../routes/api.users.server";
 
-// ===========================
-// LOADER
-// ===========================
 export async function loader({
   params,
   request
@@ -13,7 +11,7 @@ export async function loader({
   params: { id: string; taskId: string; entregaId: string };
   request: Request;
 }) {
-  const { getValidJWTToken } = await import("~/services/session.server");
+  const { getValidJWTToken, getUserRole } = await import("~/services/session.server");
   const { apiFetch } = await import("~/features/auth/utils/methods");
   const { getUserById } = await import("~/routes/api.users.server");
 
@@ -22,10 +20,9 @@ export async function loader({
   const entregaId = params.entregaId;
 
   try {
-    // Obtener JWT válido
     const jwtToken = await getValidJWTToken(request);
+    const userRole = await getUserRole(request);
 
-    // Llamar al backend usando apiFetch
     const endpoint = `/cursos/${cursoId}/tareas/${tareaId}/entregas/${entregaId}`;
     const res = await apiFetch(
       endpoint,
@@ -37,21 +34,17 @@ export async function loader({
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
 
-    // Parsear respuesta
     const submission: EntregaDetalle = await res.json();
 
-    // Obtener detalles del estudiante
     let student: UsuarioDetalleResponse | null = null;
     if (submission.estudianteId) {
       try {
         student = await getUserById(request, submission.estudianteId);
       } catch (studentErr) {
         console.error("Error fetching student details:", studentErr);
-        // No fallar si no se puede obtener el estudiante
       }
     }
 
-    // Obtener URL de descarga si hay recurso
     let downloadUrl: string | null = null;
     if (submission.recursoId) {
       try {
@@ -77,7 +70,9 @@ export async function loader({
     return {
       submission,
       student,
-      downloadUrl
+      downloadUrl,
+      userRole,
+      jwtToken
     };
 
   } catch (err) {
@@ -86,27 +81,69 @@ export async function loader({
     return {
       submission: null,
       student: null,
-      downloadUrl: null
+      downloadUrl: null,
+      userRole: null,
+      jwtToken: null
     };
   }
 }
 
-// ===========================
-// COMPONENTE
-// ===========================
 export default function CourseTaskSubmissions() {
-  const { submission, student, downloadUrl } = useLoaderData() as { submission: EntregaDetalle | null; student: UsuarioDetalleResponse | null; downloadUrl: string | null };
+  const { submission, student, downloadUrl, userRole, jwtToken } = useLoaderData() as { submission: EntregaDetalle | null; student: UsuarioDetalleResponse | null; downloadUrl: string | null; userRole: string | null; jwtToken: string | null };
   const { course } = useOutletContext<{ course: Course }>();
   const params = useParams<{ id: string; taskId: string; entregaId: string }>();
   const entregaId = params.entregaId;
   const cursoId = params.id;
   const tareaId = params.taskId;
 
+  const [isGradingModalOpen, setIsGradingModalOpen] = useState(false);
+  const [calificacion, setCalificacion] = useState('');
+  const [comentario, setComentario] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleDownload = () => {
     if (downloadUrl) {
       window.open(downloadUrl, '_blank');
     } else {
       alert("URL de descarga no disponible");
+    }
+  };
+
+  const handleGradeSubmission = async () => {
+    if (!jwtToken || !submission) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_URL}/cursos/${cursoId}/tareas/${tareaId}/entregas/${entregaId}/corregir`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify({
+          calificacion: parseFloat(calificacion),
+          comentario,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const updatedSubmission = await response.json();
+      // Update the submission state
+      // Since submission is from loader, we need to update it somehow
+      // For now, reload the page or update state
+      window.location.reload(); // Simple way, or use a state update
+
+      setIsGradingModalOpen(false);
+      setCalificacion('');
+      setComentario('');
+    } catch (error) {
+      console.error('Error grading submission:', error);
+      alert('Error al calificar la entrega');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -127,7 +164,6 @@ export default function CourseTaskSubmissions() {
       <main className="w-full max-w-4xl mx-auto">
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
 
-          {/* HEADER */}
           <div className="p-6 md:p-8 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -145,11 +181,9 @@ export default function CourseTaskSubmissions() {
             </div>
           </div>
 
-          {/* BODY */}
           <div className="p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              {/* Información del Estudiante */}
               <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   Información del Estudiante
@@ -164,7 +198,6 @@ export default function CourseTaskSubmissions() {
                 </div>
               </div>
 
-              {/* Detalles de la Entrega */}
               <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   Detalles de la Entrega
@@ -192,14 +225,23 @@ export default function CourseTaskSubmissions() {
                     <span className="font-medium text-slate-600 dark:text-slate-400">Calificación:</span>
                     <p className="text-slate-800 dark:text-slate-200">
                       {submission.calificacion !== null && submission.calificacion !== undefined
-                        ? `${submission.calificacion}/10`
+                        ? `${submission.calificacion}/12`
                         : "Sin calificar"}
                     </p>
                   </div>
+                  {userRole === 'PROFESOR' && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => setIsGradingModalOpen(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Calificar
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Comentario */}
               <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 md:col-span-2">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   Comentario
@@ -209,7 +251,6 @@ export default function CourseTaskSubmissions() {
                 </p>
               </div>
 
-              {/* Archivo Adjunto */}
               <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 md:col-span-2">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
                   Archivo Adjunto
@@ -239,6 +280,62 @@ export default function CourseTaskSubmissions() {
 
         </div>
       </main>
+
+      {/* Grading Modal */}
+      {isGradingModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+              Calificar Entrega
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Calificación (0-12)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="12"
+                  step="1"
+                  value={calificacion}
+                  onChange={(e) => setCalificacion(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                  placeholder="Ej: 8.5"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Comentario
+                </label>
+                <textarea
+                  value={comentario}
+                  onChange={(e) => setComentario(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                  rows={4}
+                  placeholder="Comentario sobre la entrega..."
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setIsGradingModalOpen(false)}
+                className="px-4 py-2 bg-slate-300 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors"
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGradeSubmission}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                disabled={isSubmitting || !calificacion.trim()}
+              >
+                {isSubmitting ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

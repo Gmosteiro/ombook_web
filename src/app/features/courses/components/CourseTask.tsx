@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLoaderData, useOutletContext, Link, Outlet } from "react-router";
+import { useLoaderData, useOutletContext, Link, Outlet, useLocation } from "react-router";
 import { getValidJWTToken, getUserRole } from "~/services/session.server";
 import { UploadResourceDialog } from "./UploadResourceDialog";
 import useRecursosPorTasks from "../hooks/useRecursosPorTasks";
@@ -27,6 +27,7 @@ export async function loader({ params, request }: { params: { id: string }, requ
 export default function CourseTasks() {
   const context = useOutletContext<{ course: Course }>();
   const course = context?.course;
+  const location = useLocation();
 
   const loaderData = useLoaderData() as { jwtToken: string; isProfesor: boolean };
   const jwtToken = loaderData?.jwtToken || '';
@@ -254,85 +255,88 @@ export default function CourseTasks() {
   };
 
 
+  // Check if we're in a submissions view
+  const isInSubmissionsView = location.pathname.includes('/submissions');
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Tareas</h1>
-        {isProfesor && (
-          <div>
-            <button onClick={() => setShowNewTask(s => !s)} className={showNewTask ? "ombook-btn ombook-btn-secondary" : "ombook-btn ombook-btn-primary"}>
-              {showNewTask ? 'Cancelar' : 'Crear Tarea'}
-            </button>
-          </div>
-        )}
-      </div>
-
-      <Outlet context={{ course }} />
-
-      {showNewTask && (
-        <form onSubmit={handleCreateTask} className="mb-4 bg-white p-4 rounded-md shadow">
-          <div className="grid grid-cols-1 gap-2">
-            <div>
-              <label htmlFor="new-titulo" className="block text-sm font-medium">Título</label>
-              <input
-                id="new-titulo"
-                value={newTaskData.titulo}
-                onChange={(e) => setNewTaskData(prev => ({ ...prev, titulo: e.target.value }))}
-                placeholder="Título"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="new-descripcion" className="block text-sm font-medium">Descripción</label>
-              <textarea
-                id="new-descripcion"
-                value={newTaskData.descripcion}
-                onChange={(e) => setNewTaskData(prev => ({ ...prev, descripcion: e.target.value }))}
-                placeholder="Descripción"
-                rows={3}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
+      {!isInSubmissionsView && (
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-semibold">Tareas</h1>
+            {isProfesor && (
               <div>
-                <label htmlFor="new-fechaInicio" className="block text-sm font-medium">Fecha inicio</label>
-                <input
-                  id="new-fechaInicio"
-                  value={newTaskData.fechaInicio}
-                  onChange={(e) => setNewTaskData(prev => ({ ...prev, fechaInicio: e.target.value }))}
-                  type="datetime-local"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                />
+                <button onClick={() => setShowNewTask(s => !s)} className={showNewTask ? "ombook-btn ombook-btn-secondary" : "ombook-btn ombook-btn-primary"}>
+                  {showNewTask ? 'Cancelar' : 'Crear Tarea'}
+                </button>
               </div>
-              <div>
-                <label htmlFor="new-fechaFin" className="block text-sm font-medium">Fecha fin</label>
-                <input
-                  id="new-fechaFin"
-                  value={newTaskData.fechaFin}
-                  onChange={(e) => setNewTaskData(prev => ({ ...prev, fechaFin: e.target.value }))}
-                  type="datetime-local"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setShowNewTask(false)} className="ombook-btn ombook-btn-secondary">Cancelar</button>
-              <button type="submit" className="ombook-btn ombook-btn-primary">Crear</button>
-            </div>
+            )}
           </div>
-        </form>
-      )}
 
-      <div className="space-y-4">
-        {tasks.length === 0 && <div className="text-gray-500">No hay tareas.</div>}
-        {tasks.map((t: Tarea) => (
+          {showNewTask && (
+            <form onSubmit={handleCreateTask} className="mb-4 bg-white p-4 rounded-md shadow">
+              <div className="grid grid-cols-1 gap-2">
+                <div>
+                  <label htmlFor="new-titulo" className="block text-sm font-medium">Título</label>
+                  <input
+                    id="new-titulo"
+                    value={newTaskData.titulo}
+                    onChange={(e) => setNewTaskData(prev => ({ ...prev, titulo: e.target.value }))}
+                    placeholder="Título"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="new-descripcion" className="block text-sm font-medium">Descripción</label>
+                  <textarea
+                    id="new-descripcion"
+                    value={newTaskData.descripcion}
+                    onChange={(e) => setNewTaskData(prev => ({ ...prev, descripcion: e.target.value }))}
+                    placeholder="Descripción"
+                    rows={3}
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label htmlFor="new-fechaInicio" className="block text-sm font-medium">Fecha inicio</label>
+                    <input
+                      id="new-fechaInicio"
+                      value={newTaskData.fechaInicio}
+                      onChange={(e) => setNewTaskData(prev => ({ ...prev, fechaInicio: e.target.value }))}
+                      type="datetime-local"
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="new-fechaFin" className="block text-sm font-medium">Fecha fin</label>
+                    <input
+                      id="new-fechaFin"
+                      value={newTaskData.fechaFin}
+                      onChange={(e) => setNewTaskData(prev => ({ ...prev, fechaFin: e.target.value }))}
+                      type="datetime-local"
+                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button type="button" onClick={() => setShowNewTask(false)} className="ombook-btn ombook-btn-secondary">Cancelar</button>
+                  <button type="submit" className="ombook-btn ombook-btn-primary">Crear</button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          <div className="space-y-4">
+            {tasks.length === 0 && <div className="text-gray-500">No hay tareas.</div>}
+            {tasks.map((t: Tarea) => (
           <div key={t.id} className={`bg-white rounded-md shadow overflow-hidden cursor-pointer ${getTaskStatus(t) === 'overdue' ? 'ombook-border-brown border-l-4' : ''}`} onClick={() => toggleExpand(t)}>
             <div className="p-4 flex justify-between items-start">
                <div>
                  <div className="flex items-center gap-2">
                    <div className="text-lg font-semibold">{t.titulo}</div>
-                   <span className={`ombook-badge ${getTaskStatus(t) === 'overdue' ? 'ombook-badge-brown' : 'ombook-badge-green'}`}>{getTaskStatus(t) === 'overdue' ? 'Vencida' : 'Pendiente'}</span>
+                   <span className={`ombook-badge ${getTaskStatus(t) === 'overdue' ? 'ombook-badge-brown' : 'ombook-badge-green'}`}>{getTaskStatus(t) === 'overdue' ? 'Vencida' : 'En Fecha'}</span>
                  </div>
                  <div className="text-xs text-gray-500">{t.fechaCreacion ? new Date(t.fechaCreacion).toLocaleString() : ''}</div>
                  <p className="text-sm text-gray-700 mt-2 line-clamp-2">{t.descripcion}</p>
@@ -485,8 +489,12 @@ export default function CourseTasks() {
               </div>
             )}
           </div>
-        ))}
-      </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <Outlet context={{ course }} />
 
     </div>
   );

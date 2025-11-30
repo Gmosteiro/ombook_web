@@ -1,4 +1,5 @@
 import { useLoaderData, useOutletContext, Link, useParams } from "react-router";
+import { useState } from "react";
 import type { Course, Entrega } from "../types/types";
 
 // ===========================
@@ -66,35 +67,58 @@ const handleDownloadSubmission = async (tareaId: number, entrega: Entrega) => {
       console.error('Error getting submission download url:', err);
     }
   };
-
-// ===========================
-// COMPONENTE
-// ===========================
 export default function CourseTaskSubmissionsList() {
   const { submissions } = useLoaderData() as { submissions: Entrega[] };
   const { course } = useOutletContext<{ course: Course }>();
   const params = useParams<{ id: string; taskId: string }>();
   const tareaId = params.taskId;
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filteredSubmissions = submissions.filter(submission => {
+    const fullName = `${submission.nombre} ${submission.apellido}`.toLowerCase();
+    const matchesSearch = fullName.includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || submission.estado === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="font-display bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-300 min-h-screen p-4">
       <main className="w-full max-w-4xl mx-auto">
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
 
-          {/* HEADER */}
           <div className="p-6 md:p-8 border-b border-slate-200 dark:border-slate-700">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               {course?.nombre || course?.id} — Entregas de la Tarea {tareaId}
             </h1>
+            <div className="mt-4 flex flex-col sm:flex-row gap-4">
+              <input
+                type="text"
+                placeholder="Buscar por nombre o apellido"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                aria-label="Filtrar por estado de entrega"
+              >
+                <option value="all">Todos los estados</option>
+                <option value="ENVIADA">ENVIADA</option>
+                <option value="CORREGIDA">CORREGIDA</option>
+              </select>
+            </div>
           </div>
 
-          {/* BODY */}
           <div className="p-6 md:p-8">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-700">
-                    <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Estudiante ID</th>
+                    <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Estudiante</th>
                     <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Fecha de Envío</th>
                     <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Estado</th>
                     <th className="px-4 py-3 text-left font-medium text-slate-500 dark:text-slate-400">Calificación</th>
@@ -102,10 +126,10 @@ export default function CourseTaskSubmissionsList() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {submissions.map((submission) => (
+                  {filteredSubmissions.map((submission) => (
                     <tr key={submission.id}>
                       <td className="px-4 py-3 text-slate-800 dark:text-slate-200">
-                        {submission.estudianteId}
+                        {submission.nombre} {submission.apellido}
                       </td>
                       <td className="px-4 py-3 text-slate-800 dark:text-slate-200">
                         {submission.fechaEnvio ? new Date(submission.fechaEnvio).toLocaleString() : '-'}
@@ -123,7 +147,7 @@ export default function CourseTaskSubmissionsList() {
                   ))}
                 </tbody>
               </table>
-              {submissions.length === 0 && (
+              {filteredSubmissions.length === 0 && (
                 <div className="text-gray-500 text-center py-4">No hay entregas.</div>
               )}
             </div>
