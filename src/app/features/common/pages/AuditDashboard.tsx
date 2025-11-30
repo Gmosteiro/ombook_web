@@ -1,5 +1,9 @@
 import { apiFetch } from "../../auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { MaterialIcon } from "~/features/common/components/ui/MaterialIcon";
+import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
+import { UserRole } from "~/features/auth/types";
 
 // Tipos backend (mejor tipado según API)
 interface ResumenResponse {
@@ -49,6 +53,7 @@ export interface AuditDashboardData {
 // Loader para obtener datos reales
 // El loader recibe un objeto con 'request' de tipo Request (nativo)
 export async function loader({ request }: { request: Request }): Promise<AuditDashboardData> {
+    requireRoleLoader([UserRole.ADMINISTRADOR]);
     const jwtToken = await getValidJWTToken(request);
 
     // Fetch resumen
@@ -60,7 +65,7 @@ export async function loader({ request }: { request: Request }): Promise<AuditDa
     const topAccionesRaw: TopAccionResponse[] = await topAccionesRes.json();
     const topActions: TopAction[] = Array.isArray(topAccionesRaw)
         ? topAccionesRaw.map((item) => ({
-            label: item.action,
+            label: item.action?.replace(/_/g, " "),
             value: item.cantidad
         }))
         : [];
@@ -68,6 +73,8 @@ export async function loader({ request }: { request: Request }): Promise<AuditDa
     // Fetch actividad últimos días
     const actividadDiasRes = await apiFetch("/admin/dashboard/actividad-ultimos-dias", { method: "GET", jwtToken, secure: true });
     const actividadDiasRaw: ActividadDiaResponse[] = await actividadDiasRes.json();
+
+
     const weeklyActivity: number[] = Array.isArray(actividadDiasRaw)
         ? actividadDiasRaw.map((item) => item.cantidad)
         : [];
@@ -142,30 +149,30 @@ function DonutChart({ donutData, total }: DonutChartProps) {
 
 interface WeeklyActivityChartProps {
     weeklyActivity: number[];
+    weeklyLabels: string[];
 }
-function WeeklyActivityChart({ weeklyActivity }: WeeklyActivityChartProps) {
-    if (!weeklyActivity || weeklyActivity.length === 0) return null;
-    const max = Math.max(...weeklyActivity);
-    const points = weeklyActivity.map((v, i) => `${(i * 32)},${160 - (v / max) * 140}`).join(" ");
+
+function WeeklyActivityChart({ weeklyActivity, weeklyLabels }: WeeklyActivityChartProps) {
+    const data = weeklyLabels.map((label, i) => ({
+        name: label,
+        value: weeklyActivity[i] ?? 0
+    }));
+
     return (
-        <svg viewBox="0 0 192 180" className="w-full h-32">
-            <polyline
-                fill="none"
-                stroke="#2563eb"
-                strokeWidth="4"
-                points={points}
-            />
-            {/* Dots */}
-            {weeklyActivity.map((v, i) => (
-                <circle
-                    key={i}
-                    cx={i * 32}
-                    cy={160 - (v / max) * 140}
-                    r="4"
-                    fill="#2563eb"
-                />
-            ))}
-        </svg>
+        <ResponsiveContainer width="100%" height={160}>
+            <AreaChart data={data}>
+                <defs>
+                    <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#2563eb" stopOpacity={0.18} />
+                        <stop offset="100%" stopColor="#2563eb" stopOpacity={0.01} />
+                    </linearGradient>
+                </defs>
+                <XAxis dataKey="name" />
+                <YAxis hide />
+                <Tooltip />
+                <Area type="monotone" dataKey="value" stroke="#2563eb" fill="url(#colorActivity)" strokeWidth={3} />
+            </AreaChart>
+        </ResponsiveContainer>
     );
 }
 
@@ -177,26 +184,26 @@ export default function AuditDashboard({ loaderData }: AuditDashboardProps) {
         {
             label: "Usuarios Totales",
             value: loaderData.usuariosTotales,
-            icon: "👥",
-            color: "ombook-bg-green"
+            icon: <MaterialIcon name="group" color="var(--color-ombook-green)" size={40} />,
+            color: "ombook-bg-green/10"
         },
         {
             label: "Cursos Totales",
             value: loaderData.cursosTotales,
-            icon: "📚",
-            color: "ombook-bg-brown"
+            icon: <MaterialIcon name="school" color="var(--color-ombook-green)" size={40} />,
+            color: "ombook-bg-green/10"
         },
         {
             label: "Acciones Hoy",
             value: loaderData.accionesHoy,
-            icon: "⚡",
-            color: "ombook-bg-green"
+            icon: <MaterialIcon name="bolt" color="var(--color-ombook-green)" size={40} />,
+            color: "ombook-bg-green/10"
         },
         {
             label: "Logins Hoy",
             value: loaderData.loginsHoy,
-            icon: "🔑",
-            color: "ombook-bg-brown"
+            icon: <MaterialIcon name="login" color="var(--color-ombook-green)" size={40} />,
+            color: "ombook-bg-green/10"
         }
     ];
 
@@ -212,7 +219,7 @@ export default function AuditDashboard({ loaderData }: AuditDashboardProps) {
                     {stats.map((stat) => (
                         <div key={stat.label} className="ombook-card flex items-start gap-4">
                             <div className={`p-3 rounded-full ${stat.color}`}>
-                                <span className="text-2xl">{stat.icon}</span>
+                                {stat.icon}
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="ombook-text-gray text-sm font-medium">{stat.label}</span>
@@ -262,12 +269,7 @@ export default function AuditDashboard({ loaderData }: AuditDashboardProps) {
                     <span className="ombook-heading ombook-heading-md">Actividad de los últimos 7 días</span>
                     <div className="flex items-center gap-6">
                         <div className="w-full max-w-lg">
-                            <WeeklyActivityChart weeklyActivity={loaderData.weeklyActivity} />
-                            <div className="flex justify-between mt-2">
-                                {loaderData.weeklyLabels?.map((label) => (
-                                    <span key={label} className="ombook-text-gray text-xs">{label}</span>
-                                ))}
-                            </div>
+                            <WeeklyActivityChart weeklyActivity={loaderData.weeklyActivity} weeklyLabels={loaderData.weeklyLabels} />
                         </div>
                         <div className="flex flex-col items-end">
                             <span className="ombook-heading ombook-heading-lg">{loaderData.weeklyTotal?.toLocaleString?.() ?? 0}</span>

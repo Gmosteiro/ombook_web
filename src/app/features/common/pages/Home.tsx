@@ -65,6 +65,13 @@ export default function Index({ loaderData }: Route.ComponentProps) {
             roles: [UserRole.ADMINISTRADOR]
         },
         {
+            title: "Auditoria",
+            description: "Revisa las actividades del sistema",
+            icon: "🕵️‍♂️",
+            link: "/audit",
+            roles: [UserRole.ADMINISTRADOR]
+        },
+        {
             title: "Mi Perfil",
             description: "Ver y editar tu información",
             icon: "👤",
