@@ -22,6 +22,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/notificaciones/{id}/marcar-leida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Marcar una notificación como leída */
+        put: operations["marcarComoLeida"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notificaciones/marcar-todas-leidas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Marcar todas las notificaciones como leídas */
+        put: operations["marcarTodasComoLeidas"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cursos/{cursoId}/paginas/{paginaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Actualiza una página temática de un curso (solo profesor responsable) */
+        put: operations["actualizarPagina"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cursos/{cursoId}/imagen": {
         parameters: {
             query?: never;
@@ -620,6 +671,23 @@ export interface paths {
         patch: operations["editarTarea"];
         trace?: never;
     };
+    "/cursos/{cursoId}/tareas/{tareaId}/entregas/{entregaId}/corregir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corregir la entrega de un estudiante (prof responsable) */
+        patch: operations["editarTarea_1"];
+        trace?: never;
+    };
     "/usuarios/{id}": {
         parameters: {
             query?: never;
@@ -629,6 +697,23 @@ export interface paths {
         };
         /** Busca usuario por id, si es administrador devuelve todos los datos */
         get: operations["buscarUsuarioPorId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notificaciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener todas las notificaciones del usuario autenticado */
+        get: operations["obtenerNotificaciones"];
         put?: never;
         post?: never;
         delete?: never;
@@ -889,6 +974,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auditoria": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buscar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/dashboard/top-acciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["topAcciones"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/dashboard/resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["resumen"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/dashboard/actividad-ultimos-dias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["actividadPorDia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/dashboard/actividad-reciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["actividad"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cursos/{cursoId}/recursos/{recursoId}": {
         parameters: {
             query?: never;
@@ -926,6 +1091,24 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        PaginaActualizacionRequest: {
+            titulo?: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+        };
+        PaginaResponse: {
+            /** Format: int64 */
+            id?: number;
+            titulo?: string;
+            /** Format: date-time */
+            fechaProgramada?: string;
+            /** Format: date-time */
+            fechaCreacion?: string;
+            /** Format: int64 */
+            cursoId?: number;
+            /** Format: int64 */
+            creadorId?: number;
+        };
         ForoUpdateRequest: {
             contenido: string;
         };
@@ -1088,7 +1271,7 @@ export interface components {
             /** Format: date-time */
             fechaEnvio?: string;
             /** @enum {string} */
-            estado?: "ENVIADA" | "CORREGIDA" | "RECHAZADA";
+            estado?: "ENVIADA" | "CORREGIDA";
             /** Format: double */
             calificacion?: number;
             comentario?: string;
@@ -1125,19 +1308,6 @@ export interface components {
             titulo?: string;
             /** Format: date-time */
             fechaProgramada?: string;
-        };
-        PaginaResponse: {
-            /** Format: int64 */
-            id?: number;
-            titulo?: string;
-            /** Format: date-time */
-            fechaProgramada?: string;
-            /** Format: date-time */
-            fechaCreacion?: string;
-            /** Format: int64 */
-            cursoId?: number;
-            /** Format: int64 */
-            creadorId?: number;
         };
         PublicacionCreateRequest: {
             contenido: string;
@@ -1220,6 +1390,11 @@ export interface components {
             /** Format: date-time */
             fechaFin?: string;
         };
+        CorregirEntregaRequest: {
+            /** Format: double */
+            calificacion?: number;
+            comentario?: string;
+        };
         PaginatorResponseUsuarioListaResponse: {
             content?: components["schemas"]["UsuarioListaResponse"][];
             /** Format: int32 */
@@ -1253,6 +1428,13 @@ export interface components {
             /** Format: date */
             fechaNacimiento?: string;
             fotoPerfil?: string;
+        };
+        NotificacionInAppDTO: {
+            id?: string;
+            title?: string;
+            body?: string;
+            timestamp?: string;
+            read?: boolean;
         };
         ContactoSimpleResponse: {
             /** Format: int64 */
@@ -1347,7 +1529,7 @@ export interface components {
             /** Format: date-time */
             fechaEnvio?: string;
             /** @enum {string} */
-            estado?: "ENVIADA" | "CORREGIDA" | "RECHAZADA";
+            estado?: "ENVIADA" | "CORREGIDA";
             /** Format: double */
             calificacion?: number;
         };
@@ -1365,7 +1547,7 @@ export interface components {
             /** Format: date-time */
             fechaEnvio?: string;
             /** @enum {string} */
-            estado?: "ENVIADA" | "CORREGIDA" | "RECHAZADA";
+            estado?: "ENVIADA" | "CORREGIDA";
             /** Format: double */
             calificacion?: number;
         };
@@ -1409,6 +1591,67 @@ export interface components {
             tituloTarea?: string;
             /** Format: double */
             calificacion?: number;
+        };
+        AuditoriaResponse: {
+            nombreUsuario?: string;
+            /** @enum {string} */
+            action?: "ANUNCIO_CREAR" | "ANUNCIO_EDITAR" | "ANUNCIO_ELIMINAR" | "PAGINA_CREAR" | "PAGINA_EDITAR" | "PAGINA_ELIMINAR" | "TAREA_CREAR" | "TAREA_EDITAR" | "TAREA_ELIMINAR" | "TAREA_ENTREGA_SUBIR" | "TAREA_ENTREGA_ELIMINAR" | "ENTREGA_SUBIR" | "ENTREGA_CORREGIR" | "MATRICULA_INDIVIDUAL" | "DESMATRICULA_INDIVIDUAL" | "MATRICULA_MASIVA" | "DESMATRICULA_MASIVA" | "MATRICULA_RECHAZADA" | "CALIFICACION_PUBLICAR_MASIVA" | "CALIFICACION_GUARDAR" | "CALIFICACION_CARGA_MASIVA" | "LOGIN" | "LOGOUT" | "TOKEN_REFRESH" | "PASSWORD_CAMBIAR" | "PASSWORD_RECUPERAR" | "CUENTA_DESBLOQUEAR" | "PASSWORD_RECUPERAR_REQUEST" | "USUARIO_CREAR" | "USUARIO_EDITAR" | "USUARIO_CARGA_MASIVA" | "EMAIL_CAMBIO_INICIAR" | "EMAIL_CAMBIO_CONFIRMAR" | "AVATAR_ACTUALIZAR" | "AVATAR_RESETEAR" | "CURSO_CREAR" | "CURSO_EDITAR" | "CURSO_ELIMINAR" | "CURSO_CARGA_MASIVA" | "CURSO_ELIMINACION_MASIVA" | "CURSO_CAMBIAR_ESTADO" | "CURSO_IMAGEN_ACTUALIZAR" | "CURSO_IMAGEN_RESETEAR" | "PUBLICACION_CREAR" | "PUBLICACION_EDITAR" | "PUBLICACION_ELIMINAR" | "MENSAJE_FORO_PUBLICAR" | "MENSAJE_FORO_EDITAR" | "MENSAJE_FORO_ELIMINAR" | "MENSAJE_PRIVADO_ENVIAR" | "RECURSO_SUBIR" | "RECURSO_ELIMINAR";
+            /** @enum {string} */
+            resultado?: "EXITO" | "ERROR" | "EXITO_PARCIAL";
+            descripcion?: string;
+            entidad?: string;
+            ip?: string;
+            canal?: string;
+            /** Format: date-time */
+            fecha?: string;
+        };
+        PaginatorResponseAuditoriaResponse: {
+            content?: components["schemas"]["AuditoriaResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        TopAccionResponse: {
+            action?: string;
+            /** Format: int64 */
+            cantidad?: number;
+        };
+        DashboardResponse: {
+            /** Format: int64 */
+            totalUsuarios?: number;
+            /** Format: int64 */
+            totalCursos?: number;
+            /** Format: int64 */
+            totalMatriculas?: number;
+            /** Format: int64 */
+            totalTareas?: number;
+            /** Format: int64 */
+            totalEntregas?: number;
+            /** Format: int64 */
+            totalAuditorias?: number;
+        };
+        PuntoDiaResponse: {
+            /** Format: date */
+            dia?: string;
+            /** Format: int64 */
+            cantidad?: number;
+        };
+        ActividadRecienteResponse: {
+            /** Format: int64 */
+            loginsExitosos?: number;
+            /** Format: int64 */
+            loginsFallidos?: number;
+            /** Format: int64 */
+            cambiosPassword?: number;
+            /** Format: int64 */
+            cambiosEmail?: number;
         };
         DesactivarTokenRequest: {
             token?: string;
@@ -1466,6 +1709,90 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    marcarComoLeida: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notificación marcada como leída */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Notificación no encontrada o no pertenece al usuario */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    marcarTodasComoLeidas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notificaciones marcadas como leídas */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    actualizarPagina: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                paginaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaginaActualizacionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaResponse"];
+                };
             };
         };
     };
@@ -2705,6 +3032,34 @@ export interface operations {
             };
         };
     };
+    editarTarea_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cursoId: number;
+                tareaId: number;
+                entregaId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregaRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EntregaDetalleResponse"];
+                };
+            };
+        };
+    };
     buscarUsuarioPorId: {
         parameters: {
             query?: never;
@@ -2723,6 +3078,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    obtenerNotificaciones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lista de notificaciones */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificacionInAppDTO"][];
                 };
             };
         };
@@ -3085,6 +3460,118 @@ export interface operations {
                 };
                 content: {
                     "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    buscar: {
+        parameters: {
+            query?: {
+                userId?: string;
+                action?: "ANUNCIO_CREAR" | "ANUNCIO_EDITAR" | "ANUNCIO_ELIMINAR" | "PAGINA_CREAR" | "PAGINA_EDITAR" | "PAGINA_ELIMINAR" | "TAREA_CREAR" | "TAREA_EDITAR" | "TAREA_ELIMINAR" | "TAREA_ENTREGA_SUBIR" | "TAREA_ENTREGA_ELIMINAR" | "ENTREGA_SUBIR" | "ENTREGA_CORREGIR" | "MATRICULA_INDIVIDUAL" | "DESMATRICULA_INDIVIDUAL" | "MATRICULA_MASIVA" | "DESMATRICULA_MASIVA" | "MATRICULA_RECHAZADA" | "CALIFICACION_PUBLICAR_MASIVA" | "CALIFICACION_GUARDAR" | "CALIFICACION_CARGA_MASIVA" | "LOGIN" | "LOGOUT" | "TOKEN_REFRESH" | "PASSWORD_CAMBIAR" | "PASSWORD_RECUPERAR" | "CUENTA_DESBLOQUEAR" | "PASSWORD_RECUPERAR_REQUEST" | "USUARIO_CREAR" | "USUARIO_EDITAR" | "USUARIO_CARGA_MASIVA" | "EMAIL_CAMBIO_INICIAR" | "EMAIL_CAMBIO_CONFIRMAR" | "AVATAR_ACTUALIZAR" | "AVATAR_RESETEAR" | "CURSO_CREAR" | "CURSO_EDITAR" | "CURSO_ELIMINAR" | "CURSO_CARGA_MASIVA" | "CURSO_ELIMINACION_MASIVA" | "CURSO_CAMBIAR_ESTADO" | "CURSO_IMAGEN_ACTUALIZAR" | "CURSO_IMAGEN_RESETEAR" | "PUBLICACION_CREAR" | "PUBLICACION_EDITAR" | "PUBLICACION_ELIMINAR" | "MENSAJE_FORO_PUBLICAR" | "MENSAJE_FORO_EDITAR" | "MENSAJE_FORO_ELIMINAR" | "MENSAJE_PRIVADO_ENVIAR" | "RECURSO_SUBIR" | "RECURSO_ELIMINAR";
+                resultado?: "EXITO" | "ERROR" | "EXITO_PARCIAL";
+                fechaDesde?: string;
+                fechaHasta?: string;
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatorResponseAuditoriaResponse"];
+                };
+            };
+        };
+    };
+    topAcciones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TopAccionResponse"][];
+                };
+            };
+        };
+    };
+    resumen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DashboardResponse"];
+                };
+            };
+        };
+    };
+    actividadPorDia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PuntoDiaResponse"][];
+                };
+            };
+        };
+    };
+    actividad: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ActividadRecienteResponse"];
                 };
             };
         };

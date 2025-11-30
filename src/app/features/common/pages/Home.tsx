@@ -77,12 +77,14 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         action.roles.includes(userRole as UserRole)
     );
 
+    const nombre = perfil ? perfil.nombre + " " + perfil.apellido : "Usuario";
+
     return (
         <div className="ombook-container ombook-section">
             {/* Hero Section */}
             <div className="mb-8">
                 <h1 className="ombook-heading ombook-heading-xl ombook-text-green mb-2">
-                    ¡Bienvenido a Ombook {perfil.nombre + " " + perfil.apellido}! 👋
+                    ¡Bienvenido a Ombook {nombre}! 👋
                 </h1>
             </div>
 

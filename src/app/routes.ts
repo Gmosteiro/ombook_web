@@ -40,6 +40,9 @@ const routes: RouteConfig = [
     // Chat
     route("/chat", "./features/chat/pages/ChatInterface.tsx"),
 
+    // Auditoría
+    route("/audit", "./features/common/pages/AuditDashboard.tsx"),
+
     // Notifications Resource
     route("/resource/notifications", "./routes/resource.notifications.ts"),
 
