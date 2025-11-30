@@ -1,9 +1,11 @@
-import { useOutletContext, useParams } from "react-router";
 import type { Course } from "../types/types";
 
-export default function CourseTaskSubmissions() {
-  const { course } = useOutletContext<{ course: Course }>();
-  const { tareaId } = useParams();
+interface CourseTaskSubmissionsProps {
+  course: Course;
+  tareaId: string;
+}
+
+export default function CourseTaskSubmissions({ course, tareaId }: CourseTaskSubmissionsProps) {
 
   return (
     <div className="font-display bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-300 min-h-screen p-4">

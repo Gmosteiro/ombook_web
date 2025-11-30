@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLoaderData, useOutletContext, Link } from "react-router";
 import { getValidJWTToken, getUserRole } from "~/services/session.server";
 import { UploadResourceDialog } from "./UploadResourceDialog";
-import { SubmissionDetailModal } from "./SubmissionDetailModal";
+import CourseTaskSubmissions from "./CourseTaskSubmissions";
 import useRecursosPorTasks from "../hooks/useRecursosPorTasks";
 import type { Course, Tarea, Recurso, Entrega } from "../types/types";
 
@@ -48,9 +48,7 @@ export default function CourseTasks() {
   const [submissionsByTask, setSubmissionsByTask] = useState<Record<number, Entrega[]>>({});
   const [showUploadSubmissionFor, setShowUploadSubmissionFor] = useState<number | null>(null);
   const [uploadSubmissionError, setUploadSubmissionError] = useState<string>('');
-  const [showSubmissionDetailModal, setShowSubmissionDetailModal] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<Entrega | null>(null);
-  const [selectedTareaId, setSelectedTareaId] = useState<number | null>(null);
+  const [showSubmissionsFor, setShowSubmissionsFor] = useState<number | null>(null);
 
   // Form states
   const [newTaskData, setNewTaskData] = useState({
@@ -256,6 +254,19 @@ export default function CourseTasks() {
     });
   };
 
+  if (showSubmissionsFor) {
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <button onClick={() => setShowSubmissionsFor(null)} className="ombook-btn ombook-btn-secondary">
+            ← Volver a Tareas
+          </button>
+        </div>
+        <CourseTaskSubmissions course={course} tareaId={showSubmissionsFor.toString()} />
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -343,11 +354,6 @@ export default function CourseTasks() {
                     <>
                       <button onClick={(e) => { e.stopPropagation(); editingId === t.id ? setEditingId(null) : startEditing(t); }} className="ombook-text-green text-sm">{editingId === t.id ? 'Cancelar' : 'Editar'}</button>
                     </>
-                  )}
-                  {isProfesor ? (
-                    <Link to={`tasks/${t.id}/submissions`} onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm">Detalles de Entregas</Link>
-                  ) : (
-                    <button onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm" disabled>Entregar</button>
                   )}
                 </div>
               </div>
@@ -466,7 +472,7 @@ export default function CourseTasks() {
                             {entrega.calificacion !== undefined && <div className="text-sm">Calificación: {entrega.calificacion}</div>}
                             <div className="flex gap-2 mt-2">
                               <button onClick={(e) => { e.stopPropagation(); handleDownloadSubmission(t.id, entrega); }} className="ombook-text-green text-sm">Descargar</button>
-                              <button onClick={(e) => { e.stopPropagation(); setSelectedSubmission(entrega); setSelectedTareaId(t.id); setShowSubmissionDetailModal(true); }} className="ombook-text-blue text-sm">Ver más detalles</button>
+                              <button onClick={(e) => { e.stopPropagation(); setShowSubmissionsFor(t.id); }} className="ombook-text-blue text-sm">Ver más detalles</button>
                             </div>
                           </div>
                         ))
@@ -487,16 +493,6 @@ export default function CourseTasks() {
         ))}
       </div>
 
-      {showSubmissionDetailModal && selectedSubmission && (
-        <SubmissionDetailModal
-          isOpen={showSubmissionDetailModal}
-          onClose={() => setShowSubmissionDetailModal(false)}
-          submission={selectedSubmission}
-          cursoId={course?.id}
-          tareaId={selectedTareaId || undefined}
-          jwtToken={jwtToken}
-        />
-      )}
     </div>
   );
 }
