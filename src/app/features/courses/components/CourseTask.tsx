@@ -33,24 +33,19 @@ export default function CourseTasks() {
   const jwtToken = loaderData?.jwtToken || '';
   const isProfesor = loaderData?.isProfesor || false;
 
-  // Hook that centralizes tareas and recursos per tarea
   const recursosHook = useRecursosPorTasks(course?.id as number | undefined, jwtToken || undefined);
   const { tasks, resourcesByTask, getRecursosForTask, getRecursoUrl, uploadRecursoForTask, deleteRecursoForTask, createTask, updateTask } = recursosHook;
 
-  // NOTE: upload/delete action handlers are registered below (after state declarations)
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  // resourcesByTask is managed by useRecursosPorTasks
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [showNewTask, setShowNewTask] = useState(false);
   const [showUploadFor, setShowUploadFor] = useState<number | null>(null);
   const [submissionsByTask, setSubmissionsByTask] = useState<Record<number, Entrega[]>>({});
   const [showUploadSubmissionFor, setShowUploadSubmissionFor] = useState<number | null>(null);
   const [uploadSubmissionError, setUploadSubmissionError] = useState<string>('');
-  // Removed showSubmissionsFor state as we'll use proper routing
 
-  // Form states
   const [newTaskData, setNewTaskData] = useState({
     titulo: '',
     descripcion: '',
@@ -72,7 +67,6 @@ export default function CourseTasks() {
         const payload = JSON.parse(atob(jwtToken.split('.')[1]));
         setCurrentUserId(payload.id || payload.sub);
       } catch (e) {
-        // ignore
       }
     }
   }, [jwtToken]);
@@ -94,7 +88,6 @@ export default function CourseTasks() {
     const next = expandedId === t.id ? null : t.id;
     setExpandedId(next);
     if (next) {
-      // load recursos for this tarea via hook
       try {
         await getRecursosForTask(t.id);
         await getSubmissionsForTask(t.id);
@@ -137,7 +130,6 @@ export default function CourseTasks() {
     const tareaId = showUploadSubmissionFor;
     if (!tareaId || !course?.id) return;
 
-    // Validate file extension
     const allowedExtensions = ['.txt', '.doc', '.docx', '.pdf', '.zip', '.rar'];
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     if (!allowedExtensions.includes(fileExtension)) {
@@ -210,7 +202,7 @@ export default function CourseTasks() {
     if (!window.confirm('¿Eliminar recurso?')) return;
     const success = await deleteRecursoForTask(recurso.ownerId, recurso.id);
     if (success) {
-      // already updated in hook
+
     }
   };
 
@@ -255,7 +247,6 @@ export default function CourseTasks() {
   };
 
 
-  // Check if we're in a submissions view
   const isInSubmissionsView = location.pathname.includes('/submissions');
 
   return (

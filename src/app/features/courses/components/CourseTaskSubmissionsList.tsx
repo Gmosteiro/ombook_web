@@ -2,9 +2,6 @@ import { useLoaderData, useOutletContext, Link, useParams } from "react-router";
 import { useState } from "react";
 import type { Course, Entrega } from "../types/types";
 
-// ===========================
-// LOADER
-// ===========================
 export async function loader({
   params,
   request
@@ -19,10 +16,8 @@ export async function loader({
   const tareaId = params.taskId;
 
   try {
-    // Obtener JWT válido
     const jwtToken = await getValidJWTToken(request);
 
-    // Llamar al backend usando apiFetch
     const res = await apiFetch(
       `/cursos/${cursoId}/tareas/${tareaId}/entregas`,
       {
@@ -34,7 +29,6 @@ export async function loader({
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    // Parsear respuesta
     const submissions = await res.json();
 
     return {
@@ -49,24 +43,24 @@ export async function loader({
     };
   }
 }
-const handleDownloadSubmission = async (tareaId: number, entrega: Entrega) => {
-    if (cursoId) return;
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/cursos/${course.id}/tareas/${tareaId}/entregas/estudiantes/${entrega.estudianteId}/archivo`, {
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.url) window.open(data.url, '_blank');
-      } else {
-        console.error('Error getting submission download url:', response.statusText);
-      }
-    } catch (err) {
-      console.error('Error getting submission download url:', err);
-    }
-  };
+// const handleDownloadSubmission = async (tareaId: number, entrega: Entrega) => {
+//     if (cursoId) return;
+//     try {
+//       const response = await fetch(`${import.meta.env.VITE_API_URL}/cursos/${course.id}/tareas/${tareaId}/entregas/estudiantes/${entrega.estudianteId}/archivo`, {
+//         headers: {
+//           'Authorization': `Bearer ${jwtToken}`,
+//         },
+//       });
+//       if (response.ok) {
+//         const data = await response.json();
+//         if (data.url) window.open(data.url, '_blank');
+//       } else {
+//         console.error('Error getting submission download url:', response.statusText);
+//       }
+//     } catch (err) {
+//       console.error('Error getting submission download url:', err);
+//     }
+//   }; me puede servir despues
 export default function CourseTaskSubmissionsList() {
   const { submissions } = useLoaderData() as { submissions: Entrega[] };
   const { course } = useOutletContext<{ course: Course }>();

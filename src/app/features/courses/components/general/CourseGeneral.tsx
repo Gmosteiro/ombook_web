@@ -102,7 +102,7 @@ export default function CourseGeneral() {
       }, jwtToken);
       setNewPage({ titulo: "", descripcion: "", fechaProgramada: "" });
       setShowNewPage(false);
-      window.location.reload(); // Recargar la página para obtener los datos actualizados
+      window.location.reload();
     } catch (err) {
       console.error("Error al crear página:", err);
     }
@@ -111,7 +111,7 @@ export default function CourseGeneral() {
   const handleUploadRecurso = async (paginaId: number, nombre: string, file: File) => {
     try {
       await uploadRecurso(paginaId, nombre, file, jwtToken);
-      window.location.reload(); // Recargar la página para obtener los datos actualizados
+      window.location.reload();
     } catch (err) {
       console.error("Error al subir recurso:", err);
     }
@@ -122,7 +122,7 @@ export default function CourseGeneral() {
 
     try {
       await deleteRecurso(paginaId, recursoId, jwtToken);
-      window.location.reload(); // Recargar la página para obtener los datos actualizados
+      window.location.reload();
     } catch (err) {
       console.error("Error al eliminar recurso:", err);
     }
@@ -150,11 +150,10 @@ export default function CourseGeneral() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      // Recargar la página para obtener los datos actualizados
       window.location.reload();
     } catch (err) {
       console.error("Error al actualizar página:", err);
-      throw err; // Re-throw to let the component handle the error
+      throw err;
     }
   };
 
@@ -254,7 +253,6 @@ export default function CourseGeneral() {
           </form>
         )}
 
-        {/* Lista de páginas */}
         <div className="space-y-4">
           {paginas.map(pagina => (
             <PaginaTematica

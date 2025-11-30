@@ -131,10 +131,7 @@ export default function CourseTaskSubmissions() {
       }
 
       const updatedSubmission = await response.json();
-      // Update the submission state
-      // Since submission is from loader, we need to update it somehow
-      // For now, reload the page or update state
-      window.location.reload(); // Simple way, or use a state update
+      window.location.reload();
 
       setIsGradingModalOpen(false);
       setCalificacion('');
@@ -281,7 +278,6 @@ export default function CourseTaskSubmissions() {
         </div>
       </main>
 
-      {/* Grading Modal */}
       {isGradingModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4">
