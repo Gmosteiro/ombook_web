@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useLoaderData, useOutletContext, Link } from "react-router";
+import { useLoaderData, useOutletContext, Link, Outlet } from "react-router";
 import { getValidJWTToken, getUserRole } from "~/services/session.server";
 import { UploadResourceDialog } from "./UploadResourceDialog";
-import CourseTaskSubmissions from "./CourseTaskSubmissions";
 import useRecursosPorTasks from "../hooks/useRecursosPorTasks";
 import type { Course, Tarea, Recurso, Entrega } from "../types/types";
 
@@ -48,7 +47,7 @@ export default function CourseTasks() {
   const [submissionsByTask, setSubmissionsByTask] = useState<Record<number, Entrega[]>>({});
   const [showUploadSubmissionFor, setShowUploadSubmissionFor] = useState<number | null>(null);
   const [uploadSubmissionError, setUploadSubmissionError] = useState<string>('');
-  const [showSubmissionsFor, setShowSubmissionsFor] = useState<number | null>(null);
+  // Removed showSubmissionsFor state as we'll use proper routing
 
   // Form states
   const [newTaskData, setNewTaskData] = useState({
@@ -254,18 +253,6 @@ export default function CourseTasks() {
     });
   };
 
-  if (showSubmissionsFor) {
-    return (
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <button onClick={() => setShowSubmissionsFor(null)} className="ombook-btn ombook-btn-secondary">
-            ← Volver a Tareas
-          </button>
-        </div>
-        <CourseTaskSubmissions course={course} tareaId={showSubmissionsFor.toString()} />
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -279,6 +266,8 @@ export default function CourseTasks() {
           </div>
         )}
       </div>
+
+      <Outlet context={{ course }} />
 
       {showNewTask && (
         <form onSubmit={handleCreateTask} className="mb-4 bg-white p-4 rounded-md shadow">
@@ -456,7 +445,7 @@ export default function CourseTasks() {
                 <div>
                   <div className="text-sm font-semibold mb-2">Entrega</div>
                   {isProfesor ? (
-                    <Link to={`tasks/${t.id}/submissions`} onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm">Ver Entregas</Link>
+                    <Link to={`${t.id}/submissions`} onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm">Ver Entregas</Link>
                   ) : (
                     <div className="space-y-2">
                       {(submissionsByTask[t.id] || []).length === 0 ? (
@@ -472,7 +461,13 @@ export default function CourseTasks() {
                             {entrega.calificacion !== undefined && <div className="text-sm">Calificación: {entrega.calificacion}</div>}
                             <div className="flex gap-2 mt-2">
                               <button onClick={(e) => { e.stopPropagation(); handleDownloadSubmission(t.id, entrega); }} className="ombook-text-green text-sm">Descargar</button>
-                              <button onClick={(e) => { e.stopPropagation(); setShowSubmissionsFor(t.id); }} className="ombook-text-blue text-sm">Ver más detalles</button>
+                              <Link
+  to={`${t.id}/submissions/${entrega.id}`}
+  onClick={(e) => e.stopPropagation()}
+  className="ombook-text-blue text-sm"
+>
+  Ver más detalles
+</Link>
                             </div>
                           </div>
                         ))

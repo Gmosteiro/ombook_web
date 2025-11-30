@@ -21,7 +21,8 @@ const routes: RouteConfig = [
     route("/courses/:id", "./features/courses/pages/CourseDetail.Page.tsx", [
         route("general", "./features/courses/components/general/CourseGeneral.tsx"),
         route("tasks", "./features/courses/components/CourseTask.tsx", [
-            route(":tareaId/submissions", "./features/courses/components/CourseTaskSubmissions.tsx"),
+            route(":taskId/submissions", "./features/courses/components/CourseTaskSubmissionsList.tsx"),
+            route(":taskId/submissions/:entregaId", "./features/courses/components/CourseTaskSubmissions.tsx"),
         ]),
         route("forums", "./features/courses/components/CourseForums.tsx"),
         route("announcements", "./features/courses/components/CourseAnnouncements.tsx"),

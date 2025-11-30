@@ -1,11 +1,126 @@
-import type { Course } from "../types/types";
+import { useLoaderData, useOutletContext, useParams, Link } from "react-router";
+import type { Course, EntregaDetalle } from "../types/types";
+import { API_URL } from "../../common/utils/Utils";
+import type { UsuarioDetalleResponse } from "../../../routes/api.users.server";
 
-interface CourseTaskSubmissionsProps {
-  course: Course;
-  tareaId: string;
+// ===========================
+// LOADER
+// ===========================
+export async function loader({
+  params,
+  request
+}: {
+  params: { id: string; taskId: string; entregaId: string };
+  request: Request;
+}) {
+  const { getValidJWTToken } = await import("~/services/session.server");
+  const { apiFetch } = await import("~/features/auth/utils/methods");
+  const { getUserById } = await import("~/routes/api.users.server");
+
+  const cursoId = params.id;
+  const tareaId = params.taskId;
+  const entregaId = params.entregaId;
+
+  try {
+    // Obtener JWT válido
+    const jwtToken = await getValidJWTToken(request);
+
+    // Llamar al backend usando apiFetch
+    const endpoint = `/cursos/${cursoId}/tareas/${tareaId}/entregas/${entregaId}`;
+    const res = await apiFetch(
+      endpoint,
+      {
+        method: "GET",
+        secure: true,
+        jwtToken
+      }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+
+    // Parsear respuesta
+    const submission: EntregaDetalle = await res.json();
+
+    // Obtener detalles del estudiante
+    let student: UsuarioDetalleResponse | null = null;
+    if (submission.estudianteId) {
+      try {
+        student = await getUserById(request, submission.estudianteId);
+      } catch (studentErr) {
+        console.error("Error fetching student details:", studentErr);
+        // No fallar si no se puede obtener el estudiante
+      }
+    }
+
+    // Obtener URL de descarga si hay recurso
+    let downloadUrl: string | null = null;
+    if (submission.recursoId) {
+      try {
+        const downloadRes = await apiFetch(
+          `/cursos/${cursoId}/recursos/${submission.recursoId}/descargar-url`,
+          {
+            method: "GET",
+            secure: true,
+            jwtToken
+          }
+        );
+        if (downloadRes.ok) {
+          const downloadData = await downloadRes.json();
+          downloadUrl = downloadData.url;
+        } else {
+          console.error("Error fetching download URL:", downloadRes.status);
+        }
+      } catch (downloadErr) {
+        console.error("Error fetching download URL:", downloadErr);
+      }
+    }
+
+    return {
+      submission,
+      student,
+      downloadUrl
+    };
+
+  } catch (err) {
+    console.error("Error fetching submission detail:", err);
+
+    return {
+      submission: null,
+      student: null,
+      downloadUrl: null
+    };
+  }
 }
 
-export default function CourseTaskSubmissions({ course, tareaId }: CourseTaskSubmissionsProps) {
+// ===========================
+// COMPONENTE
+// ===========================
+export default function CourseTaskSubmissions() {
+  const { submission, student, downloadUrl } = useLoaderData() as { submission: EntregaDetalle | null; student: UsuarioDetalleResponse | null; downloadUrl: string | null };
+  const { course } = useOutletContext<{ course: Course }>();
+  const params = useParams<{ id: string; taskId: string; entregaId: string }>();
+  const entregaId = params.entregaId;
+  const cursoId = params.id;
+  const tareaId = params.taskId;
+
+  const handleDownload = () => {
+    if (downloadUrl) {
+      window.open(downloadUrl, '_blank');
+    } else {
+      alert("URL de descarga no disponible");
+    }
+  };
+
+  if (!submission) {
+    return (
+      <div className="font-display bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-300 min-h-screen p-4">
+        <main className="w-full max-w-4xl mx-auto">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+            <p className="text-red-600 dark:text-red-400">Error al cargar la entrega. Verifica que la URL sea correcta.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="font-display bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-300 min-h-screen p-4">
@@ -14,165 +129,114 @@ export default function CourseTaskSubmissions({ course, tareaId }: CourseTaskSub
 
           {/* HEADER */}
           <div className="p-6 md:p-8 border-b border-slate-200 dark:border-slate-700">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {course?.nombre || course?.id} — Tarea {tareaId}
-            </h1>
-
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-              <span className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 font-medium px-3 py-1 rounded-full">
-                <span className="material-icons text-base">check</span>
-                Hecho
-              </span>
-
-              <div className="text-slate-500 dark:text-slate-400">
-                <p>
-                  <span className="font-semibold">Apertura:</span> miércoles, 8 de octubre de 2025, 00:00
-                </p>
-                <p>
-                  <span className="font-semibold">Cierre:</span> lunes, 13 de octubre de 2025, 23:59
-                </p>
-              </div>
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                {course?.nombre || course?.id} — Detalle de la Entrega {entregaId}
+              </h1>
+              <Link
+                to={`/courses/${cursoId}/tasks`}
+                className="inline-flex items-center px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Volver a las Tareas
+              </Link>
             </div>
           </div>
 
           {/* BODY */}
           <div className="p-6 md:p-8">
-            {/* BUTTONS */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              <button className="w-full sm:w-auto flex-1 sm:flex-initial justify-center inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-md transition-colors">
-                <span className="material-icons text-lg">edit</span>
-                Editar entrega
-              </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              <button className="w-full sm:w-auto flex-1 sm:flex-initial justify-center inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-md transition-colors">
-                <span className="material-icons text-lg">delete</span>
-                Borrar entrega
-              </button>
+              {/* Información del Estudiante */}
+              <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Información del Estudiante
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <span className="font-medium text-slate-600 dark:text-slate-400">Nombre del Estudiante:</span>
+                    <p className="text-slate-800 dark:text-slate-200">
+                      {student ? `${student.nombre} ${student.apellido}` : `ID: ${submission.estudianteId}`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detalles de la Entrega */}
+              <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Detalles de la Entrega
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <span className="font-medium text-slate-600 dark:text-slate-400">Fecha de Envío:</span>
+                    <p className="text-slate-800 dark:text-slate-200">
+                      {submission.fechaEnvio
+                        ? new Date(submission.fechaEnvio).toLocaleString()
+                        : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-600 dark:text-slate-400">Estado:</span>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                      submission.estado === 'ENVIADA'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                    }`}>
+                      {submission.estado}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-600 dark:text-slate-400">Calificación:</span>
+                    <p className="text-slate-800 dark:text-slate-200">
+                      {submission.calificacion !== null && submission.calificacion !== undefined
+                        ? `${submission.calificacion}/10`
+                        : "Sin calificar"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Comentario */}
+              <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 md:col-span-2">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Comentario
+                </h3>
+                <p className="text-slate-800 dark:text-slate-200">
+                  {submission.comentario || "Sin comentario"}
+                </p>
+              </div>
+
+              {/* Archivo Adjunto */}
+              <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 md:col-span-2">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                  Archivo Adjunto
+                </h3>
+                {submission.nombreArchivo ? (
+                  <div className="flex items-center space-x-3">
+                    <svg className="w-8 h-8 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <button
+                         onClick={handleDownload}
+                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium underline"
+                       >
+                         {submission.nombreArchivo}
+                       </button>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Haz clic para descargar el archivo</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-slate-500 dark:text-slate-400">No hay archivo adjunto</p>
+                )}
+              </div>
+
             </div>
-
-            {/* STATE TITLE */}
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
-              Estado de la entrega
-            </h2>
-
-            {/* TABLE */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 w-1/3 sm:w-1/4">
-                      Grupo
-                    </td>
-                    <td className="px-4 py-3 text-slate-800 dark:text-slate-200">
-                      Grupo 1
-                    </td>
-                  </tr>
-
-                  <tr className="bg-green-50 dark:bg-green-900/20">
-                    <td className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400">
-                      Estado de la entrega
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-green-800 dark:text-green-300">
-                      Enviado para calificar
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400">
-                      Estado de la calificación
-                    </td>
-                    <td className="px-4 py-3 text-slate-800 dark:text-slate-200">
-                      Sin calificar
-                    </td>
-                  </tr>
-
-                  <tr className="bg-green-50 dark:bg-green-900/20">
-                    <td className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400">
-                      Tiempo restante
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-green-800 dark:text-green-300">
-                      La tarea fue enviada 1 día 2 horas antes de la fecha límite
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400">
-                      Última modificación
-                    </td>
-                    <td className="px-4 py-3 text-slate-800 dark:text-slate-200">
-                      domingo, 12 de octubre de 2025, 21:05
-                    </td>
-                  </tr>
-
-                  {/* FILES */}
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400 align-top pt-4">
-                      Archivos enviados
-                    </td>
-                    <td className="px-4 py-3">
-                      <ul className="space-y-3">
-                        <li>
-                          <a
-                            href="#"
-                            className="flex items-center gap-3 text-blue-600 dark:text-primary hover:underline"
-                          >
-                            <img
-                              className="w-6 h-6 flex-shrink-0"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8n_vOBHb8h0Xau_dCyxCz6czwBGH1V0JCjRrfYbJ45k7SF5rnOPdTWAM3I5DESKHkc_Sx57eF559g4szpMg7WGsD4gXuwZb-dgH4b0UwjO64vQQ0Ls7yapeXrYPK4dyS02X4vd-OMyDf1xIJ1lJUaBuCvLTAYeKrGiyqxEm6hFwU8wEu0M9on-mi0x9lrXa7T5Btkhpxuno5zTyQ6Q4Dty-t5-wCyNFuVwPGKH2nQ5SYgiF8CVwgmUHpzyRPL53ZWpDKgGnQxJJo"
-                              alt=""
-                            />
-                            <span className="truncate">
-                              Documento de Arquitectura de Software.docx
-                              <span className="ml-2 text-slate-500 dark:text-slate-400 text-xs">
-                                12 de octubre de 2025, 21:05
-                              </span>
-                            </span>
-                          </a>
-                        </li>
-
-                        <li>
-                          <a
-                            href="#"
-                            className="flex items-center gap-3 text-blue-600 dark:text-primary hover:underline"
-                          >
-                            <img
-                              className="w-6 h-6 flex-shrink-0"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdeQhTIauZPNb0MV7bMuc-jFZFCCtj81S9VHbrtQd7snRGVwE75JhBwQty_AydXQNPU35Jn94UcfyXD8GOa9pcLiHUds1Tm-lp5veFywZ7b4Y5u68_yZg6oOxnyF5Do7B_RXaPvWZUKrdEn3swmrYvyOqSQ9hDT0RHvtG4oHKQ9hy9ttgSXM7i3Bdeyjpl5ukFcafXREefxfgRNfUUbDZvBcEOpETq8i_BI8M3FNMfIOrDjuU-Nbe-qMmLlsvtXU8Ffdf_BrAX274"
-                              alt=""
-                            />
-                            <span className="truncate">
-                              Documento de Arquitectura de Software.pdf
-                              <span className="ml-2 text-slate-500 dark:text-slate-400 text-xs">
-                                12 de octubre de 2025, 21:05
-                              </span>
-                            </span>
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  {/* COMMENTS */}
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400">
-                      Comentarios de la entrega
-                    </td>
-                    <td className="px-4 py-3">
-                      <a
-                        href="#"
-                        className="inline-flex items-center gap-1 font-medium text-blue-600 dark:text-primary hover:underline"
-                      >
-                        <span className="material-icons text-xl">play_arrow</span>
-                        Comentarios (0)
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
           </div>
+
         </div>
       </main>
     </div>
