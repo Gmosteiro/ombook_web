@@ -139,6 +139,25 @@ export default function CourseGeneral() {
     }
   };
 
+  const handleUpdatePagina = async (paginaId: number, updatedData: { titulo: string; fechaProgramada: string | null }) => {
+    try {
+      const res = await apiFetch(`/cursos/${course?.id}/paginas/${paginaId}`, {
+        method: 'PUT',
+        secure: true,
+        jwtToken,
+        body: updatedData
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      // Recargar la página para obtener los datos actualizados
+      window.location.reload();
+    } catch (err) {
+      console.error("Error al actualizar página:", err);
+      throw err; // Re-throw to let the component handle the error
+    }
+  };
+
   return (
     <div>
       <div className="ombook-card mb-8">
@@ -246,6 +265,7 @@ export default function CourseGeneral() {
               onUploadRecurso={(nombre, file) => handleUploadRecurso(pagina.id, nombre, file)}
               onDeleteRecurso={(recursoId) => handleDeleteRecurso(pagina.id, recursoId)}
               onDownloadRecurso={handleDownloadRecurso}
+              onUpdatePagina={handleUpdatePagina}
               isProfesor={isProfesor}
             />
           ))}

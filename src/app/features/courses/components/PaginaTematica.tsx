@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRecursosPorPagina } from '../hooks/useRecursosPorPagina';
 import { type PaginaTematica as IPaginaTematica } from '../types/types';
 import { UploadResourceDialog } from './UploadResourceDialog';
+import { apiFetch } from '../../auth/utils/methods';
 
 interface Props {
   pagina: IPaginaTematica;
@@ -10,6 +11,7 @@ interface Props {
   onUploadRecurso: (nombre: string, file: File) => Promise<void>;
   onDeleteRecurso: (recursoId: number) => Promise<void>;
   onDownloadRecurso: (recursoId: number) => Promise<void>;
+  onUpdatePagina?: (paginaId: number, updatedData: { titulo: string; fechaProgramada: string | null }) => Promise<void>;
   isProfesor: boolean;
 }
 
@@ -20,10 +22,17 @@ export const PaginaTematica = ({
   onUploadRecurso,
   onDeleteRecurso,
   onDownloadRecurso,
+  onUpdatePagina,
   isProfesor
 }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    titulo: pagina.titulo,
+    fechaProgramada: pagina.fechaProgramada ? new Date(pagina.fechaProgramada).toISOString().slice(0, 16) : ''
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleUpload = async (nombre: string, file: File) => {
     try {
@@ -31,6 +40,29 @@ export const PaginaTematica = ({
       setShowUploadDialog(false);
     } catch (error) {
       console.error('Error al subir el recurso:', error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!onUpdatePagina) return;
+
+    setIsUpdating(true);
+    try {
+      const fechaProgramada = editData.fechaProgramada
+        ? new Date(editData.fechaProgramada).toISOString()
+        : null;
+
+      await onUpdatePagina(pagina.id, {
+        titulo: editData.titulo,
+        fechaProgramada
+      });
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error al actualizar la página:', error);
+      alert('Error al actualizar la página. Inténtalo de nuevo.');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -89,26 +121,92 @@ export const PaginaTematica = ({
             </div>
           </div>
         </div>
-        <button
-          className="p-2"
-          title={isExpanded ? "Contraer página" : "Expandir página"}
-          aria-label={isExpanded ? "Contraer página" : "Expandir página"}
-        >
-          <svg
-            className={`w-6 h-6 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="flex items-center gap-2">
+          {isProfesor && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(!isEditing);
+              }}
+              className="p-2 text-blue-600 hover:text-blue-800"
+              title="Editar página"
+              aria-label="Editar página"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          )}
+          <button
+            className="p-2"
+            title={isExpanded ? "Contraer página" : "Expandir página"}
+            aria-label={isExpanded ? "Contraer página" : "Expandir página"}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
+            <svg
+              className={`w-6 h-6 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {isEditing && isProfesor && (
+        <div className="p-4 border-t bg-blue-50">
+          <div className="space-y-4">
+            <div>
+              <label htmlFor={`edit-titulo-${pagina.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                Título
+              </label>
+              <input
+                id={`edit-titulo-${pagina.id}`}
+                type="text"
+                value={editData.titulo}
+                onChange={(e) => setEditData(prev => ({ ...prev, titulo: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isUpdating}
+              />
+            </div>
+            <div>
+              <label htmlFor={`edit-fecha-${pagina.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                Fecha Programada (opcional)
+              </label>
+              <input
+                id={`edit-fecha-${pagina.id}`}
+                type="datetime-local"
+                value={editData.fechaProgramada}
+                onChange={(e) => setEditData(prev => ({ ...prev, fechaProgramada: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isUpdating}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                disabled={isUpdating}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleUpdate}
+                disabled={isUpdating || !editData.titulo.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isExpanded && (
         <div className={`p-4 border-t ${isHidden ? 'bg-gray-100' : ''}`}>
