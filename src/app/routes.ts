@@ -11,6 +11,7 @@ const routes: RouteConfig = [
     route("/forgot-password", "./features/auth/components/ForgotPassword.tsx"),
     route("/password-reset", "./features/auth/components/ResetPassword.tsx"),
     route("/account-unlock", "./features/auth/components/AccountUnlock.tsx"),
+    route("email-change/confirm", "./features/users/pages/ConfirmEmailChange.tsx"),
 
     // Courses
     route("/courses", "./features/courses/pages/CoursesPage.tsx"),
@@ -48,6 +49,8 @@ const routes: RouteConfig = [
 
     route("/profile", "./features/users/pages/ProfilePage.tsx"),
     route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),
+    route("/profile/change-email", "./features/users/pages/ChangeEmail.tsx"),
+
 
     // Legal
     route("/terms", "./features/common/pages/TermsAndConditions.tsx"),
