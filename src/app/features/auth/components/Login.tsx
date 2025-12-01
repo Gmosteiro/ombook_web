@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from "react";
 import { Form, redirect, Link, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
@@ -78,7 +79,10 @@ export async function action({ request }: Route.ActionArgs) {
     throw response;
 };
 
-export default function Login({ actionData }: Route.ComponentProps) {
+// Permite que actionData sea opcional para facilitar los tests
+type LoginProps = { actionData?: { error?: string } };
+
+export default function Login({ actionData }: LoginProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 

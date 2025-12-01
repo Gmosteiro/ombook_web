@@ -1,17 +1,20 @@
-import { useLoaderData, useFetcher, useRevalidator, Link } from "react-router";
+import { useLoaderData, useFetcher, useRevalidator, useNavigate } from "react-router";
 import type { UsuarioBasicoResponse } from "../../../routes/api.profile.server";
 import { useEffect, useState } from "react";
 import { formatFecha } from "../utils/Utils";
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
 import { UserRole } from "~/features/auth/types";
+import UserActionsMenu from "~/features/common/components/UserActionsMenu";
 
 // Loader para obtener el perfil
 export const loader = async ({ request }: { request: Request }) => {
+    const { getUserRole } = await import("../../../services/session.server");
     await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
 
     const { getPerfil } = await import("../../../routes/api.profile.server");
     const perfil = await getPerfil(request);
-    return { perfil };
+    const userRole = await getUserRole(request);
+    return { perfil, userRole };
 };
 
 
@@ -58,9 +61,11 @@ export const action = async ({ request }: { request: Request }) => {
 };
 
 export default function ProfilePage() {
-    const initialPerfil = (useLoaderData() as { perfil: UsuarioBasicoResponse }).perfil;
+    const loaderData = useLoaderData() as { perfil: UsuarioBasicoResponse, userRole: UserRole };
+    const initialPerfil = loaderData.perfil;
     const fetcher = useFetcher<any>();
     const revalidator = useRevalidator();
+    const navigate = useNavigate();
     const [edit, setEdit] = useState(false);
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -97,13 +102,33 @@ export default function ProfilePage() {
                 {fetcher.data?.error && (
                     <div className="text-red-600 mt-4">{fetcher.data.error}</div>
                 )}
-                {!edit && (
+                {!edit ? (
                     <button
                         className="ombook-btn ombook-btn-primary"
                         onClick={() => setEdit(true)}
                     >
                         Editar
                     </button>
+                ) : (
+
+                    <UserActionsMenu
+                        options={[
+                            {
+                                label: "Cambiar Contraseña",
+                                onClick: () => {
+                                    navigate("/profile/change-password");
+                                },
+                                roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE],
+                            },
+                            {
+                                label: "Cambiar Correo",
+                                onClick: () => {
+                                    navigate("/profile/change-email");
+                                },
+                                roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE],
+                            },
+                        ]}
+                    />
                 )}
             </div>
 
@@ -225,12 +250,6 @@ export default function ProfilePage() {
                         >
                             Cancelar
                         </button>
-                        <Link
-                            to="/profile/change-password"
-                            className="ombook-btn ombook-btn-outline"
-                        >
-                            Cambiar Contraseña
-                        </Link>
                     </div>
                 </fetcher.Form>
             ) : (

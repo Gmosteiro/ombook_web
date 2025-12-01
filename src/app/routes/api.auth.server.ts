@@ -1,5 +1,6 @@
 import { API_URL } from "~/features/common/utils/Utils";
 import { apiFetch } from "~/features/auth/utils/methods";
+import { getValidJWTToken } from "../services/session.server";
 
 // ==========================================
 // Tipos para las operaciones de recuperación
@@ -185,4 +186,80 @@ export interface DesbloquearCuentaRequest {
 
 export interface DesbloquearCuentaResponse {
     mensaje: string;
+}
+
+export interface IniciarCambioCorreoRequest {
+    nuevoCorreo: string;
+    passwordActual: string;
+}
+
+export interface ConfirmarCambioCorreoRequest {
+    token: string;
+}
+
+export interface CambioCorreoResponse {
+    mensaje: string;
+}
+
+/**
+ * Inicia el proceso de cambio de correo electrónico.
+ * @param request Request object para obtener el JWT token
+ * @param data Datos para iniciar el cambio (nuevo correo y contraseña actual)
+ * @returns Mensaje de éxito
+ */
+export async function iniciarCambioCorreo(
+    request: Request,
+    data: IniciarCambioCorreoRequest
+): Promise<CambioCorreoResponse> {
+    const response = await apiFetch(`/email-change/requests`, {
+        method: "POST",
+        secure: true,
+        jwtToken: await getValidJWTToken(request),
+        body: JSON.stringify(data),
+    });
+
+    console.log('Response status', response.status);
+    console.log('Response text', await response.clone().text());
+
+    if (!response.ok) {
+        let errorMsg = "Error al iniciar el cambio de correo.";
+
+        try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || errorMsg;
+        } catch { }
+        throw new Error(errorMsg);
+    }
+
+    // Si la respuesta está vacía, devuelve un mensaje por defecto
+    let mensaje = "Solicitud de cambio de correo enviada correctamente.";
+    try {
+        const json = await response.json();
+        if (json?.mensaje) mensaje = json.mensaje;
+    } catch { }
+    return { mensaje };
+}
+
+/**
+ * Confirma el cambio de correo electrónico con el token recibido.
+ * @param data Datos para confirmar el cambio (token)
+ * @returns Mensaje de éxito
+ */
+export async function confirmarCambioCorreo(
+    data: ConfirmarCambioCorreoRequest
+): Promise<CambioCorreoResponse> {
+    const response = await fetch(`${API_URL}/email-change/confirm`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al confirmar el cambio de correo.");
+    }
+
+    return { mensaje: "Correo electrónico cambiado correctamente." };
 }

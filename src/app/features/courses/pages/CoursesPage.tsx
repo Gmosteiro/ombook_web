@@ -76,13 +76,14 @@ export function meta() {
 }
 
 export default function CoursesPage() {
-  const { cursos, profesores, filters, page, showTeacherFilter } = useLoaderData() as {
+  const { cursos, profesores, filters, page, showTeacherFilter, userRole } = useLoaderData() as {
     cursos: PaginatorResponseCursoListadoResponse;
     profesores: UsuarioListaResponse[];
     filters: Filters;
     page: number;
     size: number;
     showTeacherFilter: boolean;
+    userRole: UserRole;
   };
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -161,7 +162,7 @@ export default function CoursesPage() {
               : 'No se encontraron cursos con los criterios seleccionados.'
             }
           </p>
-          {cursos.totalElements === 0 && (
+          {cursos.totalElements === 0 && userRole === UserRole.ADMINISTRADOR && (
             <button
               onClick={() => navigate('/courses/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"

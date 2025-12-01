@@ -93,32 +93,32 @@ export default function ChangePassword() {
     const isSubmitting = navigation.state === "submitting";
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="min-h-screen flex items-center justify-center ombook-bg-light px-4">
+            <div className="max-w-md w-full ombook-card">
+                <div className="ombook-card-header text-center mb-4">
+                    <h1 className="ombook-heading ombook-heading-lg ombook-text-green mb-2">
                         Cambiar Contraseña
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="ombook-text-gray">
                         Debe cambiar su contraseña antes de continuar
                     </p>
                 </div>
 
                 {actionData?.error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-800">{actionData.error}</p>
+                    <div className="ombook-alert ombook-alert-info">
+                        <p>{actionData.error}</p>
                     </div>
                 )}
 
                 {actionData?.success && actionData?.message && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-sm text-green-800">{actionData.message}</p>
+                    <div className="ombook-alert ombook-alert-success">
+                        <p>{actionData.message}</p>
                     </div>
                 )}
 
                 <Form method="post" className="space-y-6">
                     <div>
-                        <label htmlFor="contrasenaActual" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="contrasenaActual" className="ombook-label">
                             Contraseña Actual
                         </label>
                         <input
@@ -126,13 +126,13 @@ export default function ChangePassword() {
                             id="contrasenaActual"
                             name="contrasenaActual"
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            className="ombook-input"
                             placeholder="Ingrese su contraseña actual"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="nuevaContrasena" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="nuevaContrasena" className="ombook-label">
                             Nueva Contraseña
                         </label>
                         <input
@@ -140,13 +140,13 @@ export default function ChangePassword() {
                             id="nuevaContrasena"
                             name="nuevaContrasena"
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            className="ombook-input"
                             placeholder="Ingrese su nueva contraseña"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="confirmarContrasena" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="confirmarContrasena" className="ombook-label">
                             Confirmar Nueva Contraseña
                         </label>
                         <input
@@ -154,16 +154,16 @@ export default function ChangePassword() {
                             id="confirmarContrasena"
                             name="confirmarContrasena"
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            className="ombook-input"
                             placeholder="Confirme su nueva contraseña"
                         />
                     </div>
 
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p className="text-sm font-medium text-blue-900 mb-2">
+                    <div className="ombook-alert ombook-alert-info">
+                        <p className="font-medium mb-2">
                             La contraseña debe cumplir con:
                         </p>
-                        <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                        <ul className="list-disc list-inside space-y-1">
                             <li>Mínimo 8 caracteres</li>
                             <li>Al menos una letra mayúscula</li>
                             <li>Al menos una letra minúscula</li>
@@ -175,7 +175,7 @@ export default function ChangePassword() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        className={`ombook-btn ombook-btn-primary w-full ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         {isSubmitting ? 'Cambiando contraseña...' : 'Cambiar Contraseña'}
                     </button>
