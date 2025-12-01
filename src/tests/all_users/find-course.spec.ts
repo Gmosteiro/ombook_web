@@ -4,7 +4,7 @@ import { ESTUDIANTE_USER } from '../playwright.constants';
 import { WEB_PAGE } from '../playwright.constants';
 
 test('test', async ({ page }) => {
-    login(page, ESTUDIANTE_USER.mail, ESTUDIANTE_USER.password);
+    await login(page, ESTUDIANTE_USER.mail, ESTUDIANTE_USER.password);
     await page.getByRole('link', { name: 'Mis Cursos', exact: true }).click();
     await page.getByRole('combobox').selectOption('ACTIVO');
     await page.goto(`${WEB_PAGE}/courses?status=ACTIVO&page=0`);

@@ -3,7 +3,7 @@ import { login } from './helpers';
 import { PROFESOR_USER } from '../playwright.constants';
 
 test('test', async ({ page }) => {
-    login(page, PROFESOR_USER.mail, PROFESOR_USER.password);
+    await login(page, PROFESOR_USER.mail, PROFESOR_USER.password);
     await page.getByRole('button', { name: 'Abrir menú de usuario' }).click();
     await page.getByRole('navigation').getByRole('link', { name: 'Mi Perfil' }).click();
     await page.getByRole('button', { name: 'Editar' }).click();
