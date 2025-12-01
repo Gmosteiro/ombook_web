@@ -51,6 +51,9 @@ const routes: RouteConfig = [
     route("/profile/change-password", "./features/users/pages/ChangePassword.tsx"),
     route("/profile/change-email", "./features/users/pages/ChangeEmail.tsx"),
 
+    // MIRAME Y NO ME TOQUES.
+    route("/csv/import", "./routes/api-csv-import.ts"),
+
 
     // Legal
     route("/terms", "./features/common/pages/TermsAndConditions.tsx"),

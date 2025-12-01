@@ -3,7 +3,7 @@ import 'dotenv/config';
 export const WEB_PAGE = process.env.WEB_PAGE || 'http://localhost:3000';
 
 export const ADMIN_USER = {
-    mail: "admin@ombook.com",
+    mail: "gastonmosteiro1006@gmail.com",
     password: "Test.1234"
 };
 
