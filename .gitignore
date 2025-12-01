@@ -8,6 +8,7 @@ pnpm-debug.log*
 
 # React Router
 .react_router/
+src/test-results/
 
 # Next.js (si usas Next.js)
 .next/
