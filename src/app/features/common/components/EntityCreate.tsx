@@ -114,30 +114,30 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
     };
 
     return (
-        <section className={`bg-white border border-gray-200 rounded-xl p-6 ${className ?? ""}`}>
+        <section className={`bg-white ombook-border-gray rounded-xl p-6 ${className ?? ""}`}>
             <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{l.header}</h2>
             <p className="text-gray-500 mb-5">{l.subtitle}</p>
 
             {/* Mostrar mensajes de error y éxito */}
             {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div className="ombook-alert ombook-alert-info border-l-4 border-ombook-brown text-ombook-brown mb-4">
                     <strong>Error:</strong> {error}
                 </div>
             )}
 
             {success && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <div className="ombook-alert ombook-alert-success border-l-4 border-ombook-green text-ombook-green mb-4">
                     <strong>Éxito:</strong> {success}
                 </div>
             )}
 
             <div className="mb-5">
-                <div className="inline-flex w-full max-w-md rounded-lg bg-gray-100 p-1">
+                <div className="inline-flex w-full max-w-md rounded-lg ombook-bg-light p-1">
                     <button
                         type="button"
                         onClick={() => setActiveTab("individual")}
                         className={`flex-1 px-4 py-2 rounded-md font-semibold transition
-              ${activeTab === "individual" ? "bg-blue-50 text-blue-700 border border-blue-200" : "text-gray-700"}`}
+              ${activeTab === "individual" ? "ombook-bg-green ombook-text-gray border ombook-border-green" : "ombook-text-gray"}`}
                     >
                         {l.tabIndividual}
                     </button>
@@ -146,7 +146,7 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
                         disabled={!bulkCfg.enabled}
                         onClick={() => setActiveTab("bulk")}
                         className={`flex-1 px-4 py-2 rounded-md font-semibold transition
-              ${activeTab === "bulk" ? "bg-blue-50 text-blue-700 border border-blue-200" : "text-gray-700"}
+              ${activeTab === "bulk" ? "ombook-bg-green ombook-text-gray border ombook-border-green" : "ombook-text-gray"}
               ${!bulkCfg.enabled ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         {l.tabBulk}
@@ -175,16 +175,16 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
                             setDragOver(false);
                         }}
                         onDrop={handleDrop}
-                        className={`border-2 border-dashed rounded-xl p-8 text-center
-              ${dragOver ? "border-blue-400 bg-blue-50" : "border-blue-200 bg-blue-50/40"} text-gray-600`}
+                        className={`ombook-border-green border-2 border-dashed rounded-xl p-8 text-center
+              ${dragOver ? "ombook-border-green ombook-bg-green-light" : "ombook-border-green ombook-bg-light"} text-gray-600`}
                     >
-                        <div className="text-3xl text-blue-500 mb-2" aria-hidden>
+                        <div className="text-3xl ombook-text-green mb-2" aria-hidden>
                             ⛅
                         </div>
                         <div className="mb-2">
                             <label
                                 htmlFor="entity-bulk-file"
-                                className="text-blue-700 font-semibold cursor-pointer mr-1"
+                                className="ombook-text-green font-semibold cursor-pointer mr-1"
                             >
                                 Sube un archivo
                             </label>
@@ -212,7 +212,7 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
                                     href={bulkCfg.templateUrl}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-blue-700 font-semibold"
+                                    className="ombook-link font-semibold"
                                 >
                                     Descargar plantilla CSV
                                 </a>
@@ -225,8 +225,8 @@ const EntityCreate: React.FC<EntityCreateProps> = ({
                             type="button"
                             onClick={handleUpload}
                             disabled={!file || uploading || isLoading}
-                            className={`min-w-[200px] bg-blue-600 text-white py-2 px-4 rounded font-semibold
-                ${!file || uploading || isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                            className={`min-w-[200px] ombook-btn ombook-btn-primary
+                ${!file || uploading || isLoading ? "opacity-60 cursor-not-allowed" : "ombook-btn-primary"}`}
                         >
                             {(uploading || isLoading) ? "Importando..." : l.submitBulk}
                         </button>

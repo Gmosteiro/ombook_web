@@ -152,8 +152,8 @@ const UserIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submittin
                 <button
                     type="submit"
                     disabled={submitting}
-                    className={`min-w-[200px] bg-blue-600 text-white py-2 px-4 rounded font-semibold
-                        ${submitting ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                    className={`min-w-[200px] ombook-btn ombook-btn-primary
+                        ${submitting ? "opacity-60 cursor-not-allowed" : "ombook-btn-primary"}`}
                 >
                     {submitting ? "Creando..." : "Crear Usuario"}
                 </button>

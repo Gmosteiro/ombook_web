@@ -48,7 +48,7 @@ export default function UserEnrollPage() {
 
     const enrollUserImportHandler = createCsvImportHandler({
         allowedRoles: [UserRole.PROFESOR],
-        backendEndpoint: `/matricula/alta/masiva?cursoId=${course.id}`,
+        backendEndpoint: `/cursos/${course.id}/matriculas/importaciones-alta`,
         successMessage: "Estudiantes Matriculados Correctamente",
     });
 

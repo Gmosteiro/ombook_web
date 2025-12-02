@@ -14,6 +14,15 @@ export async function action({ request }: ActionFunctionArgs) {
             fileContent
         } = jsonData;
 
+
+        console.log('CSV Import Action Invoked with data:', {
+            allowedRoles,
+            backendEndpoint,
+            fileName,
+            fileType,
+            fileContentPresent: !!fileContent
+        });
+
         if (!allowedRoles || !backendEndpoint || !fileName || !fileContent) {
             return Response.json({
                 success: false,
@@ -57,6 +66,8 @@ export async function action({ request }: ActionFunctionArgs) {
         });
 
         if (!response.ok) {
+
+            console.log('Backend responded with error status:', response.status);
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
 
             try {
@@ -80,6 +91,8 @@ export async function action({ request }: ActionFunctionArgs) {
         }
 
         try {
+
+            console.log('Parsing backend response as JSON');
             const responseData = await response.json();
 
             // Construir mensaje detallado
