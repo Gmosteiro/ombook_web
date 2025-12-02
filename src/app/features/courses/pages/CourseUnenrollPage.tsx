@@ -3,6 +3,7 @@ import { UserRole } from "~/features/auth/types";
 import { EnrollUserResponse, EnrollMasivaUserData, Course } from "../types/types";
 import EntityCreate from "../../common/components/EntityCreate";
 import UnenrollIndividualForm from "../components/enroll/UnenrollIndividualForm";
+import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 import { requireRoleLoader } from "../../auth/components/requireRoleLoader";
 import React, { useCallback } from "react";
 
@@ -10,7 +11,7 @@ export const loader = requireRoleLoader([UserRole.PROFESOR]);
 
 export async function action({ request }: ActionFunctionArgs): Promise<EnrollUserResponse> {
     const { getUsuariosVinculadosByCurso } = await import("../../../routes/api.users.server");
-    const { unenrollUser, unenrollUsersMassive } = await import("../../../routes/api.matricula.server");
+    const { unenrollUser } = await import("../../../routes/api.matricula.server");
 
     const formData = await request.formData();
     const intent = formData.get("intent");
@@ -35,14 +36,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<EnrollUse
         }
     }
 
-    if (intent === "masivo") {
-        const cursoId = Number(formData.get("cursoId"));
-        const file = formData.get("file") as File;
-        const response = await unenrollUsersMassive(request, cursoId, file);
-        const result = await response.json();
-        return result;
-    }
-
+    // El masivo ahora lo maneja el endpoint /csv/import vía el helper
     return { error: "Acción no reconocida" };
 }
 
@@ -53,6 +47,12 @@ export default function UserUnenrollPage() {
     const course = context?.course;
     const fetcher = useFetcher<EnrollUserResponse>();
     const importFetcher = useFetcher<EnrollMasivaUserData>();
+
+    const unenrollUserImportHandler = createCsvImportHandler({
+        allowedRoles: [UserRole.PROFESOR],
+        backendEndpoint: `/cursos/${course.id}/matriculas/importaciones-baja`,
+        successMessage: "Usuarios desmatriculados correctamente",
+    });
 
     const handleUnenrollUser = useCallback(
         (data: { usuarioId: number }) => {
@@ -67,15 +67,20 @@ export default function UserUnenrollPage() {
     );
 
     const handleImportUsers = useCallback(
-        (file: File) => {
+        async (file: File) => {
             if (!course?.id) return;
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("cursoId", course.id.toString());
-            formData.append("intent", "masivo");
-            importFetcher.submit(formData, { method: "POST" });
+            try {
+                const { payload, action } = await unenrollUserImportHandler(file);
+                importFetcher.submit(payload, {
+                    method: "POST",
+                    action,
+                    encType: "application/json"
+                });
+            } catch (error) {
+                console.error('Error preparando importación:', error);
+            }
         },
-        [course?.id, importFetcher]
+        [course?.id, importFetcher, unenrollUserImportHandler]
     );
 
     const importResult: any = importFetcher.data;
