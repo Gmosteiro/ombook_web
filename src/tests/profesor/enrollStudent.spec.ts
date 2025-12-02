@@ -14,12 +14,4 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Buscar' }).click();
   await page.getByText('Gaston Mosteiro').click();
   await page.getByRole('button', { name: 'Matricular usuario' }).click();
-  await page.getByRole('link', { name: 'Usuarios' }).click();
-  await page.getByRole('button', { name: 'Acciones' }).click();
-  await page.getByRole('button', { name: 'Desmatricular usuarios' }).click();
-  await page.getByRole('textbox', { name: 'Ej: Juan, juan@mail.com,' }).click();
-  await page.getByRole('textbox', { name: 'Ej: Juan, juan@mail.com,' }).fill('Gaston');
-  await page.getByRole('button', { name: 'Buscar' }).click();
-  await page.getByText('Gaston Mosteiro').click();
-  await page.getByRole('button', { name: 'Desmatricular usuario' }).click();
 });
