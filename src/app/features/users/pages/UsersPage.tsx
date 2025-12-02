@@ -132,9 +132,9 @@ export default function UsersPage() {
   const totalPages = users.totalPages || 1;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="ombook-container py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Gestión de Usuarios</h1>
+        <h1 className="ombook-heading ombook-heading-lg">Gestión de Usuarios</h1>
         <UserActionsMenu
           options={[
             {
@@ -147,16 +147,16 @@ export default function UsersPage() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
+      <div className="ombook-card mb-8 flex flex-wrap gap-3 items-center">
         <input
           type="text"
           placeholder="Buscar por nombre, email o cédula (mín. 3 caracteres)..."
-          className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
+          className="ombook-input min-w-[220px] flex-1"
           value={searchInput}
           onChange={(e) => handleFilterChange("search", e.target.value)}
         />
         <select
-          className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+          className="ombook-input"
           value={filters.rol}
           onChange={(e) => handleFilterChange("rol", e.target.value)}
         >
@@ -166,7 +166,7 @@ export default function UsersPage() {
           <option value="ESTUDIANTE">Estudiante</option>
         </select>
         <select
-          className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+          className="ombook-input"
           value={filters.estado}
           onChange={(e) => handleFilterChange("estado", e.target.value)}
         >
@@ -177,65 +177,64 @@ export default function UsersPage() {
       </div>
 
       {allUsers.length > 0 && (
-        <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mb-4 text-sm ombook-text-gray">
           Total de resultados: {users.totalElements ?? allUsers.length}
         </div>
       )}
 
       {allUsers.length === 0 ? (
-        <div className="text-center text-gray-500 mt-12">
+        <div className="text-center ombook-text-gray mt-12">
           <div className="mb-4">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="mx-auto h-12 w-12 ombook-text-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+          <h3 className="ombook-heading ombook-heading-md mb-2">
             No se encontraron usuarios
           </h3>
         </div>
       ) : (
         <>
           {/* Tabla de usuarios */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="ombook-card overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="ombook-bg-light">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Nombre
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Apellido
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Correo Electrónico
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Rol
                   </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {allUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <tr key={user.id} className="hover:ombook-bg-light">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                       {user.nombre}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                       {user.apellido}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                       {user.correo}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm ombook-text-gray">
                       {user.rol}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm"
+                        className="ombook-btn ombook-btn-primary"
                         onClick={() => handleViewUser(user.id!)}
                         disabled={fetcher.state === "submitting"}
                       >
