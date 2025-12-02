@@ -34,7 +34,8 @@ const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitt
                     />
                     <button
                         type="submit"
-                        className="bg-blue-600 text-white px-4 py-2 rounded"
+                        className={`ombook-btn ombook-btn-primary px-4 py-2 rounded font-semibold
+                            ${submitting || !search || fetcher.state === "submitting" ? "opacity-60 cursor-not-allowed" : "ombook-btn-primary"}`}
                         disabled={submitting || !search || fetcher.state === "submitting"}
                     >
                         {fetcher.state === "submitting" && intent === "buscar"
@@ -74,8 +75,8 @@ const EnrollIndividualForm: React.FC<IndividualFormProps> = ({ onSubmit, submitt
                         if (selected) onSubmit({ usuarioId: selected.id });
                     }}
                     disabled={submitting || !selected}
-                    className={`min-w-[200px] bg-blue-600 text-white py-2 px-4 rounded font-semibold
-                        ${submitting || !selected ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                    className={`min-w-[200px] ombook-btn ombook-btn-primary
+                        ${submitting || !selected ? "opacity-60 cursor-not-allowed" : "ombook-btn-primary"}`}
                 >
                     {submitting ? "Matriculando..." : "Matricular usuario"}
                 </button>
