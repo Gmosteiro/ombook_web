@@ -132,9 +132,9 @@ export default function UsersPage() {
   const totalPages = users.totalPages || 1;
 
   return (
-    <div className="ombook-container py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="ombook-heading ombook-heading-lg">Gestión de Usuarios</h1>
+        <h1 className="text-2xl font-semibold">Gestión de Usuarios</h1>
         <UserActionsMenu
           options={[
             {
@@ -147,16 +147,16 @@ export default function UsersPage() {
       </div>
 
       {/* Filtros */}
-      <div className="ombook-card mb-8 flex flex-wrap gap-3 items-center">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
         <input
           type="text"
           placeholder="Buscar por nombre, email o cédula (mín. 3 caracteres)..."
-          className="ombook-input min-w-[220px] flex-1"
+          className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
           value={searchInput}
           onChange={(e) => handleFilterChange("search", e.target.value)}
         />
         <select
-          className="ombook-input"
+          className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
           value={filters.rol}
           onChange={(e) => handleFilterChange("rol", e.target.value)}
         >
@@ -166,7 +166,7 @@ export default function UsersPage() {
           <option value="ESTUDIANTE">Estudiante</option>
         </select>
         <select
-          className="ombook-input"
+          className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
           value={filters.estado}
           onChange={(e) => handleFilterChange("estado", e.target.value)}
         >

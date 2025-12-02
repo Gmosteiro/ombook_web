@@ -1,0 +1,35 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('http://localhost:3000/login/');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).click();
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).fill('gastonmosteiro@gmail.com');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Contraseña' }).fill('Test.1234');
+  await page.getByRole('textbox', { name: 'Contraseña' }).press('Enter');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).click();
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).click();
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).click();
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).click();
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowLeft');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).press('ArrowRight');
+  await page.getByRole('textbox', { name: 'Correo electrónico' }).fill('gastonmosteiro1006@gmail.com');
+  await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
+  await page.getByRole('link', { name: 'Usuarios', exact: true }).click();
+  await page.getByRole('button', { name: 'Acciones' }).click();
+  await page.getByRole('button', { name: 'Crear Usuario' }).click();
+  await page.getByRole('button', { name: 'Masiva' }).click();
+  await page.getByRole('main').click();
+  await page.getByText('Sube un archivo').click();
+  await page.getByText('HomeUsuariosCursosAuditoriaMi PerfilCerrar SesiónAlta de UsuariosSelecciona la').setInputFiles('usuarios (2).csv');
+  await page.getByRole('button', { name: 'Importar Usuarios' }).click();
+});
