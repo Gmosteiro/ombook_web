@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLoaderData } from "react-router";
 import { confirmarCambioCorreo } from "../../../routes/api.auth.server";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export async function loader({ request }: { request: Request }) {
     const url = new URL(request.url);

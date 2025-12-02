@@ -9,5 +9,4 @@ export async function login(page: Page, email: string, password: string) {
     await page.getByRole('textbox', { name: 'Correo electrónico' }).press('Tab');
     await page.getByRole('textbox', { name: 'Contraseña' }).fill(password);
     await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
-    await page.getByRole('heading', { name: '¡Bienvenido a Ombook Gaston' }).click();
 }
