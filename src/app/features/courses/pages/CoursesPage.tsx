@@ -170,10 +170,6 @@ export default function CoursesPage() {
             No se encontraron cursos
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            {cursos.totalElements === 0
-              ? 'Aún no hay cursos creados en el sistema.'
-              : 'No se encontraron cursos con los criterios seleccionados.'
-            }
           </p>
           {cursos.totalElements === 0 && userRole === UserRole.ADMINISTRADOR && (
             <button
