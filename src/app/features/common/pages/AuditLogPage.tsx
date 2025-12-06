@@ -27,10 +27,18 @@ type PaginatorResponseAuditoriaResponse = {
     last?: boolean;
 };
 
+type AuditLogFilters = {
+    action: string;
+    resultado: string;
+    userId: string;
+    fechaDesde?: string;
+    fechaHasta?: string;
+};
+
 // Loader
 export async function loader({ request }: { request: Request }) {
     try {
-        requireRoleLoader([UserRole.ADMINISTRADOR]);
+        await requireRoleLoader([UserRole.ADMINISTRADOR]); // <-- Debe ser await
         const jwtToken = await getValidJWTToken(request);
         const url = new URL(request.url);
         const params = url.searchParams;
@@ -40,6 +48,8 @@ export async function loader({ request }: { request: Request }) {
         const action = params.get("action") ?? "";
         const resultado = params.get("resultado") ?? "";
         const userId = params.get("userId") ?? "";
+        const fechaDesde = params.get("fechaDesde") ?? "";
+        const fechaHasta = params.get("fechaHasta") ?? "";
 
         const queryParams = new URLSearchParams();
         queryParams.set("page", page);
@@ -48,15 +58,24 @@ export async function loader({ request }: { request: Request }) {
         if (action) queryParams.set("action", action);
         if (resultado) queryParams.set("resultado", resultado);
         if (userId) queryParams.set("userId", userId);
+        if (fechaDesde) queryParams.set("fechaDesde", fechaDesde);
+        if (fechaHasta) queryParams.set("fechaHasta", fechaHasta);
 
         const res = await apiFetch(`/auditoria?${queryParams.toString()}`, { method: "GET", jwtToken, secure: true });
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
-        return { data, filters: { action, resultado, userId }, page: Number(page) + 1 };
+        return { data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1 };
     } catch (e) {
         // Devuelve estructura vacía para evitar errores de hidratación
         return { data: { content: [], totalPages: 1 }, filters: {}, page: 1, error: String(e) };
     }
+}
+
+
+export const meta = () => {
+    return [
+        { title: "Log de Auditoría - Ombook" },
+    ]
 }
 
 // Acciones y resultados posibles
@@ -84,23 +103,30 @@ const RESULTADOS = [
 ];
 
 // Componente principal
+function getToday() {
+    return new Date().toISOString().slice(0, 10);
+}
+
 export default function AuditLogPage() {
     const { data, filters, page } = useLoaderData() as {
         data: PaginatorResponseAuditoriaResponse;
-        filters: { action: string; resultado: string; userId: string };
+        filters: AuditLogFilters;
         page: number;
     };
     const [searchParams, setSearchParams] = useSearchParams();
     const [userInput, setUserInput] = useState(filters.userId || "");
     const [action, setAction] = useState(filters.action || "");
     const [resultado, setResultado] = useState(filters.resultado || "");
+    const [fechaDesde, setFechaDesde] = useState(filters.fechaDesde || getToday());
+    const [fechaHasta, setFechaHasta] = useState(filters.fechaHasta || getToday());
 
-    // Sincronizar inputs con filtros externos
     useEffect(() => {
         setUserInput(filters.userId || "");
         setAction(filters.action || "");
         setResultado(filters.resultado || "");
-    }, [filters.userId, filters.action, filters.resultado]);
+        setFechaDesde(filters.fechaDesde || getToday());
+        setFechaHasta(filters.fechaHasta || getToday());
+    }, [filters.userId, filters.action, filters.resultado, filters.fechaDesde, filters.fechaHasta]);
 
     // Handler para búsqueda por usuario
     const handleUserSearch = (value: string) => {
@@ -196,6 +222,34 @@ export default function AuditLogPage() {
                         <option key={r} value={r}>{r}</option>
                     ))}
                 </select>
+                <input
+                    type="date"
+                    className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                    value={fechaDesde}
+                    onChange={e => {
+                        setFechaDesde(e.target.value);
+                        const params = new URLSearchParams(searchParams);
+                        if (e.target.value) params.set("fechaDesde", e.target.value);
+                        else params.delete("fechaDesde");
+                        params.set("page", "0");
+                        setSearchParams(params);
+                    }}
+                    placeholder="Desde"
+                />
+                <input
+                    type="date"
+                    className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                    value={fechaHasta}
+                    onChange={e => {
+                        setFechaHasta(e.target.value);
+                        const params = new URLSearchParams(searchParams);
+                        if (e.target.value) params.set("fechaHasta", e.target.value);
+                        else params.delete("fechaHasta");
+                        params.set("page", "0");
+                        setSearchParams(params);
+                    }}
+                    placeholder="Hasta"
+                />
             </div>
             <div className="ombook-card overflow-x-auto">
                 <table className="w-full">
