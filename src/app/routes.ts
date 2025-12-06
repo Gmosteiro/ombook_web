@@ -43,6 +43,7 @@ const routes: RouteConfig = [
 
     // Auditoría
     route("/audit", "./features/common/pages/AuditDashboard.tsx"),
+    route("/audit/log", "./features/common/pages/AuditLogPage.tsx"),
 
     // Notifications Resource
     route("/resource/notifications", "./routes/resource.notifications.ts"),

@@ -73,6 +73,13 @@ export default function Index({ loaderData }: Route.ComponentProps) {
             roles: [UserRole.ADMINISTRADOR]
         },
         {
+            title: "Log de Auditoría",
+            description: "Ver el historial completo de auditoría",
+            icon: <MaterialIcon name="list" color="var(--color-ombook-green)" size={36} />,
+            link: "/audit/log",
+            roles: [UserRole.ADMINISTRADOR]
+        },
+        {
             title: "Mi Perfil",
             description: "Ver y editar tu información",
             icon: <MaterialIcon name="person" color="var(--color-ombook-green)" size={36} />,
