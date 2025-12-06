@@ -3,7 +3,7 @@ import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader"
 import { UserRole } from "~/features/auth/types";
 import { apiFetch } from "~/features/auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Tipos
 type AuditoriaResponse = {
@@ -29,28 +29,59 @@ type PaginatorResponseAuditoriaResponse = {
 
 // Loader
 export async function loader({ request }: { request: Request }) {
-    requireRoleLoader([UserRole.ADMINISTRADOR]);
-    const jwtToken = await getValidJWTToken(request);
-    const url = new URL(request.url);
-    const page = url.searchParams.get("page") ?? "0";
-    const size = url.searchParams.get("size") ?? "20";
-    const sort = url.searchParams.getAll("sort");
-    const action = url.searchParams.get("action") ?? "";
-    const resultado = url.searchParams.get("resultado") ?? "";
-    const userId = url.searchParams.get("userId") ?? "";
+    try {
+        requireRoleLoader([UserRole.ADMINISTRADOR]);
+        const jwtToken = await getValidJWTToken(request);
+        const url = new URL(request.url);
+        const params = url.searchParams;
+        const page = params.get("page") ?? "0";
+        const size = params.get("size") ?? "20";
+        const sort = params.getAll("sort");
+        const action = params.get("action") ?? "";
+        const resultado = params.get("resultado") ?? "";
+        const userId = params.get("userId") ?? "";
 
-    const params = new URLSearchParams();
-    params.set("page", page);
-    params.set("size", size);
-    if (sort.length) sort.forEach(s => params.append("sort", s));
-    if (action) params.set("action", action);
-    if (resultado) params.set("resultado", resultado);
-    if (userId) params.set("userId", userId);
+        const queryParams = new URLSearchParams();
+        queryParams.set("page", page);
+        queryParams.set("size", size);
+        if (sort.length) sort.forEach(s => queryParams.append("sort", s));
+        if (action) queryParams.set("action", action);
+        if (resultado) queryParams.set("resultado", resultado);
+        if (userId) queryParams.set("userId", userId);
 
-    const res = await apiFetch(`/auditoria?${params.toString()}`, { method: "GET", jwtToken, secure: true });
-    const data: PaginatorResponseAuditoriaResponse = await res.json();
-    return { data, filters: { action, resultado, userId }, page: Number(page) + 1 };
+        const res = await apiFetch(`/auditoria?${queryParams.toString()}`, { method: "GET", jwtToken, secure: true });
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        return { data, filters: { action, resultado, userId }, page: Number(page) + 1 };
+    } catch (e) {
+        // Devuelve estructura vacía para evitar errores de hidratación
+        return { data: { content: [], totalPages: 1 }, filters: {}, page: 1, error: String(e) };
+    }
 }
+
+// Acciones y resultados posibles
+const ACTIONS = [
+    "ANUNCIO_CREAR", "ANUNCIO_EDITAR", "ANUNCIO_ELIMINAR",
+    "PAGINA_CREAR", "PAGINA_EDITAR", "PAGINA_ELIMINAR",
+    "TAREA_CREAR", "TAREA_EDITAR", "TAREA_ELIMINAR", "TAREA_ENTREGA_SUBIR", "TAREA_ENTREGA_ELIMINAR",
+    "ENTREGA_SUBIR", "ENTREGA_CORREGIR",
+    "MATRICULA_INDIVIDUAL", "DESMATRICULA_INDIVIDUAL", "MATRICULA_MASIVA", "DESMATRICULA_MASIVA", "MATRICULA_RECHAZADA",
+    "CALIFICACION_PUBLICAR_MASIVA", "CALIFICACION_GUARDAR", "CALIFICACION_CARGA_MASIVA",
+    "LOGIN", "LOGOUT", "TOKEN_REFRESH",
+    "PASSWORD_CAMBIAR", "PASSWORD_RECUPERAR", "CUENTA_DESBLOQUEAR", "PASSWORD_RECUPERAR_REQUEST",
+    "USUARIO_CREAR", "USUARIO_EDITAR", "USUARIO_CARGA_MASIVA",
+    "EMAIL_CAMBIO_INICIAR", "EMAIL_CAMBIO_CONFIRMAR",
+    "AVATAR_ACTUALIZAR", "AVATAR_RESETEAR",
+    "CURSO_CREAR", "CURSO_EDITAR", "CURSO_ELIMINAR", "CURSO_CARGA_MASIVA", "CURSO_ELIMINACION_MASIVA",
+    "CURSO_CAMBIAR_ESTADO", "CURSO_IMAGEN_ACTUALIZAR", "CURSO_IMAGEN_RESETEAR",
+    "PUBLICACION_CREAR", "PUBLICACION_EDITAR", "PUBLICACION_ELIMINAR",
+    "MENSAJE_FORO_PUBLICAR", "MENSAJE_FORO_EDITAR", "MENSAJE_FORO_ELIMINAR", "MENSAJE_PRIVADO_ENVIAR",
+    "RECURSO_SUBIR", "RECURSO_ELIMINAR"
+];
+
+const RESULTADOS = [
+    "EXITO", "ERROR", "EXITO_PARCIAL"
+];
 
 // Componente principal
 export default function AuditLogPage() {
@@ -60,6 +91,58 @@ export default function AuditLogPage() {
         page: number;
     };
     const [searchParams, setSearchParams] = useSearchParams();
+    const [userInput, setUserInput] = useState(filters.userId || "");
+    const [action, setAction] = useState(filters.action || "");
+    const [resultado, setResultado] = useState(filters.resultado || "");
+
+    // Sincronizar inputs con filtros externos
+    useEffect(() => {
+        setUserInput(filters.userId || "");
+        setAction(filters.action || "");
+        setResultado(filters.resultado || "");
+    }, [filters.userId, filters.action, filters.resultado]);
+
+    // Handler para búsqueda por usuario
+    const handleUserSearch = (value: string) => {
+        setUserInput(value);
+        // Solo buscar si está vacío o tiene 3+ caracteres
+        if (value === "" || value.length >= 3) {
+            const params = new URLSearchParams(searchParams);
+            if (value.length >= 3) {
+                params.set("userId", value);
+            } else {
+                params.delete("userId");
+            }
+            params.set("page", "0");
+            setSearchParams(params);
+        }
+    };
+
+    // Handler para filtro action
+    const handleActionChange = (value: string) => {
+        setAction(value);
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+            params.set("action", value);
+        } else {
+            params.delete("action");
+        }
+        params.set("page", "0");
+        setSearchParams(params);
+    };
+
+    // Handler para filtro resultado
+    const handleResultadoChange = (value: string) => {
+        setResultado(value);
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+            params.set("resultado", value);
+        } else {
+            params.delete("resultado");
+        }
+        params.set("page", "0");
+        setSearchParams(params);
+    };
 
     // Handler para paginación
     const handlePageChange = (newPage: number) => {
@@ -84,6 +167,36 @@ export default function AuditLogPage() {
     return (
         <div className="max-w-7xl mx-auto px-6 py-8">
             <h1 className="ombook-heading ombook-heading-xl mb-6">Auditoría del Sistema</h1>
+            {/* Filtros */}
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
+                <input
+                    type="text"
+                    placeholder="Buscar por CI"
+                    className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
+                    value={userInput}
+                    onChange={e => handleUserSearch(e.target.value)}
+                />
+                <select
+                    className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                    value={action}
+                    onChange={e => handleActionChange(e.target.value)}
+                >
+                    <option value="">Filtrar por acción</option>
+                    {ACTIONS.map(a => (
+                        <option key={a} value={a}>{a.replace(/_/g, " ")}</option>
+                    ))}
+                </select>
+                <select
+                    className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+                    value={resultado}
+                    onChange={e => handleResultadoChange(e.target.value)}
+                >
+                    <option value="">Filtrar por resultado</option>
+                    {RESULTADOS.map(r => (
+                        <option key={r} value={r}>{r}</option>
+                    ))}
+                </select>
+            </div>
             <div className="ombook-card overflow-x-auto">
                 <table className="w-full">
                     <thead>
