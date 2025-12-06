@@ -94,24 +94,26 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
             </div>
           )}
 
-          <div className="flex gap-2">
-            <button
-              className="flex-1 ombook-btn ombook-btn-primary text-sm"
-              onClick={() => navigate(`/courses/${course.id}/general`)}
-            >
-              Ver Detalles
-            </button>
-
-            {userRole === UserRole.ADMINISTRADOR && (
+          {course.estadoCurso !== "ELIMINADO" && (
+            <div className="flex gap-2">
               <button
-                className="ombook-btn ombook-btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isDeleting || course.estadoCurso === "ELIMINADO"}
+                className="flex-1 ombook-btn ombook-btn-primary text-sm"
+                onClick={() => navigate(`/courses/${course.id}/general`)}
               >
-                {isDeleting ? "..." : "Eliminar"}
+                Ver Detalles
               </button>
-            )}
-          </div>
+
+              {userRole === UserRole.ADMINISTRADOR && (
+                <button
+                  className="ombook-btn ombook-btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "..." : "Eliminar"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
