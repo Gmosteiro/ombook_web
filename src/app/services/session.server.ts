@@ -202,6 +202,7 @@ export async function logout(request: Request) {
     return redirect("/login", {
         headers: {
             "Set-Cookie": await sessionStorage.destroySession(session),
+            "Cache-Control": "no-store", // <-- fuerza no cachear
         },
     });
 }
