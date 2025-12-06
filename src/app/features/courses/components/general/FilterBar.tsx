@@ -12,9 +12,18 @@ interface FilterBarProps {
   setFilters: (filters: Filters) => void;
   teachers: UsuarioListaResponse[];
   showTeacherFilter?: boolean;
+  order: string;
+  setOrder: (order: string) => void;
 }
 
-export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, teachers, showTeacherFilter = true }) => {
+export const FilterBar: React.FC<FilterBarProps> = ({
+  filters,
+  setFilters,
+  teachers,
+  showTeacherFilter = true,
+  order,
+  setOrder,
+}) => {
   const [searchInput, setSearchInput] = useState(filters.search);
 
   // Sincronizar el input con los filtros externos
@@ -32,7 +41,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, teach
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center w-full">
       <div className="relative flex-1 min-w-[220px]">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -72,6 +81,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, teach
           ))}
         </select>
       )}
+      <select
+        className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+        value={order}
+        onChange={(e) => setOrder(e.target.value)}
+      >
+        <option value="fechaCreacion,desc">Más nuevos primero</option>
+        <option value="fechaCreacion,asc">Más antiguos primero</option>
+      </select>
     </div>
   );
 };

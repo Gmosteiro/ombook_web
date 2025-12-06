@@ -8,6 +8,7 @@ import UserActionsMenu from "../../common/components/UserActionsMenu";
 import { FilterBar, Filters } from "../components/general/FilterBar";
 import { CourseCard } from "../components/general/CourseCard";
 import { Pagination } from "../components/general/Pagination";
+import { useState } from "react";
 
 export const loader = async (args: any) => {
   await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])(args);
@@ -38,7 +39,8 @@ export const loader = async (args: any) => {
     showTeacherFilter = false;
   }
 
-  const cursos = await getCursos(args.request, { q, estado, profesorId: teacher ? Number(teacher) : undefined, page, size });
+  const sort = url.searchParams.getAll("sort");
+  const cursos = await getCursos(args.request, { q, estado, profesorId: teacher ? Number(teacher) : undefined, page, size, sort });
 
   // Convertir page de 0-indexed (API) a 1-indexed (UI)
   const currentPage = page + 1;
@@ -86,6 +88,7 @@ export default function CoursesPage() {
     userRole: UserRole;
   };
   const [searchParams, setSearchParams] = useSearchParams();
+  const [order, setOrder] = useState(searchParams.get("sort") || "fechaCreacion,desc");
   const navigate = useNavigate();
   const revalidator = useRevalidator();
 
@@ -139,12 +142,22 @@ export default function CoursesPage() {
         />
       </div>
 
-      <FilterBar
-        filters={filters}
-        setFilters={setFilters}
-        teachers={profesores}
-        showTeacherFilter={showTeacherFilter}
-      />
+      <div className="flex gap-4 mb-4 items-center">
+        <FilterBar
+          filters={filters}
+          setFilters={setFilters}
+          teachers={profesores}
+          showTeacherFilter={showTeacherFilter}
+          order={order}
+          setOrder={(value) => {
+            const params = new URLSearchParams(searchParams);
+            params.set("sort", value);
+            params.set("page", "0");
+            setSearchParams(params);
+            setOrder(value);
+          }}
+        />
+      </div>
 
       {allCourses.length === 0 ? (
         <div className="text-center text-gray-500 mt-12">
