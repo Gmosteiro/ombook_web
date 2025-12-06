@@ -23,7 +23,8 @@ export const loader = async (args: any) => {
   // Solo aplicar búsqueda si tiene 3 o más caracteres
   const q = searchParam && searchParam.length >= 3 ? searchParam : undefined;
 
-  const users = await getUsers(args.request, { q, rol, estado, page, size });
+  const sort = url.searchParams.getAll("sort");
+  const users = await getUsers(args.request, { q, rol, estado, page, size, sort });
   const userRole = await getUserRole(args.request);
 
   // Convertir page de 0-indexed (API) a 1-indexed (UI)
@@ -68,6 +69,7 @@ export default function UsersPage() {
   const fetcher = useFetcher<{ user?: UsuarioDetalleResponse; error?: string }>();
   const [selectedUser, setSelectedUser] = useState<UsuarioDetalleResponse | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [sort, setSort] = useState<string[]>([]);
 
   // Cuando el fetcher devuelve datos del usuario, abrir el modal
   useEffect(() => {
@@ -81,6 +83,22 @@ export default function UsersPage() {
   useEffect(() => {
     setSearchInput(filters.search);
   }, [filters.search]);
+
+  // Actualiza los searchParams al cambiar el sort
+  const handleSort = (field: string) => {
+    const params = new URLSearchParams(searchParams);
+    let direction = "asc";
+    const currentSort = params.getAll("sort");
+    const found = currentSort.find(s => s.startsWith(field));
+    if (found) {
+      direction = found.endsWith("asc") ? "desc" : "asc";
+      params.delete("sort");
+    }
+    params.append("sort", `${field},${direction}`);
+    params.set("page", "0");
+    setSearchParams(params);
+    setSort([`${field},${direction}`]);
+  };
 
   // Handlers para filtros
   const handleFilterChange = (key: string, value: string) => {
@@ -130,6 +148,12 @@ export default function UsersPage() {
 
   const allUsers: UsuarioListaResponse[] = users.content ?? [];
   const totalPages = users.totalPages || 1;
+
+  function getSortIcon(field: string) {
+    const sortParam = sort.find(s => s.startsWith(field));
+    if (!sortParam) return null;
+    return sortParam.endsWith("asc") ? "▲" : "▼";
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -200,8 +224,11 @@ export default function UsersPage() {
             <table className="w-full">
               <thead className="ombook-bg-light">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
-                    Nombre
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort("nombre")}
+                  >
+                    Nombre {getSortIcon("nombre")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Apellido
@@ -209,8 +236,11 @@ export default function UsersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Correo Electrónico
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
-                    Rol
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort("rol")}
+                  >
+                    Rol {getSortIcon("rol")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium ombook-text-gray uppercase tracking-wider">
                     Acciones

@@ -1454,13 +1454,6 @@ export interface components {
             /** Format: int32 */
             unreadCount?: number;
         };
-        Pageable: {
-            /** Format: int32 */
-            page?: number;
-            /** Format: int32 */
-            size?: number;
-            sort?: string[];
-        };
         CursoListadoResponse: {
             /** Format: int64 */
             id?: number;
@@ -1494,6 +1487,13 @@ export interface components {
             totalPages?: number;
             first?: boolean;
             last?: boolean;
+        };
+        Pageable: {
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            sort?: string[];
         };
         PaginatorResponseUsuarioVinculadoResponse: {
             content?: components["schemas"]["UsuarioVinculadoResponse"][];
@@ -2266,11 +2266,16 @@ export interface operations {
     };
     listar_2: {
         parameters: {
-            query: {
+            query?: {
                 q?: string;
                 estado?: "ACTIVO" | "INACTIVO" | "ELIMINADO";
                 profesorId?: number;
-                pageable: components["schemas"]["Pageable"];
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
             };
             header?: never;
             path?: never;
