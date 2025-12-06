@@ -38,7 +38,7 @@ type AuditLogFilters = {
 // Loader
 export async function loader({ request }: { request: Request }) {
     try {
-        await requireRoleLoader([UserRole.ADMINISTRADOR]); // <-- Debe ser await
+        await requireRoleLoader([UserRole.ADMINISTRADOR]);
         const jwtToken = await getValidJWTToken(request);
         const url = new URL(request.url);
         const params = url.searchParams;
@@ -66,8 +66,13 @@ export async function loader({ request }: { request: Request }) {
         const data = await res.json();
         return { data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1 };
     } catch (e) {
-        // Devuelve estructura vacía para evitar errores de hidratación
-        return { data: { content: [], totalPages: 1 }, filters: {}, page: 1, error: String(e) };
+        // Devuelve estructura esperada aunque haya error
+        return {
+            data: { content: [], totalPages: 1 },
+            filters: { action: "", resultado: "", userId: "", fechaDesde: "", fechaHasta: "" },
+            page: 1,
+            error: String(e)
+        };
     }
 }
 
@@ -108,10 +113,11 @@ function getToday() {
 }
 
 export default function AuditLogPage() {
-    const { data, filters, page } = useLoaderData() as {
+    const { data, filters, page, error } = useLoaderData() as {
         data: PaginatorResponseAuditoriaResponse;
         filters: AuditLogFilters;
         page: number;
+        error?: string;
     };
     const [searchParams, setSearchParams] = useSearchParams();
     const [userInput, setUserInput] = useState(filters.userId || "");
@@ -119,6 +125,10 @@ export default function AuditLogPage() {
     const [resultado, setResultado] = useState(filters.resultado || "");
     const [fechaDesde, setFechaDesde] = useState(filters.fechaDesde || getToday());
     const [fechaHasta, setFechaHasta] = useState(filters.fechaHasta || getToday());
+    const [sort, setSort] = useState<string[]>(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.getAll("sort");
+    });
 
     useEffect(() => {
         setUserInput(filters.userId || "");
@@ -127,6 +137,12 @@ export default function AuditLogPage() {
         setFechaDesde(filters.fechaDesde || getToday());
         setFechaHasta(filters.fechaHasta || getToday());
     }, [filters.userId, filters.action, filters.resultado, filters.fechaDesde, filters.fechaHasta]);
+
+    // Actualiza el sort cuando cambian los searchParams
+    useEffect(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        setSort(params.getAll("sort"));
+    }, [searchParams]);
 
     // Handler para búsqueda por usuario
     const handleUserSearch = (value: string) => {
@@ -182,17 +198,31 @@ export default function AuditLogPage() {
         const params = new URLSearchParams(searchParams);
         const currentSort = params.getAll("sort");
         let direction = "desc";
-        if (currentSort.find(s => s.startsWith("fecha"))) {
-            direction = currentSort.find(s => s.endsWith("asc")) ? "desc" : "asc";
+        const found = currentSort.find(s => s.startsWith("fecha"));
+        if (found) {
+            direction = found.endsWith("asc") ? "desc" : "asc";
             params.delete("sort");
         }
         params.append("sort", `fecha,${direction}`);
         setSearchParams(params);
+        setSort([`fecha,${direction}`]);
     };
+
+    // Icono de sort
+    function getSortIcon(field: string) {
+        const sortParam = sort.find(s => s.startsWith(field));
+        if (!sortParam) return null;
+        return sortParam.endsWith("asc") ? "▲" : "▼";
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-8">
             <h1 className="ombook-heading ombook-heading-xl mb-6">Auditoría del Sistema</h1>
+            {error && (
+                <div className="text-red-600 mb-4">
+                    Error al cargar los datos de auditoría.
+                </div>
+            )}
             {/* Filtros */}
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
                 <input
@@ -263,10 +293,10 @@ export default function AuditLogPage() {
                             <th className="px-4 py-2 text-left">IP</th>
                             <th className="px-4 py-2 text-left">Canal</th>
                             <th
-                                className="px-4 py-2 text-left cursor-pointer"
+                                className="px-4 py-2 text-left cursor-pointer select-none"
                                 onClick={handleSort}
                             >
-                                Fecha
+                                Fecha {getSortIcon("fecha")}
                             </th>
                         </tr>
                     </thead>

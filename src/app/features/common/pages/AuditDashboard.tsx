@@ -50,6 +50,13 @@ export interface AuditDashboardData {
     weeklyPercent: number;
 }
 
+export const meta = () => {
+    return [
+        { title: "Ombook - Dashboard de Auditoría" },
+        { name: "description", content: "Panel de control de auditoría de Ombook" },
+    ];
+}
+
 // Loader para obtener datos reales
 // El loader recibe un objeto con 'request' de tipo Request (nativo)
 export async function loader({ request }: { request: Request }): Promise<AuditDashboardData> {
