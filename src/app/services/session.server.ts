@@ -163,9 +163,13 @@ const getUserSession = async (request: Request) => {
     if (token && !isJWTValid(token)) {
         // Token expired, try to refresh
         if (refreshToken) {
+
+            console.log("Access token expired, attempting to refresh");
             const newTokens = await refreshAccessToken(refreshToken);
 
             if (newTokens) {
+
+                console.log("Token refreshed successfully");
                 // Successfully refreshed, update session
                 const decoded = decodeJWT(newTokens.accessToken);
                 if (decoded) {
@@ -183,6 +187,8 @@ const getUserSession = async (request: Request) => {
             }
         }
 
+
+        console.log("Failed to refresh token or no refresh token available");
         // Couldn't refresh, clear session data
         session.unset(USER_SESSION_KEY);
         session.unset("token");
@@ -281,6 +287,9 @@ export async function getUserRole(
 export async function getValidJWTToken(request: Request): Promise<string> {
     await requireValidSession(request); // This will redirect if session is invalid
     const session = await getUserSession(request);
+
+
+    console.log("Retrieving valid JWT token from session", session);
     return session.get("token");
 }
 
@@ -295,13 +304,11 @@ export async function getValidJWTToken(request: Request): Promise<string> {
  */
 export async function createUserSession({
     request,
-    // userId
     remember = true,
     redirectUrl,
     extraSessionData,
 }: {
     request: Request;
-    // userId: string;
     remember: boolean;
     redirectUrl?: string;
     extraSessionData: {
@@ -328,10 +335,10 @@ export async function createUserSession({
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "lax",
-                maxAge: remember
-                    ? 60 * 15 // 15 minutos
-                    : undefined,
+                maxAge: remember ? 60 * 15 : undefined,
             }),
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
         },
     });
 }
