@@ -1,4 +1,4 @@
-import { useLoaderData, useSearchParams } from "react-router-dom";
+import { useLoaderData, useSearchParams } from "react-router";
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
 import { UserRole } from "~/features/auth/types";
 import { apiFetch } from "~/features/auth/utils/methods";

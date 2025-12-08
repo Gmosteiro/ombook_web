@@ -43,29 +43,10 @@ export async function loader({
     };
   }
 }
-// const handleDownloadSubmission = async (tareaId: number, entrega: Entrega) => {
-//     if (cursoId) return;
-//     try {
-//       const response = await fetch(`${import.meta.env.VITE_API_URL}/cursos/${course.id}/tareas/${tareaId}/entregas/estudiantes/${entrega.estudianteId}/archivo`, {
-//         headers: {
-//           'Authorization': `Bearer ${jwtToken}`,
-//         },
-//       });
-//       if (response.ok) {
-//         const data = await response.json();
-//         if (data.url) window.open(data.url, '_blank');
-//       } else {
-//         console.error('Error getting submission download url:', response.statusText);
-//       }
-//     } catch (err) {
-//       console.error('Error getting submission download url:', err);
-//     }
-//   }; me puede servir despues
+
 export default function CourseTaskSubmissionsList() {
   const { submissions } = useLoaderData() as { submissions: Entrega[] };
   const { course } = useOutletContext<{ course: Course }>();
-  const params = useParams<{ id: string; taskId: string }>();
-  const tareaId = params.taskId;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -84,7 +65,7 @@ export default function CourseTaskSubmissionsList() {
 
           <div className="p-6 md:p-8 border-b border-slate-200 dark:border-slate-700">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {course?.nombre || course?.id} — Entregas de la Tarea {tareaId}
+              {course?.nombre || course?.id} — Entregas de la Tarea
             </h1>
             <div className="mt-4 flex flex-col sm:flex-row gap-4">
               <input
