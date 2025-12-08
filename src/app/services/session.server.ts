@@ -119,6 +119,7 @@ export const forceTokenRefresh = async (request: Request): Promise<{
 
     if (!newTokens) {
         console.error("Failed to refresh token");
+        await logout(request);
         return { success: false };
     }
 
@@ -129,6 +130,7 @@ export const forceTokenRefresh = async (request: Request): Promise<{
         return { success: false };
     }
 
+    console.log("Token refreshed successfully (force)");
     session.set("token", newTokens.accessToken);
     session.set("refreshToken", newTokens.refreshToken);
     session.set("exp", newTokens.accessTokenExp);
@@ -222,6 +224,8 @@ export async function requireValidSession(request: Request): Promise<void> {
         throw redirect("/login", {
             headers: {
                 "Set-Cookie": await sessionStorage.destroySession(session),
+                "Cache-Control": "no-store",
+                "Pragma": "no-cache",
             },
         });
     }
@@ -325,7 +329,7 @@ export async function createUserSession({
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "lax",
                 maxAge: remember
-                    ? 60 * 60 * 24 * 7 // 7 days
+                    ? 60 * 15 // 15 minutos
                     : undefined,
             }),
         },
