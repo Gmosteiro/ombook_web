@@ -4,6 +4,7 @@ import { Route } from "../../../../.react-router/types/app/features/common/pages
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
 import { UserRole } from "~/features/auth/types";
 import { MaterialIcon } from "~/features/common/components/ui/MaterialIcon";
+import { useLoaderData } from "react-router";
 
 export const meta: MetaFunction = () => {
     return [
@@ -12,28 +13,38 @@ export const meta: MetaFunction = () => {
     ];
 };
 
+type LoaderResult = {
+    userRole: UserRole;
+    perfil: {
+        nombre: string;
+        apellido: string;
+        // agrega otros campos si es necesario
+    } | null;
+};
+
 export async function loader({ request }: Route.LoaderArgs) {
     await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
 
-    const { /*getUserId,*/ getUserRole } = await import("~/services/session.server");
+    const { getUserRole } = await import("~/services/session.server");
     const { getPerfil } = await import("../../../routes/api.profile.server");
-
-    // const userId = await getUserId(request); // Creo que esto ya no es necesario
-    // if (!userId) {
-    //     throw redirect("/login");
-    // }
 
     const userRole = await getUserRole(request);
     const perfil = await getPerfil(request);
 
-    return {
-        userRole,
-        perfil
-    };
+    return new Response(
+        JSON.stringify({ userRole, perfil }),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
-export default function Index({ loaderData }: Route.ComponentProps) {
-    const { userRole, perfil } = loaderData;
+export default function Index() {
+    const { userRole, perfil } = useLoaderData() as LoaderResult;
 
     // Quick action cards basadas en el rol
     const quickActions = [

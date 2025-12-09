@@ -50,13 +50,22 @@ export async function loader({ request }: { request: Request }) {
         ? `${perfil.fotoPerfil}?v=${Date.now()}`
         : undefined;
 
-      // Fetch notifications from backend server-side
       notifications = await obtenerNotificaciones(request);
     } catch {
       // Si falla, deja valores por defecto
     }
   }
-  return { userId, userRole, avatarUrl, notifications };
+
+  return new Response(
+    JSON.stringify({ userId, userRole, avatarUrl, notifications }),
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Pragma": "no-cache",
+      },
+    }
+  );
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {

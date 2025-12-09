@@ -13,19 +13,32 @@ import { getValidJWTToken } from "~/services/session.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
     requireRoleLoader([UserRole.PROFESOR, UserRole.ESTUDIANTE]);
-    const userRole = await getUserRole(request);
+    const userRole = await getUserRole(request) ?? UserRole.ESTUDIANTE; // Valor por defecto
     const courseId = params.id;
+
+    let result: LoaderData = { userRole };
 
     if (userRole === UserRole.ESTUDIANTE && courseId) {
         const studentMarks = await getMyMarks(request, courseId);
-        return { userRole, studentMarks };
+        result.studentMarks = studentMarks;
     }
     if (userRole === UserRole.PROFESOR && courseId) {
         const teacherMarks = await listMarks(request, courseId);
         const estudiantes = await getEstudiantesByCurso(request, Number(courseId));
-        return { userRole, teacherMarks, estudiantes };
+        result.teacherMarks = teacherMarks;
+        result.estudiantes = estudiantes;
     }
-    return {};
+
+    return new Response(
+        JSON.stringify(result),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {

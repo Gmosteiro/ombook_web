@@ -3,33 +3,51 @@ import { useLoaderData } from "react-router";
 import { confirmarCambioCorreo } from "../../../routes/api.auth.server";
 import { useNavigate } from "react-router";
 
+type LoaderResult = {
+    success: boolean;
+    mensaje?: string;
+    error?: string;
+};
+
 export async function loader({ request }: { request: Request }) {
     const url = new URL(request.url);
     const token = url.searchParams.get("token");
 
+    let result;
     if (!token) {
-        return {
+        result = {
             success: false,
             error: "Token no proporcionado. Verifique el enlace de su correo.",
         };
+    } else {
+        try {
+            const response = await confirmarCambioCorreo({ token });
+            result = {
+                success: true,
+                mensaje: response.mensaje || "Correo electrónico cambiado correctamente.",
+            };
+        } catch (error: any) {
+            result = {
+                success: false,
+                error: error.message || "Error al confirmar el cambio de correo.",
+            };
+        }
     }
 
-    try {
-        const response = await confirmarCambioCorreo({ token });
-        return {
-            success: true,
-            mensaje: response.mensaje || "Correo electrónico cambiado correctamente.",
-        };
-    } catch (error: any) {
-        return {
-            success: false,
-            error: error.message || "Error al confirmar el cambio de correo.",
-        };
-    }
+    return new Response(
+        JSON.stringify(result),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
 export default function ConfirmEmailChange() {
-    const loaderData = useLoaderData<typeof loader>();
+    const loaderData = useLoaderData() as LoaderResult;
 
     const navigate = useNavigate();
 

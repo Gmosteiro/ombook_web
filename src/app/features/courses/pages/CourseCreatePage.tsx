@@ -8,18 +8,33 @@ import { createCsvImportHandler } from "../../common/utils/csvImportHelper";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-    // Verificar roles primero
     await requireRoleLoader([UserRole.ADMINISTRADOR])({ request } as any);
-
-    // Importación dinámica server-side para obtener profesores
     const { getProfesores } = await import("../../../routes/api.users.server");
 
     try {
         const profesores = await getProfesores(request);
-        return { profesores };
+        return new Response(
+            JSON.stringify({ profesores }),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Cache-Control": "no-store, no-cache, must-revalidate",
+                    "Pragma": "no-cache",
+                },
+            }
+        );
     } catch (error) {
         console.error("Error al cargar profesores:", error);
-        return { profesores: [] };
+        return new Response(
+            JSON.stringify({ profesores: [] }),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Cache-Control": "no-store, no-cache, must-revalidate",
+                    "Pragma": "no-cache",
+                },
+            }
+        );
     }
 }
 

@@ -64,15 +64,32 @@ export async function loader({ request }: { request: Request }) {
         const res = await apiFetch(`/auditoria?${queryParams.toString()}`, { method: "GET", jwtToken, secure: true });
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
-        return { data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1 };
+        return new Response(
+            JSON.stringify({ data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1 }),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Cache-Control": "no-store, no-cache, must-revalidate",
+                    "Pragma": "no-cache",
+                },
+            }
+        );
     } catch (e) {
-        // Devuelve estructura esperada aunque haya error
-        return {
-            data: { content: [], totalPages: 1 },
-            filters: { action: "", resultado: "", userId: "", fechaDesde: "", fechaHasta: "" },
-            page: 1,
-            error: String(e)
-        };
+        return new Response(
+            JSON.stringify({
+                data: { content: [], totalPages: 1 },
+                filters: { action: "", resultado: "", userId: "", fechaDesde: "", fechaHasta: "" },
+                page: 1,
+                error: String(e)
+            }),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Cache-Control": "no-store, no-cache, must-revalidate",
+                    "Pragma": "no-cache",
+                },
+            }
+        );
     }
 }
 

@@ -42,18 +42,36 @@ export async function loader({ params, request }: { params: { id: string }, requ
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const publicaciones: Publicacion[] = await res.json();
 
-    return {
-      publicaciones,
-      isProfesor: userRole === UserRole.PROFESOR,
-      currentUserId
-    };
+    return new Response(
+      JSON.stringify({
+        publicaciones,
+        isProfesor: userRole === UserRole.PROFESOR,
+        currentUserId
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   } catch (err) {
     console.error("Error fetching forum:", err);
-    return {
-      publicaciones: [] as Publicacion[],
-      isProfesor: false,
-      currentUserId: null
-    };
+    return new Response(
+      JSON.stringify({
+        publicaciones: [] as Publicacion[],
+        isProfesor: false,
+        currentUserId: null
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   }
 }
 

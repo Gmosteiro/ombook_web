@@ -22,18 +22,35 @@ export async function loader({ params, request }: { params: { id: string }, requ
     const paginator = await getUsuariosVinculadosByCurso(request, Number(id), {
       q,
       rol: rol as UserRole,
-      // page, size, sort...
     });
-    return {
-      users: paginator.content ?? [],
-      userRole,
-    };
+    return new Response(
+      JSON.stringify({
+        users: paginator.content ?? [],
+        userRole,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   } catch (err) {
     console.error("Error fetching users:", err);
-    return {
-      users: [],
-      userRole,
-    };
+    return new Response(
+      JSON.stringify({
+        users: [],
+        userRole,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   }
 }
 

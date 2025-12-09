@@ -39,18 +39,36 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
     const paginasOrdenadas = paginasConRecursos.sort((a, b) => a.id - b.id);
 
-    return {
-      paginas: paginasOrdenadas,
-      jwtToken,
-      isProfesor: userRole === 'PROFESOR'
-    };
+    return new Response(
+      JSON.stringify({
+        paginas: paginasOrdenadas,
+        jwtToken,
+        isProfesor: userRole === 'PROFESOR'
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   } catch (err) {
     console.error("Error fetching pages or resources:", err);
-    return {
-      paginas: [],
-      jwtToken: '',
-      isProfesor: false
-    };
+    return new Response(
+      JSON.stringify({
+        paginas: [],
+        jwtToken: '',
+        isProfesor: false
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   }
 }
 

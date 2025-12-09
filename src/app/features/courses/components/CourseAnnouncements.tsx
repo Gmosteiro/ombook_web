@@ -33,18 +33,36 @@ export async function loader({ params, request }: { params: { id: string }, requ
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const anuncios: Anuncio[] = await res.json();
 
-    return {
-      anuncios,
-      isProfesor: userRole === UserRole.PROFESOR,
-      currentUserId
-    };
+    return new Response(
+      JSON.stringify({
+        anuncios,
+        isProfesor: userRole === UserRole.PROFESOR,
+        currentUserId
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   } catch (err) {
     console.error("Error fetching announcements:", err);
-    return {
-      anuncios: [] as Anuncio[],
-      isProfesor: false,
-      currentUserId: null
-    };
+    return new Response(
+      JSON.stringify({
+        anuncios: [] as Anuncio[],
+        isProfesor: false,
+        currentUserId: null
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   }
 }
 

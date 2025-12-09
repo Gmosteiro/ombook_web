@@ -9,18 +9,36 @@ import {
     redirect,
 } from "react-router";
 
-export async function loader({ request }: LoaderFunctionArgs) {
+type LoaderResult = {
+    error: string | null;
+    tokenValid: boolean;
+    token?: string;
+};
+
+export async function loader({ request }: LoaderFunctionArgs): Promise<Response> {
     const url = new URL(request.url);
     const token = url.searchParams.get("token");
 
+    let result: LoaderResult;
     if (!token) {
-        return {
+        result = {
             error: "Token no proporcionado. Por favor, verifica el enlace de desbloqueo.",
             tokenValid: false,
         };
+    } else {
+        result = { tokenValid: true, token, error: null };
     }
 
-    return { tokenValid: true, token, error: null };
+    return new Response(
+        JSON.stringify(result),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -48,7 +66,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function AccountUnlock() {
-    const loaderData = useLoaderData<typeof loader>();
+    const loaderData = useLoaderData() as LoaderResult;
     const actionData = useActionData<typeof action>();
     const navigation = useNavigation();
     const [confirmUnlock, setConfirmUnlock] = useState(false);

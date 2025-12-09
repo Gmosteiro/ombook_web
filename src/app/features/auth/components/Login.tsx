@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState } from "react";
 import { Form, redirect, Link, type MetaFunction } from "react-router";
 import { Route } from "../../../../.react-router/types/app/features/auth/components/+types/Login";
@@ -17,7 +16,16 @@ export async function loader({ request }: Route.LoaderArgs) {
     if (userId) {
         return redirect("/");
     }
-    return null;
+    return new Response(
+        JSON.stringify(null),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 };
 
 export async function action({ request }: Route.ActionArgs) {

@@ -5,38 +5,47 @@ import { validatePasswordStrength } from '../utils/methods';
 // Loader: verificar token al cargar
 export async function loader({ request }: { request: Request }) {
     const { verificarToken } = await import('~/routes/api.auth.server');
-
     const url = new URL(request.url);
     const token = url.searchParams.get('token');
 
+    let result;
     if (!token) {
-        return {
+        result = {
             tokenValid: false,
             error: 'Token no proporcionado. Por favor, utilice el enlace del correo.',
         };
-    }
-
-    try {
-        const data = await verificarToken(token);
-
-        if (!data.valido) {
-            return {
+    } else {
+        try {
+            const data = await verificarToken(token);
+            if (!data.valido) {
+                result = {
+                    tokenValid: false,
+                    error: 'El enlace no es válido o ha caducado.',
+                };
+            } else {
+                result = {
+                    tokenValid: true,
+                    token,
+                };
+            }
+        } catch (error: any) {
+            result = {
                 tokenValid: false,
-                error: 'El enlace no es válido o ha caducado.',
+                error: error.message || 'Error de conexión. Por favor, inténtelo de nuevo.',
             };
         }
-
-        return {
-            tokenValid: true,
-            token,
-        };
-    } catch (error: any) {
-        console.error('Error al verificar token:', error);
-        return {
-            tokenValid: false,
-            error: error.message || 'Error de conexión. Por favor, inténtelo de nuevo.',
-        };
     }
+
+    return new Response(
+        JSON.stringify(result),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
 // Action: restablecer contraseña
@@ -78,8 +87,14 @@ export async function action({ request }: { request: Request }) {
     }
 }
 
+type LoaderResult = {
+    tokenValid: boolean;
+    error?: string;
+    token?: string;
+};
+
 const ResetPassword: React.FC = () => {
-    const loaderData = useLoaderData<typeof loader>();
+    const loaderData = useLoaderData() as LoaderResult;
     const actionData = useActionData<typeof action>();
     const navigation = useNavigation();
 

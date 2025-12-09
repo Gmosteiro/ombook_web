@@ -6,7 +6,16 @@ import { obtenerNotificaciones, marcarNotificacionLeida, marcarTodasLeidas } fro
  */
 export async function loader({ request }: LoaderFunctionArgs) {
     const notifications = await obtenerNotificaciones(request);
-    return { notifications };
+    return new Response(
+        JSON.stringify({ notifications }),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
 /**

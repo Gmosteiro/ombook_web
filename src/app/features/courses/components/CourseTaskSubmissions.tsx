@@ -67,24 +67,42 @@ export async function loader({
       }
     }
 
-    return {
-      submission,
-      student,
-      downloadUrl,
-      userRole,
-      jwtToken
-    };
+    return new Response(
+      JSON.stringify({
+        submission,
+        student,
+        downloadUrl,
+        userRole,
+        jwtToken
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
 
   } catch (err) {
     console.error("Error fetching submission detail:", err);
 
-    return {
-      submission: null,
-      student: null,
-      downloadUrl: null,
-      userRole: null,
-      jwtToken: null
-    };
+    return new Response(
+      JSON.stringify({
+        submission: null,
+        student: null,
+        downloadUrl: null,
+        userRole: null,
+        jwtToken: null
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   }
 }
 
@@ -130,7 +148,6 @@ export default function CourseTaskSubmissions() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      const updatedSubmission = await response.json();
       window.location.reload();
 
       setIsGradingModalOpen(false);
@@ -210,11 +227,10 @@ export default function CourseTaskSubmissions() {
                   </div>
                   <div>
                     <span className="font-medium text-slate-600 dark:text-slate-400">Estado:</span>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                      submission.estado === 'ENVIADA'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                    }`}>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${submission.estado === 'ENVIADA'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                      : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                      }`}>
                       {submission.estado}
                     </span>
                   </div>
@@ -259,11 +275,11 @@ export default function CourseTaskSubmissions() {
                     </svg>
                     <div>
                       <button
-                         onClick={handleDownload}
-                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium underline"
-                       >
-                         {submission.nombreArchivo}
-                       </button>
+                        onClick={handleDownload}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium underline"
+                      >
+                        {submission.nombreArchivo}
+                      </button>
                       <p className="text-sm text-slate-500 dark:text-slate-400">Haz clic para descargar el archivo</p>
                     </div>
                   </div>

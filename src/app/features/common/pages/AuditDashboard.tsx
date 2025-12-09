@@ -59,7 +59,7 @@ export const meta = () => {
 
 // Loader para obtener datos reales
 // El loader recibe un objeto con 'request' de tipo Request (nativo)
-export async function loader({ request }: { request: Request }): Promise<AuditDashboardData> {
+export async function loader({ request }: { request: Request }) {
     requireRoleLoader([UserRole.ADMINISTRADOR]);
     const jwtToken = await getValidJWTToken(request);
 
@@ -100,7 +100,7 @@ export async function loader({ request }: { request: Request }): Promise<AuditDa
         { label: "Auditorias", value: resumen.totalAuditorias ?? 0, color: "#7c3aed" }
     ];
 
-    return {
+    const result: AuditDashboardData = {
         usuariosTotales: resumen.totalUsuarios ?? 0,
         cursosTotales: resumen.totalCursos ?? 0,
         accionesHoy: resumen.totalAuditorias ?? 0,
@@ -110,8 +110,19 @@ export async function loader({ request }: { request: Request }): Promise<AuditDa
         weeklyActivity,
         weeklyLabels,
         weeklyTotal,
-        weeklyPercent: 0 // Placeholder, update if API provides previous week
+        weeklyPercent: 0
     };
+
+    return new Response(
+        JSON.stringify(result),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
 interface DonutChartProps {

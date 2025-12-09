@@ -1,4 +1,4 @@
-import { useLoaderData, useOutletContext, Link, useParams } from "react-router";
+import { useLoaderData, useOutletContext, Link } from "react-router";
 import { useState } from "react";
 import type { Course, Entrega } from "../types/types";
 
@@ -31,16 +31,30 @@ export async function loader({
 
     const submissions = await res.json();
 
-    return {
-      submissions
-    };
+    return new Response(
+      JSON.stringify({ submissions }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
 
   } catch (err) {
     console.error("Error fetching submissions:", err);
 
-    return {
-      submissions: []
-    };
+    return new Response(
+      JSON.stringify({ submissions: [] }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   }
 }
 

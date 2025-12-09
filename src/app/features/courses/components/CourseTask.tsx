@@ -5,22 +5,40 @@ import { UploadResourceDialog } from "./UploadResourceDialog";
 import useRecursosPorTasks from "../hooks/useRecursosPorTasks";
 import type { Course, Tarea, Recurso, Entrega } from "../types/types";
 
-export async function loader({ params, request }: { params: { id: string }, request: Request }) {
-  const { id } = params;
+export async function loader({ request }: { params: { id: string }, request: Request }) {
+
   try {
     const jwtToken = await getValidJWTToken(request);
     const userRole = await getUserRole(request);
 
-    return {
-      jwtToken,
-      isProfesor: userRole === 'PROFESOR'
-    };
+    return new Response(
+      JSON.stringify({
+        jwtToken,
+        isProfesor: userRole === 'PROFESOR'
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   } catch (err) {
     console.error("Error in loader:", err);
-    return {
-      jwtToken: '',
-      isProfesor: false
-    };
+    return new Response(
+      JSON.stringify({
+        jwtToken: '',
+        isProfesor: false
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      }
+    );
   }
 }
 
@@ -241,8 +259,8 @@ export default function CourseTasks() {
     setEditTaskData({
       titulo: t.titulo,
       descripcion: t.descripcion || '',
-      fechaInicio: t.fechaInicio ? new Date(t.fechaInicio).toISOString().slice(0,16) : '',
-      fechaFin: t.fechaFin ? new Date(t.fechaFin).toISOString().slice(0,16) : ''
+      fechaInicio: t.fechaInicio ? new Date(t.fechaInicio).toISOString().slice(0, 16) : '',
+      fechaFin: t.fechaFin ? new Date(t.fechaFin).toISOString().slice(0, 16) : ''
     });
   };
 
@@ -322,164 +340,164 @@ export default function CourseTasks() {
           <div className="space-y-4">
             {tasks.length === 0 && <div className="text-gray-500">No hay tareas.</div>}
             {tasks.map((t: Tarea) => (
-          <div key={t.id} className={`bg-white rounded-md shadow overflow-hidden cursor-pointer ${getTaskStatus(t) === 'overdue' ? 'ombook-border-brown border-l-4' : ''}`} onClick={() => toggleExpand(t)}>
-            <div className="p-4 flex justify-between items-start">
-               <div>
-                 <div className="flex items-center gap-2">
-                   <div className="text-lg font-semibold">{t.titulo}</div>
-                   <span className={`ombook-badge ${getTaskStatus(t) === 'overdue' ? 'ombook-badge-brown' : 'ombook-badge-green'}`}>{getTaskStatus(t) === 'overdue' ? 'Vencida' : 'En Fecha'}</span>
-                 </div>
-                 <div className="text-xs text-gray-500">{t.fechaCreacion ? new Date(t.fechaCreacion).toLocaleString() : ''}</div>
-                 <p className="text-sm text-gray-700 mt-2 line-clamp-2">{t.descripcion}</p>
-               </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex gap-2">
-                  {canEdit(t) && (
-                    <>
-                      <button onClick={(e) => { e.stopPropagation(); editingId === t.id ? setEditingId(null) : startEditing(t); }} className="ombook-text-green text-sm">{editingId === t.id ? 'Cancelar' : 'Editar'}</button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {editingId === t.id && (
-              <form onSubmit={(e) => { e.stopPropagation(); handleUpdateTask(e); }} onClick={(e) => e.stopPropagation()} className="p-4 border-t bg-gray-50">
-                <div className="space-y-2">
+              <div key={t.id} className={`bg-white rounded-md shadow overflow-hidden cursor-pointer ${getTaskStatus(t) === 'overdue' ? 'ombook-border-brown border-l-4' : ''}`} onClick={() => toggleExpand(t)}>
+                <div className="p-4 flex justify-between items-start">
                   <div>
-                    <label htmlFor={`edit-titulo-${t.id}`} className="block text-sm font-medium">Título</label>
-                    <input
-                      id={`edit-titulo-${t.id}`}
-                      value={editTaskData.titulo}
-                      onChange={(e) => setEditTaskData(prev => ({ ...prev, titulo: e.target.value }))}
-                      placeholder="Título"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor={`edit-desc-${t.id}`} className="block text-sm font-medium">Descripción</label>
-                    <textarea
-                      id={`edit-desc-${t.id}`}
-                      value={editTaskData.descripcion}
-                      onChange={(e) => setEditTaskData(prev => ({ ...prev, descripcion: e.target.value }))}
-                      placeholder="Descripción"
-                      rows={3}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label htmlFor={`edit-fechaInicio-${t.id}`} className="block text-sm font-medium">Fecha inicio</label>
-                      <input
-                        id={`edit-fechaInicio-${t.id}`}
-                        value={editTaskData.fechaInicio}
-                        onChange={(e) => setEditTaskData(prev => ({ ...prev, fechaInicio: e.target.value }))}
-                        type="datetime-local"
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                      />
+                    <div className="flex items-center gap-2">
+                      <div className="text-lg font-semibold">{t.titulo}</div>
+                      <span className={`ombook-badge ${getTaskStatus(t) === 'overdue' ? 'ombook-badge-brown' : 'ombook-badge-green'}`}>{getTaskStatus(t) === 'overdue' ? 'Vencida' : 'En Fecha'}</span>
                     </div>
-                    <div>
-                      <label htmlFor={`edit-fechaFin-${t.id}`} className="block text-sm font-medium">Fecha fin</label>
-                      <input
-                        id={`edit-fechaFin-${t.id}`}
-                        value={editTaskData.fechaFin}
-                        onChange={(e) => setEditTaskData(prev => ({ ...prev, fechaFin: e.target.value }))}
-                        type="datetime-local"
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                      />
-                    </div>
+                    <div className="text-xs text-gray-500">{t.fechaCreacion ? new Date(t.fechaCreacion).toLocaleString() : ''}</div>
+                    <p className="text-sm text-gray-700 mt-2 line-clamp-2">{t.descripcion}</p>
                   </div>
-                  <div className="flex justify-end gap-2 mt-2">
-                    <button type="button" onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="ombook-btn ombook-btn-secondary">Cancelar</button>
-                    <button type="submit" className="ombook-btn ombook-btn-primary">Guardar</button>
-                  </div>
-                </div>
-              </form>
-            )}
-
-            {expandedId === t.id && (
-              <div className="p-4 border-t space-y-4" onClick={(e) => e.stopPropagation()}>
-                <div>
-                  <div className="text-sm font-medium">Descripción</div>
-                  <div className="text-sm text-gray-700 whitespace-pre-line mt-1">{t.descripcion}</div>
-                </div>
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <div>Inicio: {t.fechaInicio ? new Date(t.fechaInicio).toLocaleString() : '-'}</div>
-                  <div>Fin: {t.fechaFin ? new Date(t.fechaFin).toLocaleString() : '-'}</div>
-                </div>
-
-                <div>
-                  <div className="text-sm font-semibold mb-2">Recursos</div>
-                  <div className="space-y-2">
-                    {(resourcesByTask[t.id] || []).length === 0 && <div className="text-gray-500">No hay recursos.</div>}
-                    {(resourcesByTask[t.id] || []).map(r => (
-                      <div key={r.id} className="flex justify-between items-center bg-white border rounded p-2">
-                        <div className="text-sm">{r.nombreOriginal}</div>
-                        <div className="flex gap-2">
-                          <button onClick={(e) => { e.stopPropagation(); handleDownloadResource(r); }} className="ombook-text-green text-sm">Descargar</button>
-                          {isProfesor && (
-                            <button onClick={(e) => { e.stopPropagation(); handleDeleteResource(r); }} className="ombook-text-brown-dark text-sm">Eliminar</button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {isProfesor && (
-                    <div className="mt-3 border-t pt-3">
-                      <button onClick={(e) => { e.stopPropagation(); setShowUploadFor(t.id); }} className="ombook-btn ombook-btn-primary">Subir recurso</button>
-                      <UploadResourceDialog
-                        isOpen={showUploadFor === t.id}
-                        onClose={() => setShowUploadFor(null)}
-                        onUpload={handleUploadResource}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <div className="text-sm font-semibold mb-2">Entrega</div>
-                  {isProfesor ? (
-                    <Link to={`${t.id}/submissions`} onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm">Ver Entregas</Link>
-                  ) : (
-                    <div className="space-y-2">
-                      {(submissionsByTask[t.id] || []).length === 0 ? (
-                        <div>
-                          <div className="text-gray-500">No hay entregas</div>
-                          <button onClick={(e) => { e.stopPropagation(); setUploadSubmissionError(''); setShowUploadSubmissionFor(t.id); }} className="ombook-btn ombook-btn-primary mt-2">Entregar</button>
-                        </div>
-                      ) : (
-                        (submissionsByTask[t.id] || []).map(entrega => (
-                          <div key={entrega.id} className="bg-white border rounded p-2">
-                            <div className="text-sm">Entregado el {entrega.fechaEnvio ? new Date(entrega.fechaEnvio).toLocaleString() : '-'}</div>
-                            <div className="text-sm">Estado: {entrega.estado}</div>
-                            {entrega.calificacion !== undefined && <div className="text-sm">Calificación: {entrega.calificacion}</div>}
-                            <div className="flex gap-2 mt-2">
-                              <button onClick={(e) => { e.stopPropagation(); handleDownloadSubmission(t.id, entrega); }} className="ombook-text-green text-sm">Descargar</button>
-                              <Link
-  to={`${t.id}/submissions/${entrega.id}`}
-  onClick={(e) => e.stopPropagation()}
-  className="ombook-text-blue text-sm"
->
-  Ver más detalles
-</Link>
-                            </div>
-                          </div>
-                        ))
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex gap-2">
+                      {canEdit(t) && (
+                        <>
+                          <button onClick={(e) => { e.stopPropagation(); editingId === t.id ? setEditingId(null) : startEditing(t); }} className="ombook-text-green text-sm">{editingId === t.id ? 'Cancelar' : 'Editar'}</button>
+                        </>
                       )}
                     </div>
-                  )}
-                  <UploadResourceDialog
-                    isOpen={showUploadSubmissionFor === t.id}
-                    onClose={() => setShowUploadSubmissionFor(null)}
-                    onUpload={(nombre, file) => handleUploadSubmission(file)}
-                    showNombre={false}
-                  />
-                  {uploadSubmissionError && <div className="text-red-500 text-sm mt-2">{uploadSubmissionError}</div>}
+                  </div>
                 </div>
+
+                {editingId === t.id && (
+                  <form onSubmit={(e) => { e.stopPropagation(); handleUpdateTask(e); }} onClick={(e) => e.stopPropagation()} className="p-4 border-t bg-gray-50">
+                    <div className="space-y-2">
+                      <div>
+                        <label htmlFor={`edit-titulo-${t.id}`} className="block text-sm font-medium">Título</label>
+                        <input
+                          id={`edit-titulo-${t.id}`}
+                          value={editTaskData.titulo}
+                          onChange={(e) => setEditTaskData(prev => ({ ...prev, titulo: e.target.value }))}
+                          placeholder="Título"
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`edit-desc-${t.id}`} className="block text-sm font-medium">Descripción</label>
+                        <textarea
+                          id={`edit-desc-${t.id}`}
+                          value={editTaskData.descripcion}
+                          onChange={(e) => setEditTaskData(prev => ({ ...prev, descripcion: e.target.value }))}
+                          placeholder="Descripción"
+                          rows={3}
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label htmlFor={`edit-fechaInicio-${t.id}`} className="block text-sm font-medium">Fecha inicio</label>
+                          <input
+                            id={`edit-fechaInicio-${t.id}`}
+                            value={editTaskData.fechaInicio}
+                            onChange={(e) => setEditTaskData(prev => ({ ...prev, fechaInicio: e.target.value }))}
+                            type="datetime-local"
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor={`edit-fechaFin-${t.id}`} className="block text-sm font-medium">Fecha fin</label>
+                          <input
+                            id={`edit-fechaFin-${t.id}`}
+                            value={editTaskData.fechaFin}
+                            onChange={(e) => setEditTaskData(prev => ({ ...prev, fechaFin: e.target.value }))}
+                            type="datetime-local"
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-2">
+                        <button type="button" onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="ombook-btn ombook-btn-secondary">Cancelar</button>
+                        <button type="submit" className="ombook-btn ombook-btn-primary">Guardar</button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+
+                {expandedId === t.id && (
+                  <div className="p-4 border-t space-y-4" onClick={(e) => e.stopPropagation()}>
+                    <div>
+                      <div className="text-sm font-medium">Descripción</div>
+                      <div className="text-sm text-gray-700 whitespace-pre-line mt-1">{t.descripcion}</div>
+                    </div>
+                    <div className="flex gap-4 text-sm text-gray-600">
+                      <div>Inicio: {t.fechaInicio ? new Date(t.fechaInicio).toLocaleString() : '-'}</div>
+                      <div>Fin: {t.fechaFin ? new Date(t.fechaFin).toLocaleString() : '-'}</div>
+                    </div>
+
+                    <div>
+                      <div className="text-sm font-semibold mb-2">Recursos</div>
+                      <div className="space-y-2">
+                        {(resourcesByTask[t.id] || []).length === 0 && <div className="text-gray-500">No hay recursos.</div>}
+                        {(resourcesByTask[t.id] || []).map(r => (
+                          <div key={r.id} className="flex justify-between items-center bg-white border rounded p-2">
+                            <div className="text-sm">{r.nombreOriginal}</div>
+                            <div className="flex gap-2">
+                              <button onClick={(e) => { e.stopPropagation(); handleDownloadResource(r); }} className="ombook-text-green text-sm">Descargar</button>
+                              {isProfesor && (
+                                <button onClick={(e) => { e.stopPropagation(); handleDeleteResource(r); }} className="ombook-text-brown-dark text-sm">Eliminar</button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {isProfesor && (
+                        <div className="mt-3 border-t pt-3">
+                          <button onClick={(e) => { e.stopPropagation(); setShowUploadFor(t.id); }} className="ombook-btn ombook-btn-primary">Subir recurso</button>
+                          <UploadResourceDialog
+                            isOpen={showUploadFor === t.id}
+                            onClose={() => setShowUploadFor(null)}
+                            onUpload={handleUploadResource}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="text-sm font-semibold mb-2">Entrega</div>
+                      {isProfesor ? (
+                        <Link to={`${t.id}/submissions`} onClick={(e) => e.stopPropagation()} className="px-3 py-1 bg-gray-100 rounded text-sm">Ver Entregas</Link>
+                      ) : (
+                        <div className="space-y-2">
+                          {(submissionsByTask[t.id] || []).length === 0 ? (
+                            <div>
+                              <div className="text-gray-500">No hay entregas</div>
+                              <button onClick={(e) => { e.stopPropagation(); setUploadSubmissionError(''); setShowUploadSubmissionFor(t.id); }} className="ombook-btn ombook-btn-primary mt-2">Entregar</button>
+                            </div>
+                          ) : (
+                            (submissionsByTask[t.id] || []).map(entrega => (
+                              <div key={entrega.id} className="bg-white border rounded p-2">
+                                <div className="text-sm">Entregado el {entrega.fechaEnvio ? new Date(entrega.fechaEnvio).toLocaleString() : '-'}</div>
+                                <div className="text-sm">Estado: {entrega.estado}</div>
+                                {entrega.calificacion !== undefined && <div className="text-sm">Calificación: {entrega.calificacion}</div>}
+                                <div className="flex gap-2 mt-2">
+                                  <button onClick={(e) => { e.stopPropagation(); handleDownloadSubmission(t.id, entrega); }} className="ombook-text-green text-sm">Descargar</button>
+                                  <Link
+                                    to={`${t.id}/submissions/${entrega.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="ombook-text-blue text-sm"
+                                  >
+                                    Ver más detalles
+                                  </Link>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                      <UploadResourceDialog
+                        isOpen={showUploadSubmissionFor === t.id}
+                        onClose={() => setShowUploadSubmissionFor(null)}
+                        onUpload={(_, file) => handleUploadSubmission(file)}
+                        showNombre={false}
+                      />
+                      {uploadSubmissionError && <div className="text-red-500 text-sm mt-2">{uploadSubmissionError}</div>}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
             ))}
           </div>
         </>

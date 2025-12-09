@@ -11,7 +11,16 @@ export function meta() {
 export async function loader({ request }: { request: Request }) {
     const { requireValidSession } = await import("../../../services/session.server");
     await requireValidSession(request);
-    return {};
+    return new Response(
+        JSON.stringify({}),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        }
+    );
 }
 
 export async function action({ request }: { request: Request }) {
