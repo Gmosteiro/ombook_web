@@ -14,7 +14,6 @@ import { NotificationProvider } from "./features/common/contexts/NotificationCon
 import { useNotificationPolling } from "./features/common/hooks/useSSENotifications";
 import { User } from "./features/auth/types";
 
-
 export const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -32,7 +31,17 @@ export const links = () => [
   },
 ];
 
-// Loader para pasar datos de sesión al layout
+// -------------------------------------------------------
+// SOLUCIÓN FUERTE: headers globales que fuerzan no-cache
+// -------------------------------------------------------
+export const headers = () => {
+  return {
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+    "Pragma": "no-cache",
+  };
+};
+
+// Loader root
 export async function loader({ request }: { request: Request }) {
   const { getUserId, getUserRole } = await import("./services/session.server");
   const { getPerfil } = await import("./routes/api.profile.server");
@@ -51,9 +60,7 @@ export async function loader({ request }: { request: Request }) {
         : undefined;
 
       notifications = await obtenerNotificaciones(request);
-    } catch {
-      // Si falla, deja valores por defecto
-    }
+    } catch { }
   }
 
   return new Response(
@@ -71,12 +78,11 @@ export async function loader({ request }: { request: Request }) {
 export function Layout({ children }: { children: React.ReactNode }) {
   const { userId, userRole, avatarUrl, notifications } = useLoaderData() as {
     userId: string;
-    userRole: User['rol']
-    avatarUrl: string | undefined;
+    userRole: User['rol'];
+    avatarUrl?: string;
     notifications: any[];
   };
 
-  // Component to initialize polling inside NotificationProvider
   function PollingInitializer() {
     useNotificationPolling(Boolean(userId));
     return null;
@@ -90,17 +96,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="">
+      <body>
         <NotificationProvider initialNotifications={notifications}>
           <PollingInitializer />
-          <Navbar
-            userRole={userRole}
-            avatarUrl={avatarUrl}
-          />
+          <h1>
+            Logueado con {userId ? `ID: ${userId} | Rol: ${userRole}` : "No logueado"}
+          </h1>
+          <Navbar userRole={userRole} avatarUrl={avatarUrl} />
           <div className="bg-gray-50 min-h-screen pt-20 flex flex-col">
-            <main className="flex-grow">
-              {children}
-            </main>
+            <main className="flex-grow">{children}</main>
             <Footer />
             <ScrollRestoration />
             <Scripts />

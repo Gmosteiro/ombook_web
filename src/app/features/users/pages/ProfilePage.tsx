@@ -10,7 +10,7 @@ import UserActionsMenu from "~/features/common/components/UserActionsMenu";
 export const loader = async ({ request }: { request: Request }) => {
     const { getUserRole } = await import("../../../services/session.server");
     await requireRoleLoader([UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE])({ request } as any);
-
+    console.log("Loader de perfil")
     const { getPerfil } = await import("../../../routes/api.profile.server");
     const perfil = await getPerfil(request);
     const userRole = await getUserRole(request);
