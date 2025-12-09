@@ -5,9 +5,10 @@ import { API_URL } from "~/features/common/utils/Utils";
 
 const USER_SESSION_KEY = "userId";
 
-// =====================================================
-// SESSION STORAGE
-// =====================================================
+/**
+ * Creates a cookie-based session storage.
+ * @see https://reactrouter.com/en/dev/utils/create-cookie-session-storage
+ */
 export const sessionStorage = createCookieSessionStorage({
     cookie: {
         name: "__session",
@@ -22,9 +23,11 @@ export const sessionStorage = createCookieSessionStorage({
 
 export const { commitSession, destroySession } = sessionStorage;
 
-// =====================================================
-// JWT HELPERS
-// =====================================================
+/**
+ * Decodes a JWT token (basic decoding, no signature verification)
+ * @param {string} token - The JWT token to decode
+ * @returns {Token | null} The decoded payload or null if invalid
+ */
 interface Token {
     ip: string;
     id: string;
@@ -37,51 +40,44 @@ interface Token {
 
 const decodeJWT = (token: string): Token | null => {
     try {
-        console.log("[SESSION DEBUG] Decoding JWT...");
-
         const parts = token.split('.');
-        if (parts.length !== 3) {
-            console.log("[SESSION DEBUG] Invalid JWT format");
-            return null;
-        }
+        if (parts.length !== 3) return null;
 
+        // Decode the payload (base64url)
         const payload = JSON.parse(
             atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
         );
-
-        console.log("[SESSION DEBUG] JWT decoded:", payload);
         return payload;
     } catch (error) {
-        console.error("[SESSION DEBUG] Error decoding JWT:", error);
+        console.error('Session Server - Error decoding JWT:', error);
         return null;
     }
-};
-
-function isJWTValid(token: string): boolean {
-    console.log("[SESSION DEBUG] Checking if JWT is valid...");
-    const decoded = decodeJWT(token);
-    if (!decoded) {
-        console.log("[SESSION DEBUG] JWT invalid");
-        return false;
-    }
-
-    const now = Date.now();
-    const expMs = decoded.exp * 1000;
-
-    console.log("[SESSION DEBUG] Now:", now, "Exp:", expMs);
-
-    const valid = expMs > now;
-    console.log("[SESSION DEBUG] Token valid?", valid);
-
-    return valid;
 }
 
-// =====================================================
-// REFRESH TOKEN
-// =====================================================
-async function refreshAccessToken(refreshToken: string) {
-    console.log("[SESSION DEBUG] Calling /auth/refresh...");
+/**
+ * Validates if a JWT token is still valid (not expired)
+ * @param {string} token - The JWT token to validate
+ * @returns {boolean} True if token is valid, false if expired or invalid
+ */
+function isJWTValid(token: string): boolean {
+    const decoded = decodeJWT(token);
+    if (!decoded || !decoded.exp) return false;
 
+    // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
+    return decoded.exp * 1000 > Date.now();
+}
+
+/**
+ * Refreshes the access token using the refresh token
+ * @param {string} refreshToken - The refresh token
+ * @returns {Promise<{accessToken: string, accessTokenExp: number, refreshToken: string} | null>} New tokens or null if failed
+ */
+async function refreshAccessToken(refreshToken: string): Promise<{
+    accessToken: string;
+    accessTokenExp: number;
+    refreshToken: string;
+    rol: string;
+} | null> {
     try {
         const response = await fetch(`${API_URL}/auth/refresh`, {
             method: "POST",
@@ -89,208 +85,260 @@ async function refreshAccessToken(refreshToken: string) {
             body: JSON.stringify({ refreshToken }),
         });
 
-        console.log("[SESSION DEBUG] Refresh response status:", response.status);
-
         if (!response.ok) {
-            console.error("[SESSION DEBUG] FAILED refresh.");
+            console.error("Failed to refresh token:", response.status);
             return null;
         }
 
         const data = await response.json();
-        console.log("[SESSION DEBUG] Refresh success:", data);
-
-        return data;
-    } catch (err) {
-        console.error("[SESSION DEBUG] Error refreshing token:", err);
+        return {
+            accessToken: data.accessToken,
+            accessTokenExp: data.accessTokenExp,
+            refreshToken: data.refreshToken,
+            rol: data.rol,
+        };
+    } catch (error) {
+        console.error("Error refreshing token:", error);
         return null;
     }
 }
 
-// =====================================================
-// FORCE REFRESH
-// =====================================================
-export const forceTokenRefresh = async (request: Request) => {
-    console.log("[SESSION DEBUG] forceTokenRefresh called");
 
+export const forceTokenRefresh = async (request: Request): Promise<{
+    success: boolean;
+    headers?: HeadersInit;
+}> => {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
     const refreshToken = session.get("refreshToken");
 
-    console.log("[SESSION DEBUG] Refresh token:", refreshToken);
-
     if (!refreshToken) {
-        console.log("[SESSION DEBUG] No refresh token found");
+        console.error("No refresh token found in session");
         return { success: false };
     }
 
     const newTokens = await refreshAccessToken(refreshToken);
 
     if (!newTokens) {
-        console.log("[SESSION DEBUG] Failed refreshing inside forceTokenRefresh");
+        console.error("Failed to refresh token");
         await logout(request);
         return { success: false };
     }
 
-    console.log("[SESSION DEBUG] Refresh OK, updating session...");
-
+    // Successfully refreshed, update session
     const decoded = decodeJWT(newTokens.accessToken);
+    if (!decoded) {
+        console.error("Failed to decode new access token");
+        return { success: false };
+    }
 
+    console.log("Token refreshed successfully (force)");
     session.set("token", newTokens.accessToken);
     session.set("refreshToken", newTokens.refreshToken);
     session.set("exp", newTokens.accessTokenExp);
     session.set("rol", newTokens.rol);
-    session.set(USER_SESSION_KEY, decoded?.id);
+    session.set(USER_SESSION_KEY, decoded.id);
 
-    return {
-        success: true,
-        headers: {
-            "Set-Cookie": await commitSession(session),
-        },
+    // Commit the session and return headers
+    const headers = {
+        "Set-Cookie": await sessionStorage.commitSession(session),
     };
-};
 
-// =====================================================
-// GET USER SESSION
-// =====================================================
+    return { success: true, headers };
+}
+
+/**
+ * Retrieves the user session from the request and validates JWT expiration.
+ * If JWT is expired, tries to refresh it using the refresh token.
+ * Automatically commits session changes if token was refreshed.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<Session>} The user session.
+ */
 const getUserSession = async (request: Request) => {
-    console.log("[SESSION DEBUG] getUserSession called");
-
     const cookieHeader = request.headers.get("Cookie");
-    console.log("[SESSION DEBUG] Incoming Cookie:", cookieHeader);
-
     const session = await sessionStorage.getSession(cookieHeader);
 
+    // Check if session has a token and if it's expired
     const token = session.get("token");
     const refreshToken = session.get("refreshToken");
 
-    console.log("[SESSION DEBUG] Found token:", token);
-    console.log("[SESSION DEBUG] Found refresh token:", refreshToken);
-
     if (token && !isJWTValid(token)) {
-        console.log("[SESSION DEBUG] Token EXPIRED");
-
+        // Token expired, try to refresh
         if (refreshToken) {
-            console.log("[SESSION DEBUG] Attempting token refresh...");
 
+            console.log("Access token expired, attempting to refresh");
             const newTokens = await refreshAccessToken(refreshToken);
 
             if (newTokens) {
-                console.log("[SESSION DEBUG] Refresh successful inside getUserSession");
 
+                console.log("Token refreshed successfully");
+                // Successfully refreshed, update session
                 const decoded = decodeJWT(newTokens.accessToken);
+                if (decoded) {
+                    session.set("token", newTokens.accessToken);
+                    session.set("refreshToken", newTokens.refreshToken);
+                    session.set("exp", newTokens.accessTokenExp);
+                    session.set("rol", newTokens.rol);
+                    session.set(USER_SESSION_KEY, decoded.id);
 
-                session.set("token", newTokens.accessToken);
-                session.set("refreshToken", newTokens.refreshToken);
-                session.set("exp", newTokens.accessTokenExp);
-                session.set("rol", newTokens.rol);
-                session.set(USER_SESSION_KEY, decoded?.id);
-
-                (session as any)._tokenRefreshed = true;
-
-                return session;
+                    console.log("Token refreshed successfully");
+                    // Note: Session will be committed by the calling function
+                    (session as any)._tokenRefreshed = true;
+                    return session;
+                }
             }
-
-            console.log("[SESSION DEBUG] Refresh FAILED inside getUserSession");
         }
 
-        console.log("[SESSION DEBUG] No refresh token OR refresh failed. Clearing session");
+
+        console.log("Failed to refresh token or no refresh token available");
+        // Couldn't refresh, clear session data
+        session.unset(USER_SESSION_KEY);
         session.unset("token");
         session.unset("refreshToken");
         session.unset("rol");
-        session.unset(USER_SESSION_KEY);
+        session.unset("exp");
     }
 
     return session;
 };
 
-// =====================================================
-// LOGOUT
-// =====================================================
+/**
+ * Logs out the user by destroying their session.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<Response>} Redirect response after logout.
+ */
 export async function logout(request: Request) {
-    console.log("[SESSION DEBUG] LOGOUT triggered");
-
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-
+    console.log("[logout] Destroying session for user:", session.get(USER_SESSION_KEY));
     return redirect("/login", {
         headers: {
-            "Set-Cookie": await destroySession(session),
-            "Cache-Control": "no-store",
+            "Set-Cookie": await sessionStorage.destroySession(session),
+            "Cache-Control": "no-store", // <-- fuerza no cachear
         },
     });
 }
 
-// =====================================================
-// REQUIRE VALID SESSION
-// =====================================================
-export async function requireValidSession(request: Request) {
-    console.log("[SESSION DEBUG] requireValidSession called");
-
+/**
+ * Checks if the user has a valid session, redirects to login if not.
+ * Automatically persists session if token was refreshed.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<void>} Throws redirect if session is invalid.
+ */
+export async function requireValidSession(request: Request): Promise<void> {
     const session = await getUserSession(request);
-
     const userId = session.get(USER_SESSION_KEY);
     const token = session.get("token");
 
-    console.log("[SESSION DEBUG] UserId:", userId);
-    console.log("[SESSION DEBUG] Token:", token);
+    console.log("[requireValidSession] userId:", userId, "token:", token);
 
     if (!userId || !token) {
-        console.log("[SESSION DEBUG] Invalid session → redirecting to login");
-
+        console.log("[requireValidSession] Invalid session, redirecting to login");
         throw redirect("/login", {
             headers: {
-                "Set-Cookie": await destroySession(session),
+                "Set-Cookie": await sessionStorage.destroySession(session),
                 "Cache-Control": "no-store",
+                "Pragma": "no-cache",
             },
         });
     }
+
+    if ((session as any)._tokenRefreshed) {
+        console.log("[requireValidSession] Token was refreshed for user:", userId);
+    }
 }
 
-// =====================================================
-// GETTERS
-// =====================================================
-export async function getUserId(request: Request) {
-    console.log("[SESSION DEBUG] getUserId called");
+/**
+ * Retrieves the user ID from the session.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<string | undefined>} The user ID if found, undefined otherwise.
+ */
+export async function getUserId(
+    request: Request
+): Promise<User["id"] | undefined> {
     const session = await getUserSession(request);
-    console.log("[SESSION DEBUG] Returning userId:", session.get(USER_SESSION_KEY));
-    return session.get(USER_SESSION_KEY);
+    const userId = session.get(USER_SESSION_KEY);
+    console.log("[getUserId] userId:", userId);
+    return userId;
 }
 
-export async function getUserRole(request: Request) {
-    console.log("[SESSION DEBUG] getUserRole called");
+/**
+ * Retrieves the user role from the session.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<string | undefined>} The user role if found, undefined otherwise.
+ */
+export async function getUserRole(
+    request: Request
+): Promise<UserRole | undefined> {
     const session = await getUserSession(request);
-    console.log("[SESSION DEBUG] Returning role:", session.get("rol"));
-    return session.get("rol");
+    const role = session.get("rol");
+    console.log("[getUserRole] role:", role);
+    return role;
 }
 
-export async function getValidJWTToken(request: Request) {
-    console.log("[SESSION DEBUG] getValidJWTToken called", Date.now());
-    await requireValidSession(request);
+/**
+ * Retrieves a valid JWT token from the session (checks expiration).
+ * Redirects to login if token is expired or invalid.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<string | null>} The JWT token if valid, null if not found.
+ */
+export async function getValidJWTToken(request: Request): Promise<string> {
+    console.log("[getValidJWTToken] ejecutado", Date.now());
+    await requireValidSession(request); // This will redirect if session is invalid
     const session = await getUserSession(request);
-    console.log("[SESSION DEBUG] Returning token:", session.get("token"));
+
+    console.log("[getValidJWTToken] token:", session.get("token"));
+
     return session.get("token");
 }
 
-// =====================================================
-// CREATE SESSION
-// =====================================================
-export async function createUserSession({ request, remember, redirectUrl, extraSessionData }) {
-    console.log("[SESSION DEBUG] createUserSession called");
-
+/**
+ * Creates a new user session.
+ * @param {Object} params - The parameters for creating the session.
+ * @param {Request} params.request - The incoming request.
+ * @param {string} params.userId - The user ID to store in the session.
+ * @param {boolean} params.remember - Whether to create a persistent session.
+ * @param {string} [params.redirectUrl] - The URL to redirect to after creating the session.
+ * @returns {Promise<Response>} Redirect response with the new session cookie.
+ */
+export async function createUserSession({
+    request,
+    remember = true,
+    redirectUrl,
+    extraSessionData,
+}: {
+    request: Request;
+    remember: boolean;
+    redirectUrl?: string;
+    extraSessionData: {
+        rol: UserRole
+        [key: string]: string | any;
+    };
+}) {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-
     const data = decodeJWT(extraSessionData.token);
-    console.log("[SESSION DEBUG] Decoded login token:", data);
+
+    if (!data) {
+        console.error("[createUserSession] Invalid token data");
+        throw new Error("Invalid token data");
+    }
 
     session.set(USER_SESSION_KEY, data.id);
-
-    Object.entries(extraSessionData).forEach(([k, v]) => {
-        session.set(k, v);
-        console.log(`[SESSION DEBUG] Set session key ${k} =`, v);
-    });
+    if (extraSessionData) {
+        Object.entries(extraSessionData).forEach(([key, value]) => {
+            session.set(key, value);
+        });
+    }
+    console.log("[createUserSession] Creating session for user:", data.id, "remember:", remember);
 
     return redirect(redirectUrl || "/", {
         headers: {
-            "Set-Cookie": await commitSession(session),
+            "Set-Cookie": await sessionStorage.commitSession(session, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: remember ? 60 * 15 : undefined,
+            }),
             "Cache-Control": "no-store",
+            "Pragma": "no-cache",
         },
     });
 }
