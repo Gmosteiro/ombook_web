@@ -20,7 +20,7 @@ const UnenrollIndividualForm: React.FC<IndividualFormProps & { cursoId?: number 
                 <input type="hidden" name="intent" value="buscar" />
                 <input type="hidden" name="cursoId" value={cursoId ?? ""} />
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Buscar usuario por nombre, apellido, correo o cédula
+                    Buscar usuario por nombre, apellido o cédula
                 </label>
                 <div className="flex gap-2">
                     <input
@@ -30,7 +30,7 @@ const UnenrollIndividualForm: React.FC<IndividualFormProps & { cursoId?: number 
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         disabled={submitting}
-                        placeholder="Ej: Juan, juan@mail.com, 12345678"
+                        placeholder="Ej: Juan, 12345678"
                     />
                     <button
                         type="submit"
