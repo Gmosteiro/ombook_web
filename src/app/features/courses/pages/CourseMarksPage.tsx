@@ -127,9 +127,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 type LoaderData = {
     userRole: UserRole;
-    studentMarks?: CalificacionFinalEstudianteResponse;
+    studentMarks?: CalificacionFinalEstudianteResponse | null;
     teacherMarks?: MarksListResponse;
-    estudiantes?: UsuarioListaResponse[]
+    estudiantes?: UsuarioListaResponse[];
 };
 
 export default function CourseMarksPage() {
@@ -138,7 +138,13 @@ export default function CourseMarksPage() {
     return (
         <div className="ombook-container">
             {userRole === UserRole.ESTUDIANTE ? (
-                <StudentMarks mark={studentMarks} />
+                studentMarks ? (
+                    <StudentMarks mark={studentMarks} />
+                ) : (
+                    <div className="ombook-alert ombook-alert-info">
+                        Aún no hay calificaciones disponibles para este curso.
+                    </div>
+                )
             ) : (
                 <TeacherMarks
                     teacherMarks={teacherMarks ?? []}

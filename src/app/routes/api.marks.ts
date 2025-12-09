@@ -1,5 +1,3 @@
-
-
 import { apiFetch } from "../features/auth/utils/methods";
 import type { components } from "../../types/openapi";
 
@@ -70,7 +68,7 @@ export async function publishMarks(request: Request, cursoId: string): Promise<P
 }
 
 
-export async function getMyMarks(request: Request, cursoId: string): Promise<CalificacionFinalEstudianteResponse> {
+export async function getMyMarks(request: Request, cursoId: string): Promise<CalificacionFinalEstudianteResponse | null> {
     const { getValidJWTToken } = await import("../services/session.server");
 
     const res = await apiFetch(`/cursos/${cursoId}/calificaciones-finales/mi`, {
@@ -78,12 +76,22 @@ export async function getMyMarks(request: Request, cursoId: string): Promise<Cal
         secure: true,
         jwtToken: await getValidJWTToken(request),
     });
+
     if (!res.ok) {
         console.log("Failed to fetch my mark, status:", res.status);
         throw new Error("Error al obtener mi calificación");
     }
 
-    const response = await res.json();
+    if (res.status === 204 || res.headers.get("content-length") === "0") {
+        return null;
+    }
 
-    return response;
+    const text = await res.text();
+    if (!text) return null;
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        return null;
+    }
 }

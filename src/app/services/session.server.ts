@@ -288,8 +288,6 @@ export async function getValidJWTToken(request: Request): Promise<string> {
     await requireValidSession(request); // This will redirect if session is invalid
     const session = await getUserSession(request);
 
-
-    console.log("Retrieving valid JWT token from session", session);
     return session.get("token");
 }
 
