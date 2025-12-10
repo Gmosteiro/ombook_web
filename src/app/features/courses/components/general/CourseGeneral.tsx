@@ -1,5 +1,5 @@
-import { useOutletContext, useLoaderData, type LoaderFunctionArgs, type ActionFunctionArgs } from "react-router";
-import { useState } from "react";
+import { useOutletContext, useLoaderData, type LoaderFunctionArgs, type ActionFunctionArgs, useFetcher } from "react-router";
+import { useState, useEffect } from "react";
 import { Course, CreatePaginaRequest } from "../../types/types";
 import { PaginaTematica } from "../PaginaTematica";
 import {
@@ -113,6 +113,7 @@ type Ctx = { course: Course };
 export default function CourseGeneral() {
   const context = useOutletContext<Ctx>();
   const course = context?.course;
+  const fetcher = useFetcher();
   const [showNewPage, setShowNewPage] = useState(false);
   const [newPage] = useState<Partial<CreatePaginaRequest>>({
     titulo: "",
@@ -170,17 +171,18 @@ export default function CourseGeneral() {
     formData.append('_action', 'downloadRecurso');
     formData.append('recursoId', recursoId.toString());
 
-    try {
-      const response = await fetch(`/courses/${course.id}/general`, {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      if (data.url) window.open(data.url, '_blank');
-    } catch (err) {
-      console.error('Error getting download url:', err);
-    }
+    fetcher.submit(formData, {
+      method: 'POST',
+      action: `/courses/${course.id}/general`,
+    });
   };
+
+  // Abrir URL cuando fetcher devuelva el resultado
+  useEffect(() => {
+    if (fetcher.data?.url) {
+      window.open(fetcher.data.url, '_blank');
+    }
+  }, [fetcher.data]);
 
   const handleUpdatePagina = async (paginaId: number, updatedData: { titulo: string; fechaProgramada: string | null }) => {
     if (!course?.id) return;
