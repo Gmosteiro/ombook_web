@@ -156,12 +156,25 @@ export default function CourseAnnouncements() {
   const [fechaProgramada, setFechaProgramada] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingAnuncioId, setEditingAnuncioId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const canEditAnuncio = (anuncio: Anuncio) => isProfesor || currentUserId === anuncio.autorId;
 
   const handleCreate = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!course?.id || !titulo || !contenido) return;
+
+    // Validar que la fecha programada no sea pasada
+    if (fechaProgramada) {
+      const selectedDate = new Date(fechaProgramada);
+      const now = new Date();
+      if (selectedDate < now) {
+        setErrorMessage('La fecha programada no puede ser anterior a la fecha actual');
+        return;
+      }
+    }
+
+    setErrorMessage(null);
     setIsSubmitting(true);
 
     const formData = new FormData();
@@ -250,6 +263,11 @@ export default function CourseAnnouncements() {
       {showNew && (
         <form onSubmit={handleCreate} className="ombook-card mb-6">
           <div className="space-y-4">
+            {errorMessage && (
+              <div className="ombook-alert  bg-red-50 border-red-500">
+                <p className="text-red-700">{errorMessage}</p>
+              </div>
+            )}
             <div>
               <label className="ombook-label">Título</label>
               <input
