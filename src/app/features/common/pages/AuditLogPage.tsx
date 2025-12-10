@@ -37,9 +37,9 @@ type AuditLogFilters = {
 
 // Loader
 export async function loader({ request }: { request: Request }) {
+    requireRoleLoader([UserRole.ADMINISTRADOR]);
+    const jwtToken = await getValidJWTToken(request);
     try {
-        await requireRoleLoader([UserRole.ADMINISTRADOR]);
-        const jwtToken = await getValidJWTToken(request);
         const url = new URL(request.url);
         const params = url.searchParams;
         const page = params.get("page") ?? "0";

@@ -33,55 +33,47 @@ type LoaderData = {
 };
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  try {
-    const userRole = await getUserRole(request);
-    const currentUserId = await getCurrentUserId(request);
-    const courseId = parseInt(params.id || '0');
+  // REMOVE the try-catch - let redirects propagate
+  const userRole = await getUserRole(request);
+  const currentUserId = await getCurrentUserId(request);
+  const courseId = parseInt(params.id || '0');
 
-    if (!courseId) {
-      throw new Error("Course ID is required");
-    }
-
-    const tasks = await getTareas(request, courseId);
-
-    // Pre-load recursos and entregas for all tasks
-    const taskDetails: { recursos: Record<number, Recurso[]>; entregas: Record<number, Entrega[]> } = {
-      recursos: {},
-      entregas: {}
-    };
-
-    await Promise.all(
-      tasks.map(async (task) => {
-        try {
-          const [recursos, entregas] = await Promise.all([
-            getRecursosTarea(request, courseId, task.id),
-            getEntregasTarea(request, courseId, task.id)
-          ]);
-          taskDetails.recursos[task.id] = recursos;
-          taskDetails.entregas[task.id] = entregas;
-        } catch (err) {
-          console.error(`Error loading details for task ${task.id}:`, err);
-          taskDetails.recursos[task.id] = [];
-          taskDetails.entregas[task.id] = [];
-        }
-      })
-    );
-
-    return {
-      isProfesor: userRole === UserRole.PROFESOR,
-      currentUserId,
-      tasks,
-      taskDetails,
-    };
-  } catch (err) {
-    console.error("Error in loader:", err);
-    return {
-      isProfesor: false,
-      currentUserId: 0,
-      tasks: [],
-      taskDetails: { recursos: {}, entregas: {} },
-    };
+  if (!courseId) {
+    throw new Error("Course ID is required");
   }
+
+  const tasks = await getTareas(request, courseId);
+
+  // Pre-load recursos and entregas for all tasks
+  const taskDetails: { recursos: Record<number, Recurso[]>; entregas: Record<number, Entrega[]> } = {
+    recursos: {},
+    entregas: {}
+  };
+
+  // Keep try-catch only around optional data loading, not session checks
+  await Promise.all(
+    tasks.map(async (task) => {
+      try {
+        const [recursos, entregas] = await Promise.all([
+          getRecursosTarea(request, courseId, task.id),
+          getEntregasTarea(request, courseId, task.id)
+        ]);
+        taskDetails.recursos[task.id] = recursos;
+        taskDetails.entregas[task.id] = entregas;
+      } catch (err) {
+        console.error(`Error loading details for task ${task.id}:`, err);
+        taskDetails.recursos[task.id] = [];
+        taskDetails.entregas[task.id] = [];
+      }
+    })
+  );
+
+  return {
+    isProfesor: userRole === UserRole.PROFESOR,
+    currentUserId,
+    tasks,
+    taskDetails,
+  };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {

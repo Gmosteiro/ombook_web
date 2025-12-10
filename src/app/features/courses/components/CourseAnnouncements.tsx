@@ -18,12 +18,12 @@ type Anuncio = {
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
   const { getValidJWTToken, getUserRole, getUserId } = await import("~/services/session.server");
-
   const { id } = params;
+  const jwtToken = await getValidJWTToken(request);
+  const userRole = await getUserRole(request);
+  const currentUserId = await getUserId(request);
+
   try {
-    const jwtToken = await getValidJWTToken(request);
-    const userRole = await getUserRole(request);
-    const currentUserId = await getUserId(request);
 
     const res = await apiFetch(`/cursos/${id}/anuncios`, {
       method: 'GET',

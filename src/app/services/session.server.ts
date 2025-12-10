@@ -79,7 +79,10 @@ async function refreshAccessToken(refreshToken: string): Promise<{
     rol: string;
 } | null> {
     try {
-        const response = await fetch(`${API_URL}/auth/refresh`, {
+        // Use the full API_URL for server-side fetch
+        const url = `${API_URL}/auth/refresh`;
+
+        const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refreshToken }),
@@ -161,13 +164,14 @@ const getUserSession = async (request: Request) => {
     const refreshToken = session.get("refreshToken");
 
     if (token && !isJWTValid(token)) {
+        console.log("[getUserSession] Token expired, attempting refresh...");
         // Token expired, try to refresh
         if (refreshToken) {
 
             const newTokens = await refreshAccessToken(refreshToken);
 
             if (newTokens) {
-
+                console.log("[getUserSession] Token refreshed successfully");
                 // Successfully refreshed, update session
                 const decoded = decodeJWT(newTokens.accessToken);
                 if (decoded) {
@@ -181,9 +185,10 @@ const getUserSession = async (request: Request) => {
                     (session as any)._tokenRefreshed = true;
                     return session;
                 }
+            } else {
+                console.log("[getUserSession] Failed to refresh token, clearing session");
             }
         }
-
 
         // Couldn't refresh, clear session data
         session.unset(USER_SESSION_KEY);
@@ -203,10 +208,13 @@ const getUserSession = async (request: Request) => {
  */
 export async function logout(request: Request) {
     const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-    return redirect("/login", {
+
+    // Throw redirect to ensure it stops execution
+    throw redirect("/login", {
         headers: {
             "Set-Cookie": await sessionStorage.destroySession(session),
-            "Cache-Control": "no-store", // <-- fuerza no cachear
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
         },
     });
 }
@@ -223,6 +231,7 @@ export async function requireValidSession(request: Request): Promise<void> {
     const token = session.get("token");
 
     if (!userId || !token) {
+        console.log("[requireValidSession] Invalid session, redirecting to login");
         throw redirect("/login", {
             headers: {
                 "Set-Cookie": await sessionStorage.destroySession(session),
@@ -278,12 +287,30 @@ export async function getCurrentUserId(request: Request): Promise<number> {
  * Retrieves a valid JWT token from the session (checks expiration).
  * Redirects to login if token is expired or invalid.
  * @param {Request} request - The incoming request.
- * @returns {Promise<string | null>} The JWT token if valid, null if not found.
+ * @returns {Promise<string>} The JWT token if valid.
+ * @throws {Response} Redirect response if session is invalid.
  */
 export async function getValidJWTToken(request: Request): Promise<string> {
-    await requireValidSession(request); // This will redirect if session is invalid
     const session = await getUserSession(request);
-    return session.get("token");
+    const userId = session.get(USER_SESSION_KEY);
+    const token = session.get("token");
+
+    if (!userId || !token) {
+        console.log("[getValidJWTToken] Invalid session, redirecting to login");
+        throw redirect("/login", {
+            headers: {
+                "Set-Cookie": await sessionStorage.destroySession(session),
+                "Cache-Control": "no-store",
+                "Pragma": "no-cache",
+            },
+        });
+    }
+
+    if ((session as any)._tokenRefreshed) {
+        console.log("[getValidJWTToken] Token was refreshed for user:", userId);
+    }
+
+    return token;
 }
 
 /**

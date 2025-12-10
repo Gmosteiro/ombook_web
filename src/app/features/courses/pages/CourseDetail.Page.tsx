@@ -6,13 +6,14 @@ import { apiFetch } from "../../auth/utils/methods";
 
 export async function loader({ params, request }: { params: { id: string }, request: Request }) {
   const { getValidJWTToken } = await import("~/services/session.server");
-
   const { id } = params;
+  const jwtToken = await getValidJWTToken(request);
+
   try {
     const res = await apiFetch(`/cursos/buscar?id=${id}`, {
       method: 'GET',
       secure: true,
-      jwtToken: await getValidJWTToken(request)
+      jwtToken: jwtToken
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const course: Course = await res.json();

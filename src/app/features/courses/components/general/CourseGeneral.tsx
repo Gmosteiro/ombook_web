@@ -10,9 +10,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   const { getValidJWTToken, getUserRole } = await import("~/services/session.server");
 
   const { id } = params;
+  const jwtToken = await getValidJWTToken(request);
+  const userRole = await getUserRole(request);
   try {
-    const jwtToken = await getValidJWTToken(request);
-    const userRole = await getUserRole(request);
 
     const res = await apiFetch(`/cursos/${id}/paginas`, {
       method: 'GET',

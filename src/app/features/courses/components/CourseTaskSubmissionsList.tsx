@@ -14,9 +14,9 @@ export async function loader({
 
   const cursoId = params.id;
   const tareaId = params.taskId;
+  const jwtToken = await getValidJWTToken(request);
 
   try {
-    const jwtToken = await getValidJWTToken(request);
 
     const res = await apiFetch(
       `/cursos/${cursoId}/tareas/${tareaId}/entregas`,
