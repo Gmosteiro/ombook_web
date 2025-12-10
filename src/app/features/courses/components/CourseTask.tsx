@@ -93,14 +93,23 @@ export async function action({ request, params }: ActionFunctionArgs) {
         const fechaInicio = formData.get("fechaInicio") as string;
         const fechaFin = formData.get("fechaFin") as string;
 
+        // Validar que las fechas estén presentes
+        if (!fechaInicio || !fechaFin) {
+          return { error: "Debe especificar fecha de inicio y fecha de fin" };
+        }
+
+        // Validar que fecha fin sea posterior a fecha inicio
+        if (new Date(fechaInicio) >= new Date(fechaFin)) {
+          return { error: "La fecha de fin debe ser posterior a la fecha de inicio" };
+        }
+
         await createTarea(request, courseId, {
           titulo,
           descripcion: descripcion || undefined,
-          fechaInicio: fechaInicio || undefined,
-          fechaFin: fechaFin || undefined,
+          fechaInicio,
+          fechaFin,
         });
 
-        // En lugar de redirect, retorna success para que fetcher lo maneje
         return { success: true };
       }
 
@@ -111,11 +120,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
         const fechaInicio = formData.get("fechaInicio") as string;
         const fechaFin = formData.get("fechaFin") as string;
 
+        // Validar que las fechas estén presentes
+        if (!fechaInicio || !fechaFin) {
+          return { error: "Debe especificar fecha de inicio y fecha de fin" };
+        }
+
+        // Validar que fecha fin sea posterior a fecha inicio
+        if (new Date(fechaInicio) >= new Date(fechaFin)) {
+          return { error: "La fecha de fin debe ser posterior a la fecha de inicio" };
+        }
+
         await updateTarea(request, courseId, tareaId, {
           titulo,
           descripcion: descripcion || undefined,
-          fechaInicio: fechaInicio || undefined,
-          fechaFin: fechaFin || undefined,
+          fechaInicio,
+          fechaFin,
         });
 
         return { success: true };
