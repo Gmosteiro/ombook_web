@@ -108,6 +108,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
           fechaFin: fechaFin || undefined,
         });
 
+        // Redirect limpia el estado y recarga los datos
         return redirect(`/courses/${courseId}/tasks`);
       }
 
@@ -320,6 +321,7 @@ export default function CourseTasks() {
 
           {showNewTask && (
             <TaskForm
+              key="create-task-form"
               mode="create"
               onCancel={() => setShowNewTask(false)}
             />

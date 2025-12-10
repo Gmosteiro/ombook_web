@@ -81,6 +81,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
         const contenido = formData.get("contenido") as string;
         const fechaProgramada = formData.get("fechaProgramada") as string;
 
+        console.log("Creating announcement with data:", { titulo, contenido, fechaProgramada });
         const res = await apiFetch(`/cursos/${id}/anuncios`, {
           method: 'POST',
           secure: true,
