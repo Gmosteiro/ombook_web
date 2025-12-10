@@ -20,11 +20,11 @@ export interface AlertPopProps {
 
 const THEME = {
     message: {
-        accent: 'bg-blue-100',
+        accent: 'ombook-bg-light',
         text: 'text-slate-600',
-        btn: 'bg-blue-600 hover:bg-blue-500 text-white',
-        iconBg: 'bg-blue-50',
-        iconColor: 'text-blue-600',
+        btn: 'ombook-btn ombook-btn-primary',
+        iconBg: 'ombook-bg-light',
+        iconColor: 'ombook-text-green',
     },
     warning: {
         accent: 'bg-amber-100',

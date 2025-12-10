@@ -174,7 +174,7 @@ export default function CoursesPage() {
           {cursos.totalElements === 0 && userRole === UserRole.ADMINISTRADOR && (
             <button
               onClick={() => navigate('/courses/create')}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+              className="ombook-btn ombook-btn-primary"
             >
               Crear primer curso
             </button>

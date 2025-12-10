@@ -57,7 +57,7 @@ export default function ForgotPassword() {
                         <input
                             type="email"
                             name="correo"
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-900 bg-white"
+                            className="ombook-input"
                             placeholder="correo@ejemplo.com"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
@@ -74,7 +74,7 @@ export default function ForgotPassword() {
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="ombook-btn ombook-btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Enviando...' : 'Enviar enlace de recuperación'}
@@ -104,7 +104,7 @@ export default function ForgotPassword() {
             )}
 
             <div className="mt-6 text-center">
-                <Link to="/login" className="text-blue-500 hover:text-blue-600 text-sm">
+                <Link to="/login" className="ombook-link text-sm">
                     ← Volver al inicio de sesión
                 </Link>
             </div>

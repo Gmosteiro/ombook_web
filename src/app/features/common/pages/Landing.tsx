@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 const Landing: React.FC = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="min-h-screen ombook-bg-light">
             <div className="container mx-auto px-4 py-16">
                 <div className="text-center">
                     <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -15,13 +15,13 @@ const Landing: React.FC = () => {
                     <div className="space-x-4">
                         <Link
                             to="/login"
-                            className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                            className="ombook-btn ombook-btn-primary inline-block px-8 py-3"
                         >
                             Iniciar Sesión
                         </Link>
                         <Link
                             to="/home"
-                            className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 transition-colors"
+                            className="ombook-btn ombook-btn-outline inline-block px-8 py-3"
                         >
                             Ver Demo
                         </Link>
