@@ -56,7 +56,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
         await createPaginaTematica(request, cursoId, {
           titulo,
-          descripcion,
+          contenido: descripcion,
           fechaProgramada: fechaProgramada || null,
         });
 

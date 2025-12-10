@@ -14,7 +14,7 @@ export type Course = Omit<CourseOpenApi, RequiredCourseFields> & {
 export interface PaginaTematica {
   id: number;
   titulo: string;
-  descripcion: string;
+  contenido: string;
   fechaProgramada: string;
   fechaCreacion: string;
   cursoId: number;

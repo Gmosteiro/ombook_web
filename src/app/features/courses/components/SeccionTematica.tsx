@@ -117,7 +117,7 @@ export const SeccionTematica = ({
           {/* Descripción */}
           <div className="mb-6">
             <p className={`whitespace-pre-wrap ${isHidden ? 'text-gray-500' : 'text-gray-700'}`}>
-              {pagina.descripcion}
+              {pagina.contenido}
             </p>
           </div>
           {isHidden && isProfesor && (

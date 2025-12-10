@@ -80,11 +80,17 @@ async function refreshAccessToken(refreshToken: string, currentToken: string): P
 } | null> {
     try {
 
+        console.log("Calling refresh token with body", JSON.stringify({
+            refreshToken: refreshToken
+        }));
+
         const response = await apiFetch('/auth/refresh', {
             method: "POST",
             secure: true,
             jwtToken: currentToken,
-            body: JSON.stringify({ refreshToken }),
+            body: JSON.stringify({
+                refreshToken: refreshToken
+            }),
         });
 
         if (!response.ok) {

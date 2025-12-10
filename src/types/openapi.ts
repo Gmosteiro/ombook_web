@@ -1093,6 +1093,7 @@ export interface components {
     schemas: {
         PaginaActualizacionRequest: {
             titulo?: string;
+            contenido?: string;
             /** Format: date-time */
             fechaProgramada?: string;
         };
@@ -1100,6 +1101,7 @@ export interface components {
             /** Format: int64 */
             id?: number;
             titulo?: string;
+            contenido?: string;
             /** Format: date-time */
             fechaProgramada?: string;
             /** Format: date-time */
@@ -1306,6 +1308,7 @@ export interface components {
         };
         PaginaCreacionRequest: {
             titulo?: string;
+            contenido?: string;
             /** Format: date-time */
             fechaProgramada?: string;
         };
@@ -1317,6 +1320,8 @@ export interface components {
             id?: number;
             contenido?: string;
             fechaCreacion?: string;
+            /** Format: int64 */
+            autorId?: number;
             autorNombre?: string;
             autorApellido?: string;
             autorFoto?: string;
@@ -1326,6 +1331,8 @@ export interface components {
             id?: number;
             contenido?: string;
             fechaCreacion?: string;
+            /** Format: int64 */
+            autorId?: number;
             autorNombre?: string;
             autorApellido?: string;
             autorFoto?: string;

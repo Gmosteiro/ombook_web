@@ -4,7 +4,7 @@ import { apiFetch } from "~/features/auth/utils/methods";
 export type PaginaTematica = {
     id: number;
     titulo: string;
-    descripcion: string;
+    contenido: string;
     fechaCreacion: string;
     fechaProgramada: string;
     cursoId: number;
@@ -84,11 +84,12 @@ export async function createPaginaTematica(
     cursoId: number,
     data: {
         titulo: string;
-        descripcion: string;
+        contenido: string;
         fechaProgramada?: string | null;
     }
 ): Promise<PaginaTematica> {
     const jwtToken = await getValidJWTToken(request);
+
     const response = await apiFetch(`/cursos/${cursoId}/paginas`, {
         method: "POST",
         secure: true,

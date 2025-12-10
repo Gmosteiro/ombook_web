@@ -196,7 +196,7 @@ export const PaginaTematica = ({
         <div className={`p-4 border-t ${isHidden ? 'bg-gray-100' : ''}`}>
           <div className="mb-6">
             <p className={`whitespace-pre-wrap ${isHidden ? 'text-gray-500' : 'text-gray-700'}`}>
-              {pagina.descripcion}
+              {pagina.contenido}
             </p>
           </div>
           {isHidden && isProfesor && (
