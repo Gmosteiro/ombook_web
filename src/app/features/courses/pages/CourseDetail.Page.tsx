@@ -58,7 +58,7 @@ export default function CourseDetailPage() {
 
       <div className="w-full h-56 bg-gray-200 flex items-end justify-start relative">
         <img
-          src={course.imagenUrl}
+          src={course?.imagenUrl}
           alt="Banner curso"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: "center" }}

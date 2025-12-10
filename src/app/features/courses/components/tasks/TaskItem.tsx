@@ -20,6 +20,11 @@ type Recurso = {
     tipoOwner: string;
 };
 
+export enum TaskStatus {
+    PENDING = 'pending',
+    OVERDUE = 'overdue',
+}
+
 type Entrega = {
     id: number;
     estudianteId: number;
@@ -37,7 +42,7 @@ type TaskItemProps = {
     isEditing: boolean;
     canEdit: boolean;
     isProfesor: boolean;
-    status: 'pending' | 'overdue';
+    status: TaskStatus;
     onToggleExpand: () => void;
     onStartEdit: () => void;
     onCancelEdit: () => void;
@@ -148,6 +153,8 @@ export function TaskItem({
                         isProfesor={isProfesor}
                         onDownload={onDownloadEntrega}
                         onShowUpload={onShowUploadEntrega}
+                        taskStatus={status}
+
                     />
                 </div>
             )}

@@ -1,4 +1,5 @@
 import { TaskItem } from "./TaskItem";
+import { TaskStatus } from "./TaskItem";
 
 type Tarea = {
     id: number;
@@ -61,15 +62,15 @@ export function TaskList({
 }: TaskListProps) {
     const canEdit = (task: Tarea) => isProfesor || currentUserId === task.creador;
 
-    const getTaskStatus = (task: Tarea): 'pending' | 'overdue' => {
+    const getTaskStatus = (task: Tarea): TaskStatus => {
         if (task.fechaFin) {
             const now = new Date();
             const fin = new Date(task.fechaFin);
             if (fin < now) {
-                return 'overdue';
+                return TaskStatus.OVERDUE;
             }
         }
-        return 'pending';
+        return TaskStatus.PENDING;
     };
 
     if (tasks.length === 0) {

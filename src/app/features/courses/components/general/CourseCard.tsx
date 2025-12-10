@@ -56,7 +56,7 @@ export const CourseCard = ({ course, onDeleted }: CourseCardProps) => {
       <div className="ombook-card p-0 overflow-hidden">
 
         <img
-          src={course.imagenUrl}
+          src={course?.imagenUrl}
           alt={course.nombre}
           className="w-full h-48 object-cover"
         />

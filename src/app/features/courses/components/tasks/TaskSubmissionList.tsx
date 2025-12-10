@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { TaskStatus } from "./TaskItem";
 
 type Entrega = {
     id: number;
@@ -15,6 +16,7 @@ type TaskSubmissionListProps = {
     isProfesor: boolean;
     onDownload: (entrega: Entrega) => void;
     onShowUpload: () => void;
+    taskStatus: TaskStatus;
 };
 
 export function TaskSubmissionList({
@@ -22,7 +24,8 @@ export function TaskSubmissionList({
     tareaId,
     isProfesor,
     onDownload,
-    onShowUpload
+    onShowUpload,
+    taskStatus
 }: TaskSubmissionListProps) {
     if (isProfesor) {
         return (
@@ -51,7 +54,8 @@ export function TaskSubmissionList({
                                 e.stopPropagation();
                                 onShowUpload();
                             }}
-                            className="ombook-btn ombook-btn-primary mt-2"
+                            className={`ombook-btn ombook-btn-primary mt-2 ${taskStatus === TaskStatus.OVERDUE ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={taskStatus === TaskStatus.OVERDUE}
                         >
                             Entregar
                         </button>
