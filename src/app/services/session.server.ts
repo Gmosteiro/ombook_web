@@ -17,7 +17,7 @@ export const sessionStorage = createCookieSessionStorage({
         path: "/",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 15, // 15 minutes
+        maxAge: 60 * 60 * 8, // 8 horas
     },
 });
 
@@ -330,7 +330,7 @@ export async function createUserSession({
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "lax",
-                maxAge: remember ? 60 * 15 : undefined,
+                maxAge: remember ? 60 * 60 * 8 : undefined, // 8 horas si remember, sino session
             }),
             "Cache-Control": "no-store",
             "Pragma": "no-cache",

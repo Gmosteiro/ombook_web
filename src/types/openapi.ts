@@ -1583,6 +1583,7 @@ export interface components {
             /** Format: double */
             calificacionFinal?: number;
             estado?: string;
+            observacion?: string;
             notasAsociadas?: components["schemas"]["NotaAsociadaResponse"][];
         };
         NotaAsociadaResponse: {

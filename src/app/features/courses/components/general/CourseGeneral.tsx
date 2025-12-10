@@ -212,7 +212,7 @@ export default function CourseGeneral() {
           <form onSubmit={handleCreatePage} className="ombook-card mb-6">
             <div className="space-y-4">
               <div>
-                <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="titulo" className="ombook-label">
                   Título
                 </label>
                 <input
@@ -221,12 +221,12 @@ export default function CourseGeneral() {
                   id="titulo"
                   value={newPage.titulo}
                   onChange={e => setNewPage(prev => ({ ...prev, titulo: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="ombook-input"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="descripcion" className="ombook-label">
                   Descripción
                 </label>
                 <textarea
@@ -235,12 +235,12 @@ export default function CourseGeneral() {
                   value={newPage.descripcion}
                   onChange={e => setNewPage(prev => ({ ...prev, descripcion: e.target.value }))}
                   rows={4}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="ombook-input"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="fechaProgramada" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="fechaProgramada" className="ombook-label">
                   Fecha Programada
                 </label>
                 <input
@@ -249,20 +249,20 @@ export default function CourseGeneral() {
                   id="fechaProgramada"
                   value={newPage.fechaProgramada || ''}
                   onChange={e => setNewPage(prev => ({ ...prev, fechaProgramada: e.target.value || null }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="ombook-input"
                 />
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowNewPage(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="ombook-btn ombook-btn-outline"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="ombook-btn ombook-btn-primary"
                 >
                   Crear Página
                 </button>

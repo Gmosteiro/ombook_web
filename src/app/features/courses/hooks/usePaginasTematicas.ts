@@ -38,7 +38,7 @@ export const usePaginasTematicas = (cursoId: number) => {
         cursoId,
         fechaProgramada: data.fechaProgramada || null
       };
-
+      console.log('Creating pagina with payload:', payload);
       const response = await fetch(`${API_URL}/paginas/crear`, {
         method: 'POST',
         headers: {
@@ -49,6 +49,7 @@ export const usePaginasTematicas = (cursoId: number) => {
       });
 
       if (!response.ok) {
+        console.log('Response not ok:', response);
         throw new Error('Error al crear la página');
       }
 
@@ -64,48 +65,48 @@ export const usePaginasTematicas = (cursoId: number) => {
   }, [cursoId]);
 
   const uploadRecurso = useCallback(async (paginaId: number, nombre: string, file: File, jwtToken: string) => {
-  setLoading(true);
-  setError(null);
-  try {
-    const formData = new FormData();
-    formData.append('ownerRecurso', 'PAGINA');
-    formData.append('ownerId', paginaId.toString());
-    formData.append('nombre', nombre);
-    formData.append('archivo', file); // <--- archivo real, no base64
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('ownerRecurso', 'PAGINA');
+      formData.append('ownerId', paginaId.toString());
+      formData.append('nombre', nombre);
+      formData.append('archivo', file); // <--- archivo real, no base64
 
-    const response = await fetch(`${API_URL}/cursos/${cursoId}/recursos`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${jwtToken}`, // NO agregues Content-Type
-      },
-      body: formData,
-    });
+      const response = await fetch(`${API_URL}/cursos/${cursoId}/recursos`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${jwtToken}`, // NO agregues Content-Type
+        },
+        body: formData,
+      });
 
-    if (!response.ok) {
-      throw new Error('Error al subir el archivo');
-    }
-
-    const newRecurso: Recurso = await response.json();
-
-    // Actualizar la página con el nuevo recurso
-    setPaginas(prev => prev.map(pagina => {
-      if (pagina.id === paginaId) {
-        return {
-          ...pagina,
-          recursos: [...(pagina.recursos || []), newRecurso],
-        };
+      if (!response.ok) {
+        throw new Error('Error al subir el archivo');
       }
-      return pagina;
-    }));
 
-    return newRecurso;
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Error desconocido');
-    return null;
-  } finally {
-    setLoading(false);
-  }
-}, [cursoId]);
+      const newRecurso: Recurso = await response.json();
+
+      // Actualizar la página con el nuevo recurso
+      setPaginas(prev => prev.map(pagina => {
+        if (pagina.id === paginaId) {
+          return {
+            ...pagina,
+            recursos: [...(pagina.recursos || []), newRecurso],
+          };
+        }
+        return pagina;
+      }));
+
+      return newRecurso;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [cursoId]);
 
   const deleteRecurso = useCallback(async (paginaId: number, recursoId: number, jwtToken: string) => {
     setLoading(true);

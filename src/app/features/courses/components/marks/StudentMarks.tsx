@@ -15,6 +15,11 @@ export default function StudentMarks({ mark }: { mark?: CalificacionFinalEstudia
             <div className="mb-2">
                 <strong>Estado:</strong> {mark.estado ?? "-"}
             </div>
+            {mark.observacion && (
+                <div className="mb-2">
+                    <strong>Observación:</strong> {mark.observacion}
+                </div>
+            )}
             {mark.notasAsociadas && mark.notasAsociadas.length > 0 && (
                 <div className="mb-2">
                     <strong>Notas asociadas:</strong>
