@@ -60,6 +60,7 @@ const decodeJWT = (token: string): Token | null => {
  * @returns {boolean} True if token is valid, false if expired or invalid
  */
 function isJWTValid(token: string): boolean {
+
     const decoded = decodeJWT(token);
     if (!decoded || !decoded.exp) return false;
 
@@ -80,10 +81,6 @@ async function refreshAccessToken(refreshToken: string, currentToken: string): P
 } | null> {
     try {
 
-        console.log("Calling refresh token with body", JSON.stringify({
-            refreshToken: refreshToken
-        }));
-
         const response = await apiFetch('/auth/refresh', {
             method: "POST",
             secure: true,
@@ -95,6 +92,7 @@ async function refreshAccessToken(refreshToken: string, currentToken: string): P
 
         if (!response.ok) {
             console.error("Failed to refresh token:", response.status);
+            console.error("Response text:", await response.text());
             return null;
         }
 
@@ -169,14 +167,12 @@ const getUserSession = async (request: Request) => {
     const refreshToken = session.get("refreshToken");
 
     if (token && !isJWTValid(token)) {
-        console.log("[getUserSession] Token expired, attempting refresh...");
         // Token expired, try to refresh
         if (refreshToken) {
 
             const newTokens = await refreshAccessToken(refreshToken, token);
 
             if (newTokens) {
-                console.log("[getUserSession] Token refreshed successfully");
                 // Successfully refreshed, update session
                 const decoded = decodeJWT(newTokens.accessToken);
                 if (decoded) {
