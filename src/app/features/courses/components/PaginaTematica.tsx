@@ -8,7 +8,7 @@ interface Props {
   onUploadRecurso: (nombre: string, file: File) => Promise<void>;
   onDeleteRecurso: (recursoId: number) => Promise<void>;
   onDownloadRecurso: (recursoId: number) => Promise<void>;
-  onUpdatePagina?: (paginaId: number, updatedData: { titulo: string; fechaProgramada: string | null }) => Promise<void>;
+  onUpdatePagina?: (paginaId: number, updatedData: { titulo: string; contenido: string; fechaProgramada: string | null }) => Promise<void>;
   isProfesor: boolean;
 }
 
@@ -25,6 +25,7 @@ export const PaginaTematica = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     titulo: pagina.titulo,
+    contenido: pagina.contenido,
     fechaProgramada: pagina.fechaProgramada ? new Date(pagina.fechaProgramada).toISOString().slice(0, 16) : ''
   });
   const [isUpdating, setIsUpdating] = useState(false);
@@ -49,6 +50,7 @@ export const PaginaTematica = ({
 
       await onUpdatePagina(pagina.id, {
         titulo: editData.titulo,
+        contenido: editData.contenido,
         fechaProgramada
       });
 
@@ -156,6 +158,19 @@ export const PaginaTematica = ({
                 value={editData.titulo}
                 onChange={(e) => setEditData(prev => ({ ...prev, titulo: e.target.value }))}
                 className="ombook-input"
+                disabled={isUpdating}
+              />
+            </div>
+            <div>
+              <label htmlFor={`edit-contenido-${pagina.id}`} className="ombook-label">
+                Contenido
+              </label>
+              <textarea
+                id={`edit-contenido-${pagina.id}`}
+                value={editData.contenido}
+                onChange={(e) => setEditData(prev => ({ ...prev, contenido: e.target.value }))}
+                className="ombook-input"
+                rows={6}
                 disabled={isUpdating}
               />
             </div>

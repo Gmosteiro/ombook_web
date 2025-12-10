@@ -117,10 +117,13 @@ export async function updatePaginaTematica(
     paginaId: number,
     data: {
         titulo: string;
+        contenido: string;
         fechaProgramada?: string | null;
     }
 ): Promise<PaginaTematica> {
     const jwtToken = await getValidJWTToken(request);
+
+    console.log("Updating pagina tematica with data:", data);
     const response = await apiFetch(`/cursos/${cursoId}/paginas/${paginaId}`, {
         method: "PUT",
         secure: true,

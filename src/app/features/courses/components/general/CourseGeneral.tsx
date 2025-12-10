@@ -66,10 +66,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
       case "updatePagina": {
         const paginaId = parseInt(formData.get("paginaId") as string);
         const titulo = formData.get("titulo") as string;
+        const contenido = formData.get("contenido") as string;
         const fechaProgramada = formData.get("fechaProgramada") as string;
 
         await updatePaginaTematica(request, cursoId, paginaId, {
           titulo,
+          contenido,
           fechaProgramada: fechaProgramada || null,
         });
 
@@ -184,13 +186,14 @@ export default function CourseGeneral() {
     }
   }, [fetcher.data]);
 
-  const handleUpdatePagina = async (paginaId: number, updatedData: { titulo: string; fechaProgramada: string | null }) => {
+  const handleUpdatePagina = async (paginaId: number, updatedData: { titulo: string; contenido: string; fechaProgramada: string | null }) => {
     if (!course?.id) return;
 
     const formData = new FormData();
     formData.append('_action', 'updatePagina');
     formData.append('paginaId', paginaId.toString());
     formData.append('titulo', updatedData.titulo);
+    formData.append('contenido', updatedData.contenido);
     formData.append('fechaProgramada', updatedData.fechaProgramada || '');
 
     try {
@@ -198,11 +201,12 @@ export default function CourseGeneral() {
         method: 'POST',
         body: formData,
       });
+      window.location.reload();
     } catch (err) {
       console.error('Error updating pagina:', err);
       throw err;
     }
-  };
+  }
 
   return (
     <div>
