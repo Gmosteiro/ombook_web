@@ -1,4 +1,5 @@
-import { Form } from "react-router";
+import { useFetcher } from "react-router";
+import { useEffect } from "react";
 
 type TaskFormProps = {
     mode: 'create' | 'edit';
@@ -14,9 +15,17 @@ type TaskFormProps = {
 
 export function TaskForm({ mode, tareaId, defaultValues, onCancel }: TaskFormProps) {
     const isCreate = mode === 'create';
+    const fetcher = useFetcher();
+
+    // Cerrar el formulario cuando se complete exitosamente
+    useEffect(() => {
+        if (fetcher.state === 'idle' && fetcher.data && !fetcher.data.error) {
+            onCancel(); // Cierra el formulario
+        }
+    }, [fetcher.state, fetcher.data, onCancel]);
 
     return (
-        <Form method="post" className="mb-4 bg-white p-4 rounded-md shadow">
+        <fetcher.Form method="post" className="mb-4 bg-white p-4 rounded-md shadow">
             <input type="hidden" name="_action" value={isCreate ? 'createTask' : 'updateTask'} />
             {!isCreate && tareaId && <input type="hidden" name="tareaId" value={tareaId} />}
 
@@ -66,14 +75,23 @@ export function TaskForm({ mode, tareaId, defaultValues, onCancel }: TaskFormPro
                     </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                    <button type="button" onClick={onCancel} className="ombook-btn ombook-btn-secondary">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="ombook-btn ombook-btn-secondary"
+                        disabled={fetcher.state !== 'idle'}
+                    >
                         Cancelar
                     </button>
-                    <button type="submit" className="ombook-btn ombook-btn-primary">
-                        {isCreate ? 'Crear' : 'Guardar'}
+                    <button
+                        type="submit"
+                        className="ombook-btn ombook-btn-primary"
+                        disabled={fetcher.state !== 'idle'}
+                    >
+                        {fetcher.state !== 'idle' ? 'Guardando...' : (isCreate ? 'Crear' : 'Guardar')}
                     </button>
                 </div>
             </div>
-        </Form>
+        </fetcher.Form>
     );
 }

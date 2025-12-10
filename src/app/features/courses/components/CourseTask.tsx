@@ -100,8 +100,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
           fechaFin: fechaFin || undefined,
         });
 
-        // Redirect limpia el estado y recarga los datos
-        return redirect(`/courses/${courseId}/tasks`);
+        // En lugar de redirect, retorna success para que fetcher lo maneje
+        return { success: true };
       }
 
       case "updateTask": {
@@ -118,7 +118,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
           fechaFin: fechaFin || undefined,
         });
 
-        return redirect(`/courses/${courseId}/tasks`);
+        return { success: true };
       }
 
       case "uploadRecurso": {
