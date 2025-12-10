@@ -99,9 +99,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <NotificationProvider initialNotifications={notifications}>
           <PollingInitializer />
-          <h1>
-            Logueado con {userId ? `ID: ${userId} | Rol: ${userRole}` : "No logueado"}
-          </h1>
           <Navbar userRole={userRole} avatarUrl={avatarUrl} />
           <div className="bg-gray-50 min-h-screen pt-20 flex flex-col">
             <main className="flex-grow">{children}</main>

@@ -1,134 +1,278 @@
-import { getValidJWTToken } from '~/services/session.server';
-import { apiFetch } from '~/features/auth/utils/methods';
+import { apiFetch } from '../features/auth/utils/methods';
+import { getValidJWTToken } from "../services/session.server";
 
-export async function action({ request }: { request: Request }) {
+export type Tarea = {
+  id: number;
+  titulo: string;
+  descripcion?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  fechaCreacion?: string;
+  creador: number;
+  cursoId: number;
+};
+
+export type Recurso = {
+  id: number;
+  nombreOriginal: string;
+  url?: string;
+  ownerId: number;
+  tipoOwner: string;
+};
+
+export type Entrega = {
+  id: number;
+  estudianteId: number;
+  tareaId: number;
+  fechaEnvio?: string;
+  estado: string;
+  calificacion?: number;
+};
+
+/**
+ * Obtiene todas las tareas de un curso
+ */
+export async function getTareas(request: Request, cursoId: number): Promise<Tarea[]> {
   const jwtToken = await getValidJWTToken(request);
-  if (!jwtToken) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  const response = await apiFetch(`/cursos/${cursoId}/tareas`, {
+    method: "GET",
+    secure: true,
+    jwtToken,
+  });
+
+  if (!response.ok) throw new Error("Error al obtener tareas");
+  return await response.json() as Tarea[];
+}
+
+/**
+ * Obtiene una tarea específica
+ */
+export async function getTarea(request: Request, cursoId: number, tareaId: number): Promise<Tarea> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}`, {
+    method: "GET",
+    secure: true,
+    jwtToken,
+  });
+
+  if (!response.ok) throw new Error("Error al obtener tarea");
+  return await response.json() as Tarea;
+}
+
+/**
+ * Crea una nueva tarea
+ */
+export async function createTarea(
+  request: Request,
+  cursoId: number,
+  data: {
+    titulo: string;
+    descripcion?: string;
+    fechaInicio?: string;
+    fechaFin?: string;
   }
+): Promise<Tarea> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas`, {
+    method: "POST",
+    secure: true,
+    jwtToken,
+    body: JSON.stringify(data),
+  });
 
-  const formData = await request.formData();
-  const actionType = formData.get('_action');
-  const cursoId = formData.get('cursoId');
-
-  try {
-    if (request.method === 'POST' && actionType === 'createTask') {
-      const titulo = formData.get('titulo');
-      const descripcion = formData.get('descripcion');
-      const fechaInicio = formData.get('fechaInicio');
-      const fechaFin = formData.get('fechaFin');
-
-      if (!titulo || !cursoId) {
-        return Response.json({ error: 'Missing required fields' }, { status: 400 });
-      }
-
-      const body: any = { titulo, descripcion };
-      if (fechaInicio) body.fechaInicio = new Date(fechaInicio as string).toISOString();
-      if (fechaFin) body.fechaFin = new Date(fechaFin as string).toISOString();
-
-      const res = await apiFetch(`/cursos/${cursoId}/tareas`, {
-        method: 'POST',
-        secure: true,
-        jwtToken,
-        body
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const created = await res.json();
-      return Response.json(created);
-    }
-    if (request.method === 'PATCH' && actionType === 'updateTask') {
-      const tareaId = formData.get('tareaId');
-      const titulo = formData.get('titulo');
-      const descripcion = formData.get('descripcion');
-      const fechaInicio = formData.get('fechaInicio');
-      const fechaFin = formData.get('fechaFin');
-
-      if (!titulo || !cursoId || !tareaId) {
-        return Response.json({ error: 'Missing required fields' }, { status: 400 });
-      }
-
-      const body: any = { titulo, descripcion };
-      if (fechaInicio) body.fechaInicio = new Date(fechaInicio as string).toISOString();
-      if (fechaFin) body.fechaFin = new Date(fechaFin as string).toISOString();
-
-      const res = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}`, {
-        method: 'PATCH',
-        secure: true,
-        jwtToken,
-        body
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const updated = await res.json();
-      return Response.json(updated);
-    }
-
-    // =====================
-    //  BORRAR RECURSO
-    // =====================
-    if (request.method === 'DELETE' && actionType === 'deleteResource') {
-      const recursoId = formData.get('recursoId');
-
-      if (!cursoId || !recursoId) {
-        return Response.json({ error: 'Missing required fields' }, { status: 400 });
-      }
-
-      const res = await apiFetch(`/cursos/${cursoId}/recursos/${recursoId}`, {
-        method: 'DELETE',
-        secure: true,
-        jwtToken
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      return Response.json({ success: true });
-    }
-
-    // =====================
-    //  SUBIR RECURSO
-    // =====================
-    if (request.method === 'POST' && actionType === 'uploadResource') {
-      const tareaId = formData.get('ownerId');
-      const ownerRecurso = 'TAREA';
-      const nombre = formData.get('nombre');
-      const archivo = formData.get('archivo') as File;
-
-      if (!cursoId || !tareaId || !nombre || !archivo) {
-        return Response.json({ error: 'Missing required fields' }, { status: 400 });
-      }
-
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(archivo);
-      });
-      const body = {
-        ownerRecurso,
-        ownerId: parseInt(tareaId as string),
-        nombre,
-        archivo: base64.split(',')[1]
-      };
-
-      const res = await apiFetch(`/cursos/${cursoId}/recursos`, {
-        method: 'POST',
-        secure: true,
-        jwtToken,
-        body: JSON.stringify(body)
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const nuevoRecurso = await res.json();
-      return Response.json(nuevoRecurso);
-    }
-
-    return Response.json({ error: 'Invalid action' }, { status: 400 });
-  } catch (err: any) {
-    console.error('Action error:', err);
-    return Response.json({ error: err.message || 'Server error' }, { status: 500 });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Error al crear tarea");
   }
+  return await response.json() as Tarea;
+}
+
+/**
+ * Actualiza una tarea existente
+ */
+export async function updateTarea(
+  request: Request,
+  cursoId: number,
+  tareaId: number,
+  data: {
+    titulo: string;
+    descripcion?: string;
+    fechaInicio?: string;
+    fechaFin?: string;
+  }
+): Promise<Tarea> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}`, {
+    method: "PUT",
+    secure: true,
+    jwtToken,
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Error al actualizar tarea");
+  }
+  return await response.json() as Tarea;
+}
+
+/**
+ * Elimina una tarea
+ */
+export async function deleteTarea(request: Request, cursoId: number, tareaId: number): Promise<boolean> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}`, {
+    method: "DELETE",
+    secure: true,
+    jwtToken,
+  });
+
+  if (!response.ok) throw new Error("Error al eliminar tarea");
+  return true;
+}
+
+/**
+ * Obtiene recursos de una tarea
+ */
+export async function getRecursosTarea(request: Request, cursoId: number, tareaId: number): Promise<Recurso[]> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos`, {
+    method: "GET",
+    secure: true,
+    jwtToken,
+  });
+
+  if (!response.ok) throw new Error("Error al obtener recursos");
+  return await response.json() as Recurso[];
+}
+
+/**
+ * Obtiene URL de descarga de un recurso
+ */
+export async function getRecursoUrl(request: Request, cursoId: number, tareaId: number, recursoId: number): Promise<string> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos/${recursoId}/download`, {
+    method: "GET",
+    secure: true,
+    jwtToken,
+  });
+
+  if (!response.ok) throw new Error("Error al obtener URL del recurso");
+  const data = await response.json() as { url: string };
+  return data.url;
+}
+
+/**
+ * Sube un recurso a una tarea
+ */
+export async function uploadRecursoTarea(
+  request: Request,
+  cursoId: number,
+  tareaId: number,
+  nombre: string,
+  file: File
+): Promise<Recurso> {
+  const jwtToken = await getValidJWTToken(request);
+  const formData = new FormData();
+  formData.append('nombre', nombre);
+  formData.append('archivo', file);
+
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos`, {
+    method: "POST",
+    secure: true,
+    jwtToken,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Error al subir recurso");
+  }
+  return await response.json() as Recurso;
+}
+
+/**
+ * Elimina un recurso de una tarea
+ */
+export async function deleteRecursoTarea(
+  request: Request,
+  cursoId: number,
+  tareaId: number,
+  recursoId: number
+): Promise<boolean> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos/${recursoId}`, {
+    method: "DELETE",
+    secure: true,
+    jwtToken,
+  });
+
+  if (!response.ok) throw new Error("Error al eliminar recurso");
+  return true;
+}
+
+/**
+ * Obtiene entregas de una tarea
+ */
+export async function getEntregasTarea(request: Request, cursoId: number, tareaId: number): Promise<Entrega[]> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/entregas`, {
+    method: "GET",
+    secure: true,
+    jwtToken,
+  });
+
+  if (!response.ok) throw new Error("Error al obtener entregas");
+  return await response.json() as Entrega[];
+}
+
+/**
+ * Sube una entrega para una tarea
+ */
+export async function uploadEntrega(
+  request: Request,
+  cursoId: number,
+  tareaId: number,
+  file: File
+): Promise<Entrega> {
+  const jwtToken = await getValidJWTToken(request);
+  const formData = new FormData();
+  formData.append('archivo', file);
+
+  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/entregas`, {
+    method: "POST",
+    secure: true,
+    jwtToken,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Error al subir entrega");
+  }
+  return await response.json() as Entrega;
+}
+
+/**
+ * Obtiene URL de descarga de una entrega
+ */
+export async function getEntregaUrl(
+  request: Request,
+  cursoId: number,
+  tareaId: number,
+  estudianteId: number
+): Promise<string> {
+  const jwtToken = await getValidJWTToken(request);
+  const response = await apiFetch(
+    `/cursos/${cursoId}/tareas/${tareaId}/entregas/estudiantes/${estudianteId}/archivo`,
+    {
+      method: "GET",
+      secure: true,
+      jwtToken,
+    }
+  );
+
+  if (!response.ok) throw new Error("Error al obtener URL de entrega");
+  const data = await response.json() as { url: string };
+  return data.url;
 }

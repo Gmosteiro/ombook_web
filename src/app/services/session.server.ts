@@ -264,6 +264,17 @@ export async function getUserRole(
 }
 
 /**
+ * Retrieves the current user ID from the session.
+ * @param {Request} request - The incoming request.
+ * @returns {Promise<number>} The current user ID.
+ */
+export async function getCurrentUserId(request: Request): Promise<number> {
+    const session = await getUserSession(request);
+    const userId = session.get(USER_SESSION_KEY);
+    return userId ? parseInt(userId) : 0;
+}
+
+/**
  * Retrieves a valid JWT token from the session (checks expiration).
  * Redirects to login if token is expired or invalid.
  * @param {Request} request - The incoming request.
