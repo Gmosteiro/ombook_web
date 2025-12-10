@@ -103,7 +103,7 @@ export async function updateTarea(
 ): Promise<Tarea> {
   const jwtToken = await getValidJWTToken(request);
   const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}`, {
-    method: "PUT",
+    method: "PATCH",
     secure: true,
     jwtToken,
     body: JSON.stringify(data),

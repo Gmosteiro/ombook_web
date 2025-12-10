@@ -166,7 +166,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         return { error: "Unknown action" };
     }
   } catch (error) {
-    console.error("Error in action:", error);
+    console.error("Error in action: case " + _action, error);
     return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 }

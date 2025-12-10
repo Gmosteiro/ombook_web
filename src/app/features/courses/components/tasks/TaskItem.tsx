@@ -113,11 +113,14 @@ export function TaskItem({
                     <div className="flex gap-2">
                         {canEdit && (
                             <button
+                                type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     isEditing ? onCancelEdit() : onStartEdit();
                                 }}
-                                className="ombook-text-green text-sm"
+                                className="ombook-text-green text-sm cursor-pointer"
+                                tabIndex={0}
+                                aria-label={isEditing ? 'Cancelar edición' : 'Editar tarea'}
                             >
                                 {isEditing ? 'Cancelar' : 'Editar'}
                             </button>
