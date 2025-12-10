@@ -63,13 +63,24 @@ export function TaskList({
     const canEdit = (task: Tarea) => isProfesor || currentUserId === task.creador;
 
     const getTaskStatus = (task: Tarea): TaskStatus => {
+        const now = new Date();
+
+        // Si tiene fecha de inicio y es en el futuro
+        if (task.fechaInicio) {
+            const inicio = new Date(task.fechaInicio);
+            if (inicio > now) {
+                return TaskStatus.SCHEDULED;
+            }
+        }
+
+        // Si tiene fecha de fin y ya pasó
         if (task.fechaFin) {
-            const now = new Date();
             const fin = new Date(task.fechaFin);
             if (fin < now) {
                 return TaskStatus.OVERDUE;
             }
         }
+
         return TaskStatus.PENDING;
     };
 

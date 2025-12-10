@@ -21,6 +21,7 @@ type Recurso = {
 };
 
 export enum TaskStatus {
+    SCHEDULED = 'scheduled',
     PENDING = 'pending',
     OVERDUE = 'overdue',
 }
@@ -98,10 +99,14 @@ export function TaskItem({
                     <div className="flex items-center gap-2">
                         <div className="text-lg font-semibold">{task.titulo}</div>
                         <span
-                            className={`ombook-badge ${status === 'overdue' ? 'ombook-badge-brown' : 'ombook-badge-green'
+                            className={`ombook-badge ${status === 'overdue'
+                                ? 'ombook-badge-brown'
+                                : status === 'scheduled'
+                                    ? 'ombook-badge-yellow'
+                                    : 'ombook-badge-green'
                                 }`}
                         >
-                            {status === 'overdue' ? 'Vencida' : 'En Fecha'}
+                            {status === 'overdue' ? 'Vencida' : status === 'scheduled' ? 'Programada' : 'En Fecha'}
                         </span>
                     </div>
                     <div className="text-xs text-gray-500">
