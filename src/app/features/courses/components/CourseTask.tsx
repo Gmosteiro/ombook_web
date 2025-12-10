@@ -4,41 +4,23 @@ import { getValidJWTToken, getUserRole } from "~/services/session.server";
 import { UploadResourceDialog } from "./UploadResourceDialog";
 import useRecursosPorTasks from "../hooks/useRecursosPorTasks";
 import type { Course, Tarea, Recurso, Entrega } from "../types/types";
+import { UserRole } from "~/features/auth/types";
 
-export async function loader({ request }: { params: { id: string }, request: Request }) {
-
+export async function loader({ request }: { request: Request }) {
   try {
     const jwtToken = await getValidJWTToken(request);
     const userRole = await getUserRole(request);
 
-    return new Response(
-      JSON.stringify({
-        jwtToken,
-        isProfesor: userRole === 'PROFESOR'
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-          "Pragma": "no-cache",
-        },
-      }
-    );
+    return {
+      jwtToken,
+      isProfesor: userRole === UserRole.PROFESOR
+    };
   } catch (err) {
     console.error("Error in loader:", err);
-    return new Response(
-      JSON.stringify({
-        jwtToken: '',
-        isProfesor: false
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-          "Pragma": "no-cache",
-        },
-      }
-    );
+    return {
+      jwtToken: '',
+      isProfesor: false
+    };
   }
 }
 
