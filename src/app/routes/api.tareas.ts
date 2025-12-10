@@ -135,15 +135,24 @@ export async function deleteTarea(request: Request, cursoId: number, tareaId: nu
  * Obtiene recursos de una tarea
  */
 export async function getRecursosTarea(request: Request, cursoId: number, tareaId: number): Promise<Recurso[]> {
-  const jwtToken = await getValidJWTToken(request);
-  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos`, {
-    method: "GET",
-    secure: true,
-    jwtToken,
-  });
+  try {
+    const jwtToken = await getValidJWTToken(request);
 
-  if (!response.ok) throw new Error("Error al obtener recursos");
-  return await response.json() as Recurso[];
+    const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos`, {
+      method: "GET",
+      secure: true,
+      jwtToken,
+    });
+
+    if (!response.ok) {
+      // console.error(`Error fetching recursos for task ${tareaId}:`, response.status, response.statusText);
+      return [];
+    }
+    return await response.json() as Recurso[];
+  } catch (error) {
+    console.error(`Exception getting recursos for task ${tareaId}:`, error);
+    return [];
+  }
 }
 
 /**
@@ -215,15 +224,23 @@ export async function deleteRecursoTarea(
  * Obtiene entregas de una tarea
  */
 export async function getEntregasTarea(request: Request, cursoId: number, tareaId: number): Promise<Entrega[]> {
-  const jwtToken = await getValidJWTToken(request);
-  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/entregas`, {
-    method: "GET",
-    secure: true,
-    jwtToken,
-  });
+  try {
+    const jwtToken = await getValidJWTToken(request);
+    const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/entregas`, {
+      method: "GET",
+      secure: true,
+      jwtToken,
+    });
 
-  if (!response.ok) throw new Error("Error al obtener entregas");
-  return await response.json() as Entrega[];
+    if (!response.ok) {
+      console.error(`Error fetching entregas for task ${tareaId}:`, response.status, response.statusText);
+      return [];
+    }
+    return await response.json() as Entrega[];
+  } catch (error) {
+    console.error(`Exception getting entregas for task ${tareaId}:`, error);
+    return [];
+  }
 }
 
 /**
