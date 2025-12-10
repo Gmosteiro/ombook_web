@@ -3,6 +3,7 @@ import { useLoaderData, useOutletContext, useSubmit, useRevalidator, type Action
 import { apiFetch } from "../../auth/utils/methods";
 import type { Course } from "../types/types";
 import { UserRole } from "~/features/auth/types";
+import { formatDateDisplay } from "~/features/common/utils/Utils";
 
 type Mensaje = {
   id: number;
@@ -394,7 +395,7 @@ export default function CourseForums() {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="text-sm font-semibold">{(pub.autorNombre && pub.autorApellido) ? `${pub.autorNombre} ${pub.autorApellido}` : 'Usuario'}</div>
-                      <div className="text-xs text-gray-500">{pub.fechaCreacion ? new Date(pub.fechaCreacion).toLocaleString() : ''}</div>
+                      <div className="text-xs text-gray-500">{formatDateDisplay(pub.fechaCreacion)}</div>
                     </div>
                     <div className="text-sm text-gray-500 flex items-center gap-2">
                       <span>{pub.respuestas?.length ?? 0} {(pub.respuestas?.length === 1) ? 'respuesta' : 'respuestas'}</span>
@@ -507,7 +508,7 @@ export default function CourseForums() {
                                 </div>
                                 <div>
                                   <div className="text-xs font-semibold">{(msg.autorNombre && msg.autorApellido) ? `${msg.autorNombre} ${msg.autorApellido}` : 'Usuario'}</div>
-                                  <div className="text-xs text-gray-500">{msg.fechaCreacion ? new Date(msg.fechaCreacion).toLocaleString() : ''}</div>
+                                  <div className="text-xs text-gray-500">{formatDateDisplay(msg.fechaCreacion)}</div>
                                 </div>
                               </div>
                               <p className="text-sm text-gray-700 mt-2 whitespace-pre-line">{msg.contenido}</p>

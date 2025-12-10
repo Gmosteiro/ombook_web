@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Entrega, EntregaDetalle } from "../types/types";
 
+import { formatDateDisplay } from "~/features/common/utils/Utils";
+
 interface SubmissionDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -59,7 +61,7 @@ export function SubmissionDetailModal({ isOpen, onClose, submission, cursoId, ta
         {detailedSubmission && (
           <div className="space-y-2">
             <div><strong>Archivo:</strong> {detailedSubmission.nombreArchivo}</div>
-            <div><strong>Fecha de envío:</strong> {detailedSubmission.fechaEnvio ? new Date(detailedSubmission.fechaEnvio).toLocaleString() : '-'}</div>
+            <div><strong>Fecha de envío:</strong> {formatDateDisplay(detailedSubmission.fechaEnvio)}</div>
             <div><strong>Estado:</strong> {detailedSubmission.estado}</div>
             <div><strong>Calificación:</strong> {detailedSubmission.calificacion !== undefined ? detailedSubmission.calificacion : '-'}</div>
             <div><strong>Comentario:</strong> {detailedSubmission.comentario || '-'}</div>

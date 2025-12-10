@@ -29,6 +29,15 @@ export const formatFileSize = (bytes: number): string => {
 
 export const formatDateForInput = (dateString?: string) => {
     if (!dateString) return '';
+
+    // Si la fecha ya está en formato ISO, extraer directamente
+    // Formato esperado: "YYYY-MM-DDTHH:mm:ss" o "YYYY-MM-DDTHH:mm"
+    const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    if (isoMatch) {
+        return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}T${isoMatch[4]}:${isoMatch[5]}`;
+    }
+
+    // Fallback: parsear la fecha (puede causar problemas de timezone)
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -36,4 +45,35 @@ export const formatDateForInput = (dateString?: string) => {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+/**
+ * Formatea una fecha ISO para mostrar al usuario
+ * Formato: "DD/MM/YYYY HH:mm"
+ */
+export const formatDateDisplay = (dateString?: string | null): string => {
+    if (!dateString) return 'No programada';
+
+    // Extraer componentes directamente del string ISO sin parsear con Date
+    // Formato esperado: "YYYY-MM-DDTHH:mm:ss" o "YYYY-MM-DDTHH:mm"
+    const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    if (isoMatch) {
+        const [, year, month, day, hours, minutes] = isoMatch;
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+    }
+
+    // Fallback: si no es ISO estándar, intentar parsear
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString; // Fecha inválida
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+    } catch {
+        return dateString; // Si todo falla, retornar el string original
+    }
 };

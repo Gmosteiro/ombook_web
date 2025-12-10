@@ -1,6 +1,7 @@
 import { useLoaderData, useOutletContext, Link } from "react-router";
 import { useState } from "react";
 import type { Course, Entrega } from "../types/types";
+import { formatDateDisplay } from "~/features/common/utils/Utils";
 
 export async function loader({
   params,
@@ -121,7 +122,7 @@ export default function CourseTaskSubmissionsList() {
                         {submission.nombre} {submission.apellido}
                       </td>
                       <td className="px-4 py-3 text-slate-800 dark:text-slate-200">
-                        {submission.fechaEnvio ? new Date(submission.fechaEnvio).toLocaleString() : '-'}
+                        {formatDateDisplay(submission.fechaEnvio)}
                       </td>
                       <td className="px-4 py-3 font-semibold text-green-800 dark:text-green-300">
                         {submission.estado}

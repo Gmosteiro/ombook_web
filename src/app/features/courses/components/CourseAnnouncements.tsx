@@ -3,6 +3,7 @@ import { useLoaderData, useOutletContext, useSubmit, useRevalidator, type Action
 import { apiFetch } from "../../auth/utils/methods";
 import type { Course } from "../types/types";
 import { UserRole } from "~/features/auth/types";
+import { formatDateDisplay } from "~/features/common/utils/Utils";
 
 type Anuncio = {
   id: number;
@@ -393,8 +394,8 @@ export default function CourseAnnouncements() {
                     <div>
                       <div className="text-sm font-semibold">{(a.nombreCreador && a.apellidoCreador) ? `${a.nombreCreador} ${a.apellidoCreador}` : 'Usuario'}</div>
                       <div className="text-xs text-gray-500">
-                        {a.fechaCreacion ? new Date(a.fechaCreacion).toLocaleString() : ''}
-                        {a.fechaProgramada && ` • Programado: ${new Date(a.fechaProgramada).toLocaleString()}`}
+                        {formatDateDisplay(a.fechaCreacion)}
+                        {a.fechaProgramada && ` • Programado: ${formatDateDisplay(a.fechaProgramada)}`}
                       </div>
                     </div>
                     {canEditAnuncio(a) && (

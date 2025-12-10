@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import { useRecursosPorPagina } from '../hooks/useRecursosPorPagina';
 import { type PaginaTematica as IPaginaTematica } from '../types/types';
 import { UploadResourceDialog } from './UploadResourceDialog';
-import { formatDateForInput } from '~/features/common/utils/Utils';
+import { formatDateDisplay } from '~/features/common/utils/Utils';
 
 interface Props {
   pagina: IPaginaTematica;
-  cursoId: number;
-  jwtToken: string;
   onUploadRecurso: (nombre: string, file: File) => Promise<void>;
   onDeleteRecurso: (recursoId: number) => Promise<void>;
   onDownloadRecurso: (recursoId: number) => Promise<void>;
@@ -17,8 +14,6 @@ interface Props {
 
 export const PaginaTematica = ({
   pagina,
-  cursoId,
-  jwtToken,
   onUploadRecurso,
   onDeleteRecurso,
   onDownloadRecurso,
@@ -67,7 +62,7 @@ export const PaginaTematica = ({
   };
 
   const isHidden = pagina.fechaProgramada ? new Date(pagina.fechaProgramada) > new Date() : false;
-  const { recursos, loading: loadingRecursos, error: errorRecursos } = useRecursosPorPagina(cursoId, pagina.id, jwtToken);
+  const recursos = pagina.recursos || [];
 
 
 
@@ -100,13 +95,13 @@ export const PaginaTematica = ({
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <p>Creado el {formatDateForInput(pagina.fechaCreacion)}</p>
+              <p>Creado el {formatDateDisplay(pagina.fechaCreacion)}</p>
             </div>
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p>Fecha programada: {formatDateForInput(pagina.fechaProgramada)}</p>
+              <p>Fecha programada: {formatDateDisplay(pagina.fechaProgramada)}</p>
             </div>
           </div>
         </div>
@@ -210,61 +205,55 @@ export const PaginaTematica = ({
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p>Esta página está oculta para los estudiantes hasta {formatDateForInput(pagina.fechaProgramada)}</p>
+                <p>Esta página está oculta para los estudiantes hasta {formatDateDisplay(pagina.fechaProgramada)}</p>
               </div>
             </div>
           )}
 
           <div>
             <h4 className="font-medium mb-2">Recursos</h4>
-            {loadingRecursos ? (
-              <div className="text-gray-400">Cargando recursos...</div>
-            ) : errorRecursos ? (
-              <div className="text-red-500">{errorRecursos}</div>
-            ) : (
-              <div className="space-y-2">
-                {recursos.length === 0 ? (
-                  <div className="text-gray-400">No hay recursos para esta página.</div>
-                ) : (
-                  recursos.map((recurso) => (
-                    <div
-                      key={recurso.id}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <div className="space-y-2">
+              {recursos.length === 0 ? (
+                <div className="text-gray-400">No hay recursos para esta página.</div>
+              ) : (
+                recursos.map((recurso: any) => (
+                  <div
+                    key={recurso.id}
+                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-sm">{recurso.nombreOriginal}</span>
+                      <span className="text-xs text-gray-500">({formatBytes(recurso.sizeBytes)})</span>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => onDownloadRecurso(recurso.id)}
+                        className="p-1 text-blue-600 hover:text-blue-800"
+                        title="Descargar"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        <span className="text-sm">{recurso.nombreOriginal}</span>
-                        <span className="text-xs text-gray-500">({formatBytes(recurso.sizeBytes)})</span>
-                      </div>
-                      <div className="flex space-x-2">
+                      </button>
+                      {isProfesor && (
                         <button
-                          onClick={() => onDownloadRecurso(recurso.id)}
-                          className="p-1 text-blue-600 hover:text-blue-800"
-                          title="Descargar"
+                          onClick={() => onDeleteRecurso(recurso.id)}
+                          className="p-1 text-red-600 hover:text-red-800"
+                          title="Eliminar"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
-                        {isProfesor && (
-                          <button
-                            onClick={() => onDeleteRecurso(recurso.id)}
-                            className="p-1 text-red-600 hover:text-red-800"
-                            title="Eliminar"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
+                      )}
                     </div>
-                  ))
-                )}
-              </div>
-            )}
+                  </div>
+                ))
+              )}
+            </div>
 
             {isProfesor && (
               <>

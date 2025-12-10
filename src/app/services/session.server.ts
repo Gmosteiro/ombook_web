@@ -1,7 +1,7 @@
 // app/services/session.server.ts
 import { createCookieSessionStorage, redirect } from "react-router";
 import type { User, UserRole } from "~/features/auth/types";
-import { API_URL } from "~/features/common/utils/Utils";
+import { apiFetch } from "~/features/auth/utils/methods";
 
 const USER_SESSION_KEY = "userId";
 
@@ -72,19 +72,18 @@ function isJWTValid(token: string): boolean {
  * @param {string} refreshToken - The refresh token
  * @returns {Promise<{accessToken: string, accessTokenExp: number, refreshToken: string} | null>} New tokens or null if failed
  */
-async function refreshAccessToken(refreshToken: string): Promise<{
+async function refreshAccessToken(refreshToken: string, currentToken: string): Promise<{
     accessToken: string;
     accessTokenExp: number;
     refreshToken: string;
     rol: string;
 } | null> {
     try {
-        // Use the full API_URL for server-side fetch
-        const url = `${API_URL}/auth/refresh`;
 
-        const response = await fetch(url, {
+        const response = await apiFetch('/auth/refresh', {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            secure: true,
+            jwtToken: currentToken,
             body: JSON.stringify({ refreshToken }),
         });
 
@@ -119,7 +118,7 @@ export const forceTokenRefresh = async (request: Request): Promise<{
         return { success: false };
     }
 
-    const newTokens = await refreshAccessToken(refreshToken);
+    const newTokens = await refreshAccessToken(refreshToken, session.get("token"));
 
     if (!newTokens) {
         console.error("Failed to refresh token");
@@ -168,7 +167,7 @@ const getUserSession = async (request: Request) => {
         // Token expired, try to refresh
         if (refreshToken) {
 
-            const newTokens = await refreshAccessToken(refreshToken);
+            const newTokens = await refreshAccessToken(refreshToken, token);
 
             if (newTokens) {
                 console.log("[getUserSession] Token refreshed successfully");

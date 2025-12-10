@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TaskForm } from "./TaskForm";
 import { TaskResourceList } from "./TaskResourceList";
 import { TaskSubmissionList } from "./TaskSubmissionList";
-import { formatDateForInput } from "~/features/common/utils/Utils";
+import { formatDateForInput, formatDateDisplay } from "~/features/common/utils/Utils";
 
 type Tarea = {
     id: number;
@@ -103,7 +103,7 @@ export function TaskItem({
                         </span>
                     </div>
                     <div className="text-xs text-gray-500">
-                        {task.fechaCreacion ? new Date(task.fechaCreacion).toLocaleString() : ''}
+                        {task.fechaCreacion ? formatDateDisplay(task.fechaCreacion) : ''}
                     </div>
                     <p className="text-sm text-gray-700 mt-2 line-clamp-2">{task.descripcion}</p>
                 </div>
@@ -147,8 +147,8 @@ export function TaskItem({
                         </div>
                     </div>
                     <div className="flex gap-4 text-sm text-gray-600">
-                        <div>Inicio: {task.fechaInicio ? new Date(task.fechaInicio).toLocaleString() : '-'}</div>
-                        <div>Fin: {task.fechaFin ? new Date(task.fechaFin).toLocaleString() : '-'}</div>
+                        <div>Inicio: {formatDateDisplay(task.fechaInicio)}</div>
+                        <div>Fin: {formatDateDisplay(task.fechaFin)}</div>
                     </div>
 
                     <TaskResourceList

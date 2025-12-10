@@ -1,7 +1,7 @@
 import { useLoaderData, useOutletContext, useParams, Link } from "react-router";
 import { useState } from "react";
 import type { Course, EntregaDetalle } from "../types/types";
-import { API_URL } from "../../common/utils/Utils";
+import { API_URL, formatDateDisplay } from "../../common/utils/Utils";
 import type { UsuarioDetalleResponse } from "../../../routes/api.users.server";
 
 export async function loader({
@@ -221,7 +221,7 @@ export default function CourseTaskSubmissions() {
                     <span className="font-medium text-slate-600 dark:text-slate-400">Fecha de Envío:</span>
                     <p className="text-slate-800 dark:text-slate-200">
                       {submission.fechaEnvio
-                        ? new Date(submission.fechaEnvio).toLocaleString()
+                        ? formatDateDisplay(submission.fechaEnvio)
                         : "-"}
                     </p>
                   </div>

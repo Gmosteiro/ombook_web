@@ -10,6 +10,8 @@ type Entrega = {
     calificacion?: number;
 };
 
+import { formatDateDisplay } from "~/features/common/utils/Utils";
+
 type TaskSubmissionListProps = {
     entregas: Entrega[];
     tareaId: number;
@@ -64,7 +66,7 @@ export function TaskSubmissionList({
                     entregas.map(entrega => (
                         <div key={entrega.id} className="bg-white border rounded p-2">
                             <div className="text-sm">
-                                Entregado el {entrega.fechaEnvio ? new Date(entrega.fechaEnvio).toLocaleString() : '-'}
+                                Entregado el {formatDateDisplay(entrega.fechaEnvio)}
                             </div>
                             <div className="text-sm">Estado: {entrega.estado}</div>
                             {entrega.calificacion !== undefined && (
