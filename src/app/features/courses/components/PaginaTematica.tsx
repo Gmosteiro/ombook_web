@@ -112,7 +112,7 @@ export const PaginaTematica = ({
                 e.stopPropagation();
                 setIsEditing(!isEditing);
               }}
-              className="p-2 text-blue-600 hover:text-blue-800"
+              className="p-2 ombook-text-green hover:opacity-80"
               title="Editar página"
               aria-label="Editar página"
             >
@@ -144,10 +144,10 @@ export const PaginaTematica = ({
       </div>
 
       {isEditing && isProfesor && (
-        <div className="p-4 border-t bg-blue-50">
+        <div className="p-4 border-t ombook-bg-light">
           <div className="space-y-4">
             <div>
-              <label htmlFor={`edit-titulo-${pagina.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor={`edit-titulo-${pagina.id}`} className="ombook-label">
                 Título
               </label>
               <input
@@ -155,12 +155,12 @@ export const PaginaTematica = ({
                 type="text"
                 value={editData.titulo}
                 onChange={(e) => setEditData(prev => ({ ...prev, titulo: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="ombook-input"
                 disabled={isUpdating}
               />
             </div>
             <div>
-              <label htmlFor={`edit-fecha-${pagina.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor={`edit-fecha-${pagina.id}`} className="ombook-label">
                 Fecha Programada (opcional)
               </label>
               <input
@@ -168,14 +168,14 @@ export const PaginaTematica = ({
                 type="datetime-local"
                 value={editData.fechaProgramada}
                 onChange={(e) => setEditData(prev => ({ ...prev, fechaProgramada: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="ombook-input"
                 disabled={isUpdating}
               />
             </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="ombook-btn ombook-btn-outline disabled:opacity-50"
                 disabled={isUpdating}
               >
                 Cancelar
@@ -183,7 +183,7 @@ export const PaginaTematica = ({
               <button
                 onClick={handleUpdate}
                 disabled={isUpdating || !editData.titulo.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="ombook-btn ombook-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isUpdating ? 'Guardando...' : 'Guardar'}
               </button>
@@ -200,7 +200,7 @@ export const PaginaTematica = ({
             </p>
           </div>
           {isHidden && isProfesor && (
-            <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md text-sm">
+            <div className="mb-4 ombook-alert ombook-alert-info">
               <div className="flex gap-2 items-center">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -231,7 +231,7 @@ export const PaginaTematica = ({
                     <div className="flex space-x-2">
                       <button
                         onClick={() => onDownloadRecurso(recurso.id)}
-                        className="p-1 text-blue-600 hover:text-blue-800"
+                        className="p-1 ombook-text-green hover:opacity-80"
                         title="Descargar"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +241,7 @@ export const PaginaTematica = ({
                       {isProfesor && (
                         <button
                           onClick={() => onDeleteRecurso(recurso.id)}
-                          className="p-1 text-red-600 hover:text-red-800"
+                          className="p-1 ombook-text-brown hover:opacity-80"
                           title="Eliminar"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +260,7 @@ export const PaginaTematica = ({
                 <div className="mt-4">
                   <button
                     onClick={() => setShowUploadDialog(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="ombook-btn ombook-btn-primary"
                   >
                     <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
