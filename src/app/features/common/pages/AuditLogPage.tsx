@@ -9,7 +9,7 @@ import type { PaginatorResponseAuditoriaResponse } from "~/routes/api.auditoria"
 type AuditLogFilters = {
     action: string;
     resultado: string;
-    userId: string;
+    email: string;
     fechaDesde?: string;
     fechaHasta?: string;
 };
@@ -29,7 +29,7 @@ export async function loader({ request }: { request: Request }) {
         }
         const action = params.get("action") ?? "";
         const resultado = params.get("resultado") ?? "";
-        const userId = params.get("userId") ?? "";
+        const email = params.get("email") ?? "";
         const fechaDesde = params.get("fechaDesde") ?? "";
         const fechaHasta = params.get("fechaHasta") ?? "";
 
@@ -39,13 +39,13 @@ export async function loader({ request }: { request: Request }) {
             sort,
             action,
             resultado,
-            userId,
+            email,
             fechaDesde,
             fechaHasta,
         });
 
         return new Response(
-            JSON.stringify({ data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1, sort }),
+            JSON.stringify({ data, filters: { action, resultado, email, fechaDesde, fechaHasta }, page: Number(page) + 1, sort }),
             { headers: headers }
         );
 
@@ -53,7 +53,7 @@ export async function loader({ request }: { request: Request }) {
         return new Response(
             JSON.stringify({
                 data: { content: [], totalPages: 1 },
-                filters: { action: "", resultado: "", userId: "", fechaDesde: "", fechaHasta: "" },
+                filters: { action: "", resultado: "", email: "", fechaDesde: "", fechaHasta: "" },
                 page: 1,
                 sort: [],
                 error: String(e)
@@ -78,7 +78,7 @@ export default function AuditLogPage() {
         error?: string;
     };
     const [searchParams, setSearchParams] = useSearchParams();
-    const [userInput, setUserInput] = useState(filters.userId || "");
+    const [emailInput, setEmailInput] = useState(filters.email || "");
     const [action, setAction] = useState(filters.action || "");
     const [resultado, setResultado] = useState(filters.resultado || "");
     const [fechaDesde, setFechaDesde] = useState(filters.fechaDesde || getTodayDate());
@@ -86,12 +86,12 @@ export default function AuditLogPage() {
     const [sort, setSort] = useState<string[]>(initialSort);
 
     useEffect(() => {
-        setUserInput(filters.userId || "");
+        setEmailInput(filters.email || "");
         setAction(filters.action || "");
         setResultado(filters.resultado || "");
         setFechaDesde(filters.fechaDesde || getTodayDate());
         setFechaHasta(filters.fechaHasta || getTodayDate());
-    }, [filters.userId, filters.action, filters.resultado, filters.fechaDesde, filters.fechaHasta]);
+    }, [filters.email, filters.action, filters.resultado, filters.fechaDesde, filters.fechaHasta]);
 
     // Actualiza el sort cuando cambian los searchParams
     useEffect(() => {
@@ -99,16 +99,16 @@ export default function AuditLogPage() {
         setSort(params.getAll("sort"));
     }, [searchParams]);
 
-    // Handler para búsqueda por usuario
-    const handleUserSearch = (value: string) => {
-        setUserInput(value);
+    // Handler para búsqueda por email
+    const handleEmailSearch = (value: string) => {
+        setEmailInput(value);
         // Solo buscar si está vacío o tiene 3+ caracteres
         if (value === "" || value.length >= 3) {
             const params = new URLSearchParams(searchParams);
             if (value.length >= 3) {
-                params.set("userId", value);
+                params.set("email", value);
             } else {
-                params.delete("userId");
+                params.delete("email");
             }
             params.set("page", "0");
             setSearchParams(params);
@@ -184,8 +184,8 @@ export default function AuditLogPage() {
                     type="text"
                     placeholder="Buscar por email"
                     className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
-                    value={userInput}
-                    onChange={e => handleUserSearch(e.target.value)}
+                    value={emailInput}
+                    onChange={e => handleEmailSearch(e.target.value)}
                 />
                 <select
                     className="border border-gray-200 rounded-lg py-2 px-4 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"

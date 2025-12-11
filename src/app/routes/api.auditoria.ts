@@ -56,7 +56,7 @@ export async function getAuditorias(
         sort?: string[];
         action?: string;
         resultado?: string;
-        userId?: string;
+        email?: string;
         fechaDesde?: string;
         fechaHasta?: string;
     }
@@ -68,7 +68,7 @@ export async function getAuditorias(
     if (filters.sort?.length) filters.sort.forEach(s => queryParams.append("sort", s));
     if (filters.action) queryParams.set("action", filters.action);
     if (filters.resultado) queryParams.set("resultado", filters.resultado);
-    if (filters.userId) queryParams.set("userId", filters.userId);
+    if (filters.email) queryParams.set("email", filters.email);
     if (filters.fechaDesde) queryParams.set("fechaDesde", filters.fechaDesde);
     if (filters.fechaHasta) queryParams.set("fechaHasta", filters.fechaHasta);
 
