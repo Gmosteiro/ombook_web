@@ -1,32 +1,10 @@
 import { useLoaderData, useSearchParams } from "react-router";
 import { requireRoleLoader } from "~/features/auth/components/requireRoleLoader";
 import { UserRole } from "~/features/auth/types";
-import { apiFetch } from "~/features/auth/utils/methods";
-import { getValidJWTToken } from "~/services/session.server";
 import { useState, useEffect } from "react";
 import { ACTIONS, RESULTADOS, getTodayDate, headers } from "~/features/common/utils/Auditoria";
-
-// Tipos
-type AuditoriaResponse = {
-    nombreUsuario?: string;
-    action?: string;
-    resultado?: string;
-    descripcion?: string;
-    entidad?: string;
-    ip?: string;
-    canal?: string;
-    fecha?: string;
-};
-
-type PaginatorResponseAuditoriaResponse = {
-    content?: AuditoriaResponse[];
-    page?: number;
-    size?: number;
-    totalElements?: number;
-    totalPages?: number;
-    first?: boolean;
-    last?: boolean;
-};
+import { getAuditorias } from "~/routes/api.auditoria";
+import type { PaginatorResponseAuditoriaResponse } from "~/routes/api.auditoria";
 
 type AuditLogFilters = {
     action: string;
@@ -39,7 +17,6 @@ type AuditLogFilters = {
 // Loader
 export async function loader({ request }: { request: Request }) {
     requireRoleLoader([UserRole.ADMINISTRADOR]);
-    const jwtToken = await getValidJWTToken(request);
     try {
         const url = new URL(request.url);
         const params = url.searchParams;
@@ -52,23 +29,17 @@ export async function loader({ request }: { request: Request }) {
         const fechaDesde = params.get("fechaDesde") ?? "";
         const fechaHasta = params.get("fechaHasta") ?? "";
 
-        const queryParams = new URLSearchParams();
-        queryParams.set("page", page);
-        queryParams.set("size", size);
-        if (sort.length) sort.forEach(s => queryParams.append("sort", s));
-        if (action) queryParams.set("action", action);
-        if (resultado) queryParams.set("resultado", resultado);
-        if (userId) queryParams.set("userId", userId);
-        if (fechaDesde) queryParams.set("fechaDesde", fechaDesde);
-        if (fechaHasta) queryParams.set("fechaHasta", fechaHasta);
+        const data = await getAuditorias(request, {
+            page,
+            size,
+            sort,
+            action,
+            resultado,
+            userId,
+            fechaDesde,
+            fechaHasta,
+        });
 
-        const res = await apiFetch(`/auditoria?${queryParams.toString()}`, { method: "GET", jwtToken, secure: true });
-
-        if (!res.ok) {
-            throw new Error("API error");
-        }
-
-        const data = await res.json();
         return new Response(
             JSON.stringify({ data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1 }),
             { headers: headers }
@@ -266,39 +237,56 @@ export default function AuditLogPage() {
                 />
             </div>
             <div className="ombook-card overflow-x-auto">
-                <table className="w-full">
-                    <thead>
+                <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="px-4 py-2 text-left">Usuario</th>
-                            <th className="px-4 py-2 text-left">Acción</th>
-                            <th className="px-4 py-2 text-left">Resultado</th>
-                            <th className="px-4 py-2 text-left">Descripción</th>
-                            <th className="px-4 py-2 text-left">Entidad</th>
-                            <th className="px-4 py-2 text-left">IP</th>
-                            <th className="px-4 py-2 text-left">Canal</th>
+                            <th className="px-3 py-3 text-left font-semibold text-gray-700">Usuario</th>
+                            <th className="px-3 py-3 text-left font-semibold text-gray-700">Email</th>
+                            <th className="px-3 py-3 text-left font-semibold text-gray-700">Acción</th>
+                            <th className="px-3 py-3 text-left font-semibold text-gray-700">Resultado</th>
+                            {/* <th className="px-3 py-3 text-left font-semibold text-gray-700">Descripción</th> */}
+                            <th className="px-3 py-3 text-left font-semibold text-gray-700">Entidad</th>
+                            <th className="px-3 py-3 text-left font-semibold text-gray-700">IP</th>
+                            <th className="px-3 py-3 text-left font-semibold text-gray-700">Canal</th>
                             <th
-                                className="px-4 py-2 text-left cursor-pointer select-none"
+                                className="px-3 py-3 text-left font-semibold text-gray-700 cursor-pointer select-none hover:text-blue-600"
                                 onClick={handleSort}
                             >
                                 Fecha {getSortIcon("fecha")}
                             </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-200">
                         {data.content?.length ? data.content.map((row, idx) => (
-                            <tr key={idx} className="border-b">
-                                <td className="px-4 py-2">{row.nombreUsuario}</td>
-                                <td className="px-4 py-2">{row.action?.replace(/_/g, " ")}</td>
-                                <td className="px-4 py-2">{row.resultado}</td>
-                                <td className="px-4 py-2">{row.descripcion}</td>
-                                <td className="px-4 py-2">{row.entidad}</td>
-                                <td className="px-4 py-2">{row.ip}</td>
-                                <td className="px-4 py-2">{row.canal?.toUpperCase()}</td>
-                                <td className="px-4 py-2">{row.fecha ? new Date(row.fecha).toLocaleString() : ""}</td>
+                            <tr key={idx} className="hover:bg-gray-50 transition">
+                                <td className="px-3 py-3 text-gray-900">{row.nombreUsuario || "-"}</td>
+                                <td className="px-3 py-3 text-gray-700">{row.email || "-"}</td>
+                                <td className="px-3 py-3 text-gray-900 capitalize">{row.action?.replace(/_/g, " ").toLowerCase() || "-"}</td>
+                                <td className="px-3 py-3">
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${row.resultado === "EXITO" ? "bg-green-100 text-green-800" :
+                                        row.resultado === "ERROR" ? "bg-red-100 text-red-800" :
+                                            row.resultado === "EXITO_PARCIAL" ? "bg-yellow-100 text-yellow-800" :
+                                                "bg-gray-100 text-gray-800"
+                                        }`}>
+                                        {row.resultado || "-"}
+                                    </span>
+                                </td>
+                                {/* <td className="px-3 py-3 text-gray-700 max-w-xs truncate">{row.descripcion || "-"}</td> */}
+                                <td className="px-3 py-3 text-gray-700">{row.entidad || "-"}</td>
+                                <td className="px-3 py-3 text-gray-700 font-mono text-xs">{row.ip || "-"}</td>
+                                <td className="px-3 py-3">
+                                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${row.canal === "WEB" ? "bg-blue-100 text-blue-800" :
+                                        row.canal === "MOBILE" ? "bg-purple-100 text-purple-800" :
+                                            "bg-gray-100 text-gray-800"
+                                        }`}>
+                                        {row.canal?.toUpperCase() || "-"}
+                                    </span>
+                                </td>
+                                <td className="px-3 py-3 text-gray-700 whitespace-nowrap">{row.fecha ? new Date(row.fecha).toLocaleString() : "-"}</td>
                             </tr>
                         )) : (
                             <tr>
-                                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">No hay registros de auditoría.</td>
+                                <td colSpan={9} className="px-4 py-8 text-center text-gray-500">No hay registros de auditoría.</td>
                             </tr>
                         )}
                     </tbody>
