@@ -1,0 +1,121 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Mis Cursos" [ref=e10] [cursor=pointer]:
+            - /url: /courses
+          - link "Chat" [ref=e11] [cursor=pointer]:
+            - /url: /chat
+        - generic [ref=e12] [cursor=pointer]:
+          - button [ref=e14]:
+            - img [ref=e15]
+          - button "Abrir menú de usuario" [ref=e18]:
+            - img "Avatar" [ref=e19]
+            - img [ref=e20]
+  - generic [ref=e22]:
+    - main [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - img "Banner curso" [ref=e26]
+          - heading "Curso 1" [level=1] [ref=e29]
+        - generic [ref=e30]:
+          - complementary [ref=e31]:
+            - generic [ref=e32]:
+              - heading "Curso 1" [level=2] [ref=e33]
+              - paragraph [ref=e34]: cur1
+            - navigation [ref=e35]:
+              - link "General" [ref=e36] [cursor=pointer]:
+                - /url: /courses/32/general
+                - img [ref=e37]
+                - text: General
+              - link "Tareas" [ref=e39] [cursor=pointer]:
+                - /url: /courses/32/tasks
+                - img [ref=e40]
+                - text: Tareas
+              - link "Foro" [ref=e42] [cursor=pointer]:
+                - /url: /courses/32/forums
+                - img [ref=e43]
+                - text: Foro
+              - link "Anuncios" [ref=e45] [cursor=pointer]:
+                - /url: /courses/32/announcements
+                - img [ref=e46]
+                - text: Anuncios
+              - link "Usuarios" [ref=e48] [cursor=pointer]:
+                - /url: /courses/32/students
+                - img [ref=e49]
+                - text: Usuarios
+              - link "Calificaciones" [active] [ref=e51] [cursor=pointer]:
+                - /url: /courses/32/marks
+                - img [ref=e52]
+                - text: Calificaciones
+          - main [ref=e54]:
+            - generic [ref=e59]:
+              - heading "Calificaciones finales" [level=2] [ref=e61]
+              - link "Descargar modelo CSV" [ref=e63] [cursor=pointer]:
+                - /url: /plantillas/calificaciones.csv
+              - table [ref=e65]:
+                - rowgroup [ref=e66]:
+                  - row "Nombre Calificación Observación Estado" [ref=e67]:
+                    - columnheader "Nombre" [ref=e68]
+                    - columnheader "Calificación" [ref=e69]
+                    - columnheader "Observación" [ref=e70]
+                    - columnheader "Estado" [ref=e71]
+                - rowgroup [ref=e72]:
+                  - row "Ana Karen Umpierrez Pintos 9 Muy Bien BORRADOR" [ref=e73]:
+                    - cell "Ana Karen Umpierrez Pintos" [ref=e74]
+                    - cell "9" [ref=e75]:
+                      - spinbutton [ref=e76]: "9"
+                    - cell "Muy Bien" [ref=e77]:
+                      - textbox [ref=e78]: Muy Bien
+                    - cell "BORRADOR" [ref=e79]
+                  - row "Manuel Alejandro Umpierrez Hernandez 8 Tremendo BORRADOR" [ref=e80]:
+                    - cell "Manuel Alejandro Umpierrez Hernandez" [ref=e81]
+                    - cell "8" [ref=e82]:
+                      - spinbutton [ref=e83]: "8"
+                    - cell "Tremendo" [ref=e84]:
+                      - textbox [ref=e85]: Tremendo
+                    - cell "BORRADOR" [ref=e86]
+              - button "Guardar Borrador" [ref=e88] [cursor=pointer]
+    - contentinfo [ref=e89]:
+      - generic [ref=e90]:
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - link "Ombook" [ref=e93] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e94]
+            - paragraph [ref=e95]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e96]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e97]
+            - list [ref=e98]:
+              - listitem [ref=e99]:
+                - link "Cursos" [ref=e100] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e101]:
+                - link "Chat" [ref=e102] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e103]:
+            - heading "Soporte" [level=3] [ref=e104]
+            - list [ref=e105]:
+              - listitem [ref=e106]:
+                - link "Mi Perfil" [ref=e107] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e108]:
+                - link "Contacto" [ref=e109] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e110]:
+          - paragraph [ref=e111]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e112]:
+            - link "Privacidad" [ref=e113] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e114] [cursor=pointer]:
+              - /url: /terms
+```

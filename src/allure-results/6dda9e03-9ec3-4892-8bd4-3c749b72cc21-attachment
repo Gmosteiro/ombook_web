@@ -1,0 +1,132 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Usuarios" [ref=e10] [cursor=pointer]:
+            - /url: /users
+          - link "Cursos" [ref=e11] [cursor=pointer]:
+            - /url: /courses
+          - link "Auditoria" [ref=e12] [cursor=pointer]:
+            - /url: /audit
+        - generic [ref=e13] [cursor=pointer]:
+          - button [ref=e15]:
+            - img [ref=e16]
+          - button "Abrir menú de usuario" [ref=e19]:
+            - img "Avatar" [ref=e20]
+            - img [ref=e21]
+  - generic [ref=e23]:
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - heading "¡Bienvenido a Ombook Peladinho Chechevereche Admin! 👋" [level=1] [ref=e27]
+        - generic [ref=e28]:
+          - heading "Acceso Rápido" [level=2] [ref=e29]
+          - generic [ref=e30]:
+            - link "school Mis Cursos Accede a todos tus cursos" [ref=e31] [cursor=pointer]:
+              - /url: /courses
+              - generic [ref=e32]:
+                - generic [ref=e34]: school
+                - generic [ref=e35]:
+                  - heading "Mis Cursos" [level=3] [ref=e36]
+                  - paragraph [ref=e37]: Accede a todos tus cursos
+            - link "chat Chat Comunícate con estudiantes y profesores" [ref=e38] [cursor=pointer]:
+              - /url: /chat
+              - generic [ref=e39]:
+                - generic [ref=e41]: chat
+                - generic [ref=e42]:
+                  - heading "Chat" [level=3] [ref=e43]
+                  - paragraph [ref=e44]: Comunícate con estudiantes y profesores
+            - link "add Crear Curso Crea un nuevo curso" [ref=e45] [cursor=pointer]:
+              - /url: /courses/create
+              - generic [ref=e46]:
+                - generic [ref=e48]: add
+                - generic [ref=e49]:
+                  - heading "Crear Curso" [level=3] [ref=e50]
+                  - paragraph [ref=e51]: Crea un nuevo curso
+            - link "group Gestión de Usuarios Administra estudiantes y profesores" [ref=e52] [cursor=pointer]:
+              - /url: /users
+              - generic [ref=e53]:
+                - generic [ref=e55]: group
+                - generic [ref=e56]:
+                  - heading "Gestión de Usuarios" [level=3] [ref=e57]
+                  - paragraph [ref=e58]: Administra estudiantes y profesores
+            - link "search Auditoria Revisa las actividades del sistema" [ref=e59] [cursor=pointer]:
+              - /url: /audit
+              - generic [ref=e60]:
+                - generic [ref=e62]: search
+                - generic [ref=e63]:
+                  - heading "Auditoria" [level=3] [ref=e64]
+                  - paragraph [ref=e65]: Revisa las actividades del sistema
+            - link "person Mi Perfil Ver y editar tu información" [ref=e66] [cursor=pointer]:
+              - /url: /profile
+              - generic [ref=e67]:
+                - generic [ref=e69]: person
+                - generic [ref=e70]:
+                  - heading "Mi Perfil" [level=3] [ref=e71]
+                  - paragraph [ref=e72]: Ver y editar tu información
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - heading "💡 Consejos Útiles" [level=3] [ref=e75]
+            - list [ref=e76]:
+              - listitem [ref=e77]:
+                - generic [ref=e78]: ✓
+                - generic [ref=e79]: Revisa tus notificaciones regularmente para estar al día
+              - listitem [ref=e80]:
+                - generic [ref=e81]: ✓
+                - generic [ref=e82]: Utiliza el chat para comunicarte con profesores y compañeros
+              - listitem [ref=e83]:
+                - generic [ref=e84]: ✓
+                - generic [ref=e85]: Mantén tu perfil actualizado con tu información de contacto
+          - generic [ref=e86]:
+            - heading "❓ ¿Necesitas Ayuda?" [level=3] [ref=e87]
+            - paragraph [ref=e88]: Si tienes alguna pregunta o problema, estamos aquí para ayudarte.
+            - generic [ref=e89]:
+              - link "📧 soporte@ombook.com" [ref=e90] [cursor=pointer]:
+                - /url: mailto:soporte@ombook.com
+              - link "📄 Términos y Condiciones" [ref=e91] [cursor=pointer]:
+                - /url: /terms
+              - link "🔒 Política de Privacidad" [ref=e92] [cursor=pointer]:
+                - /url: /privacy
+        - img "Ombook Logo" [ref=e93]
+    - contentinfo [ref=e94]:
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - link "Ombook" [ref=e98] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e99]
+            - paragraph [ref=e100]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e101]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e102]
+            - list [ref=e103]:
+              - listitem [ref=e104]:
+                - link "Cursos" [ref=e105] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e106]:
+                - link "Chat" [ref=e107] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e108]:
+            - heading "Soporte" [level=3] [ref=e109]
+            - list [ref=e110]:
+              - listitem [ref=e111]:
+                - link "Mi Perfil" [ref=e112] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e113]:
+                - link "Contacto" [ref=e114] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e115]:
+          - paragraph [ref=e116]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e117]:
+            - link "Privacidad" [ref=e118] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e119] [cursor=pointer]:
+              - /url: /terms
+```

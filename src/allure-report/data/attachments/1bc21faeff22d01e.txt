@@ -1,0 +1,169 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Mis Cursos" [ref=e10] [cursor=pointer]:
+            - /url: /courses
+          - link "Chat" [ref=e11] [cursor=pointer]:
+            - /url: /chat
+        - generic [ref=e12] [cursor=pointer]:
+          - button [ref=e14]:
+            - img [ref=e15]
+          - button "Abrir menú de usuario" [ref=e18]:
+            - img "Avatar" [ref=e19]
+            - img [ref=e20]
+  - generic [ref=e22]:
+    - main [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - img "Banner curso" [ref=e26]
+          - heading "Arquitectura del Computador" [level=1] [ref=e29]
+        - generic [ref=e30]:
+          - complementary [ref=e31]:
+            - generic [ref=e32]:
+              - heading "Arquitectura del Computador" [level=2] [ref=e33]
+              - paragraph [ref=e34]: ARC
+            - navigation [ref=e35]:
+              - link "General" [ref=e36] [cursor=pointer]:
+                - /url: /courses/7/general
+                - img [ref=e37]
+                - text: General
+              - link "Tareas" [ref=e39] [cursor=pointer]:
+                - /url: /courses/7/tasks
+                - img [ref=e40]
+                - text: Tareas
+              - link "Foro" [ref=e42] [cursor=pointer]:
+                - /url: /courses/7/forums
+                - img [ref=e43]
+                - text: Foro
+              - link "Anuncios" [ref=e45] [cursor=pointer]:
+                - /url: /courses/7/announcements
+                - img [ref=e46]
+                - text: Anuncios
+              - link "Usuarios" [ref=e48] [cursor=pointer]:
+                - /url: /courses/7/students
+                - img [ref=e49]
+                - text: Usuarios
+              - link "Calificaciones" [active] [ref=e51] [cursor=pointer]:
+                - /url: /courses/7/marks
+                - img [ref=e52]
+                - text: Calificaciones
+          - main [ref=e54]:
+            - generic [ref=e59]:
+              - heading "Calificaciones finales" [level=2] [ref=e61]
+              - link "Descargar modelo CSV" [ref=e63] [cursor=pointer]:
+                - /url: /plantillas/calificaciones.csv
+              - table [ref=e65]:
+                - rowgroup [ref=e66]:
+                  - row "Nombre Calificación Observación Estado" [ref=e67]:
+                    - columnheader "Nombre" [ref=e68]
+                    - columnheader "Calificación" [ref=e69]
+                    - columnheader "Observación" [ref=e70]
+                    - columnheader "Estado" [ref=e71]
+                - rowgroup [ref=e72]:
+                  - row "Christian Meneses 10 Salvaste my black PUBLICADA" [ref=e73]:
+                    - cell "Christian Meneses" [ref=e74]
+                    - cell "10" [ref=e75]:
+                      - spinbutton [disabled] [ref=e76]: "10"
+                    - cell "Salvaste my black" [ref=e77]:
+                      - textbox [disabled] [ref=e78]: Salvaste my black
+                    - cell "PUBLICADA" [ref=e79]
+                  - row "Maicol Fabián Vaucher Fontes 4 Perdiste negri PUBLICADA" [ref=e80]:
+                    - cell "Maicol Fabián Vaucher Fontes" [ref=e81]
+                    - cell "4" [ref=e82]:
+                      - spinbutton [disabled] [ref=e83]: "4"
+                    - cell "Perdiste negri" [ref=e84]:
+                      - textbox [disabled] [ref=e85]: Perdiste negri
+                    - cell "PUBLICADA" [ref=e86]
+                  - row "Andres Fabricio Vargas Dias 8 Buen trabajo PUBLICADA" [ref=e87]:
+                    - cell "Andres Fabricio Vargas Dias" [ref=e88]
+                    - cell "8" [ref=e89]:
+                      - spinbutton [disabled] [ref=e90]: "8"
+                    - cell "Buen trabajo" [ref=e91]:
+                      - textbox [disabled] [ref=e92]: Buen trabajo
+                    - cell "PUBLICADA" [ref=e93]
+                  - row "Rodrigo Varela Tabakian 12 Tremendo PUBLICADA" [ref=e94]:
+                    - cell "Rodrigo Varela Tabakian" [ref=e95]
+                    - cell "12" [ref=e96]:
+                      - spinbutton [disabled] [ref=e97]: "12"
+                    - cell "Tremendo" [ref=e98]:
+                      - textbox [disabled] [ref=e99]: Tremendo
+                    - cell "PUBLICADA" [ref=e100]
+                  - row "Dayana Maria Varaldo Gonzalez 11 nice PUBLICADA" [ref=e101]:
+                    - cell "Dayana Maria Varaldo Gonzalez" [ref=e102]
+                    - cell "11" [ref=e103]:
+                      - spinbutton [disabled] [ref=e104]: "11"
+                    - cell "nice" [ref=e105]:
+                      - textbox [disabled] [ref=e106]: nice
+                    - cell "PUBLICADA" [ref=e107]
+                  - row "Willan Ariel Valor Bueno 12 Tremendo! PUBLICADA" [ref=e108]:
+                    - cell "Willan Ariel Valor Bueno" [ref=e109]
+                    - cell "12" [ref=e110]:
+                      - spinbutton [disabled] [ref=e111]: "12"
+                    - cell "Tremendo!" [ref=e112]:
+                      - textbox [disabled] [ref=e113]: Tremendo!
+                    - cell "PUBLICADA" [ref=e114]
+                  - row "Judith Maria Valdes Garandan 3 Muy mal desempeño PUBLICADA" [ref=e115]:
+                    - cell "Judith Maria Valdes Garandan" [ref=e116]
+                    - cell "3" [ref=e117]:
+                      - spinbutton [disabled] [ref=e118]: "3"
+                    - cell "Muy mal desempeño" [ref=e119]:
+                      - textbox [disabled] [ref=e120]: Muy mal desempeño
+                    - cell "PUBLICADA" [ref=e121]
+                  - row "Manuel Urdangarin Saratsola 10 mu bien PUBLICADA" [ref=e122]:
+                    - cell "Manuel Urdangarin Saratsola" [ref=e123]
+                    - cell "10" [ref=e124]:
+                      - spinbutton [disabled] [ref=e125]: "10"
+                    - cell "mu bien" [ref=e126]:
+                      - textbox [disabled] [ref=e127]: mu bien
+                    - cell "PUBLICADA" [ref=e128]
+                  - row "Acosta Y Lara Maufinet Juan Manuel 8 Muy bien, Posibilidad a mejorar PUBLICADA" [ref=e129]:
+                    - cell "Acosta Y Lara Maufinet Juan Manuel" [ref=e130]
+                    - cell "8" [ref=e131]:
+                      - spinbutton [disabled] [ref=e132]: "8"
+                    - cell "Muy bien, Posibilidad a mejorar" [ref=e133]:
+                      - textbox [disabled] [ref=e134]: Muy bien, Posibilidad a mejorar
+                    - cell "PUBLICADA" [ref=e135]
+    - contentinfo [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - link "Ombook" [ref=e140] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e141]
+            - paragraph [ref=e142]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e143]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e144]
+            - list [ref=e145]:
+              - listitem [ref=e146]:
+                - link "Cursos" [ref=e147] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e148]:
+                - link "Chat" [ref=e149] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e150]:
+            - heading "Soporte" [level=3] [ref=e151]
+            - list [ref=e152]:
+              - listitem [ref=e153]:
+                - link "Mi Perfil" [ref=e154] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e155]:
+                - link "Contacto" [ref=e156] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e157]:
+          - paragraph [ref=e158]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e159]:
+            - link "Privacidad" [ref=e160] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e161] [cursor=pointer]:
+              - /url: /terms
+```

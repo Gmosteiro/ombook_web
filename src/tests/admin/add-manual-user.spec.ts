@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../all_users/helpers';
 import { ADMIN_USER } from '../playwright.constants';
 
@@ -7,6 +7,7 @@ test('test', async ({ page }) => {
   await page.getByRole('link', { name: 'Usuarios', exact: true }).click();
   await page.getByRole('button', { name: 'Acciones' }).click();
   await page.getByRole('button', { name: 'Crear Usuario' }).click();
+  await expect(page.locator('h2')).toContainText('Alta de Usuarios');
   await page.getByRole('textbox').first().click();
   await page.getByRole('textbox').first().fill('Juan');
   await page.getByRole('textbox').first().press('Tab');

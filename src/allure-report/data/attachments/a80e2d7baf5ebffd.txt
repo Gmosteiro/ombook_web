@@ -1,0 +1,148 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Mis Cursos" [ref=e10] [cursor=pointer]:
+            - /url: /courses
+          - link "Chat" [ref=e11] [cursor=pointer]:
+            - /url: /chat
+        - generic [ref=e12] [cursor=pointer]:
+          - button [ref=e14]:
+            - img [ref=e15]
+          - button "Abrir menú de usuario" [ref=e18]:
+            - img "Avatar" [ref=e19]
+            - img [ref=e20]
+  - generic [ref=e22]:
+    - main [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - img "Banner curso" [ref=e26]
+          - heading "Redes de Computadoras" [level=1] [ref=e29]
+        - generic [ref=e30]:
+          - complementary [ref=e31]:
+            - generic [ref=e32]:
+              - heading "Redes de Computadoras" [level=2] [ref=e33]
+              - paragraph [ref=e34]: REDES
+            - navigation [ref=e35]:
+              - link "General" [ref=e36] [cursor=pointer]:
+                - /url: /courses/19/general
+                - img [ref=e37]
+                - text: General
+              - link "Tareas" [ref=e39] [cursor=pointer]:
+                - /url: /courses/19/tasks
+                - img [ref=e40]
+                - text: Tareas
+              - link "Foro" [ref=e42] [cursor=pointer]:
+                - /url: /courses/19/forums
+                - img [ref=e43]
+                - text: Foro
+              - link "Anuncios" [ref=e45] [cursor=pointer]:
+                - /url: /courses/19/announcements
+                - img [ref=e46]
+                - text: Anuncios
+              - link "Usuarios" [ref=e48] [cursor=pointer]:
+                - /url: /courses/19/students
+                - img [ref=e49]
+                - text: Usuarios
+              - link "Calificaciones" [active] [ref=e51] [cursor=pointer]:
+                - /url: /courses/19/marks
+                - img [ref=e52]
+                - text: Calificaciones
+          - main [ref=e54]:
+            - generic [ref=e59]:
+              - heading "Calificaciones finales" [level=2] [ref=e61]
+              - link "Descargar modelo CSV" [ref=e63] [cursor=pointer]:
+                - /url: /plantillas/calificaciones.csv
+              - table [ref=e65]:
+                - rowgroup [ref=e66]:
+                  - row "Nombre Calificación Observación Estado" [ref=e67]:
+                    - columnheader "Nombre" [ref=e68]
+                    - columnheader "Calificación" [ref=e69]
+                    - columnheader "Observación" [ref=e70]
+                    - columnheader "Estado" [ref=e71]
+                - rowgroup [ref=e72]:
+                  - row "Veronica Teresita Torres Estevez 5 Debe reforzar contenidos PUBLICADA" [ref=e73]:
+                    - cell "Veronica Teresita Torres Estevez" [ref=e74]
+                    - cell "5" [ref=e75]:
+                      - spinbutton [disabled] [ref=e76]: "5"
+                    - cell "Debe reforzar contenidos" [ref=e77]:
+                      - textbox [disabled] [ref=e78]: Debe reforzar contenidos
+                    - cell "PUBLICADA" [ref=e79]
+                  - row "Belen Estefania Villar Caraballo 3 Reprobado PUBLICADA" [ref=e80]:
+                    - cell "Belen Estefania Villar Caraballo" [ref=e81]
+                    - cell "3" [ref=e82]:
+                      - spinbutton [disabled] [ref=e83]: "3"
+                    - cell "Reprobado" [ref=e84]:
+                      - textbox [disabled] [ref=e85]: Reprobado
+                    - cell "PUBLICADA" [ref=e86]
+                  - row "Alaniz Lorenzo Julian Ernesto 11 Excelente (trabajo destacado) PUBLICADA" [ref=e87]:
+                    - cell "Alaniz Lorenzo Julian Ernesto" [ref=e88]
+                    - cell "11" [ref=e89]:
+                      - spinbutton [disabled] [ref=e90]: "11"
+                    - cell "Excelente (trabajo destacado)" [ref=e91]:
+                      - textbox [disabled] [ref=e92]: Excelente (trabajo destacado)
+                    - cell "PUBLICADA" [ref=e93]
+                  - row "Acosta Y Lara Maufinet Juan Manuel 8 Muy buen desempeño PUBLICADA" [ref=e94]:
+                    - cell "Acosta Y Lara Maufinet Juan Manuel" [ref=e95]
+                    - cell "8" [ref=e96]:
+                      - spinbutton [disabled] [ref=e97]: "8"
+                    - cell "Muy buen desempeño" [ref=e98]:
+                      - textbox [disabled] [ref=e99]: Muy buen desempeño
+                    - cell "PUBLICADA" [ref=e100]
+                  - row "Acosta Barboza Angelina Estephanie 10 Aprobado PUBLICADA" [ref=e101]:
+                    - cell "Acosta Barboza Angelina Estephanie" [ref=e102]
+                    - cell "10" [ref=e103]:
+                      - spinbutton [disabled] [ref=e104]: "10"
+                    - cell "Aprobado" [ref=e105]:
+                      - textbox [disabled] [ref=e106]: Aprobado
+                    - cell "PUBLICADA" [ref=e107]
+                  - row "Pelua Erik Nicolas 10 Excelente participación PUBLICADA" [ref=e108]:
+                    - cell "Pelua Erik Nicolas" [ref=e109]
+                    - cell "10" [ref=e110]:
+                      - spinbutton [disabled] [ref=e111]: "10"
+                    - cell "Excelente participación" [ref=e112]:
+                      - textbox [disabled] [ref=e113]: Excelente participación
+                    - cell "PUBLICADA" [ref=e114]
+    - contentinfo [ref=e115]:
+      - generic [ref=e116]:
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - link "Ombook" [ref=e119] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e120]
+            - paragraph [ref=e121]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e122]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e123]
+            - list [ref=e124]:
+              - listitem [ref=e125]:
+                - link "Cursos" [ref=e126] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e127]:
+                - link "Chat" [ref=e128] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e129]:
+            - heading "Soporte" [level=3] [ref=e130]
+            - list [ref=e131]:
+              - listitem [ref=e132]:
+                - link "Mi Perfil" [ref=e133] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e134]:
+                - link "Contacto" [ref=e135] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e136]:
+          - paragraph [ref=e137]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e138]:
+            - link "Privacidad" [ref=e139] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e140] [cursor=pointer]:
+              - /url: /terms
+```

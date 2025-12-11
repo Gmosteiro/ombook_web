@@ -9,7 +9,7 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Crear Usuario' }).click();
   await page.getByRole('button', { name: 'Masiva' }).click();
   await page.getByText('Sube un archivo').click();
-  await page.getByText('HomeUsuariosCursosAuditoriaMi PerfilCerrar SesiónAlta de UsuariosSelecciona la').setInputFiles('usuarios.csv');
+  await page.getByText('HomeUsuariosCursosAuditoriaMi PerfilCerrar SesiónAlta de UsuariosSelecciona la').setInputFiles('usuarios-alta.csv');
   await page.getByRole('button', { name: 'Importar Usuarios' }).click();
   await page.getByText('Éxito: Usuarios importados: 1').click();
 });

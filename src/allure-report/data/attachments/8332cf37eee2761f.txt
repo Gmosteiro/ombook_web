@@ -1,0 +1,112 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Usuarios" [ref=e10] [cursor=pointer]:
+            - /url: /users
+          - link "Cursos" [ref=e11] [cursor=pointer]:
+            - /url: /courses
+          - link "Auditoria" [ref=e12] [cursor=pointer]:
+            - /url: /audit
+        - generic [ref=e13] [cursor=pointer]:
+          - button [ref=e15]:
+            - img [ref=e16]
+          - button "Abrir menú de usuario" [ref=e19]:
+            - img "Avatar" [ref=e20]
+            - img [ref=e21]
+  - generic [ref=e23]:
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - heading "Gestión de Usuarios" [level=1] [ref=e27]
+          - button "Acciones" [ref=e29] [cursor=pointer]
+        - generic [ref=e30]:
+          - textbox "Buscar por nombre, email o cédula (mín. 3 caracteres)..." [ref=e31]: Juan
+          - combobox [active] [ref=e32]:
+            - option "Filtrar por rol" [selected]
+            - option "Administrador"
+            - option "Profesor"
+            - option "Estudiante"
+          - combobox [ref=e33]:
+            - option "Filtrar por estado" [selected]
+            - option "Activo"
+            - option "Inactivo"
+        - generic [ref=e34]: "Total de resultados: 3"
+        - table [ref=e36]:
+          - rowgroup [ref=e37]:
+            - row "Nombre Apellido Correo Electrónico Rol Acciones" [ref=e38]:
+              - columnheader "Nombre" [ref=e39] [cursor=pointer]
+              - columnheader "Apellido" [ref=e40]
+              - columnheader "Correo Electrónico" [ref=e41]
+              - columnheader "Rol" [ref=e42] [cursor=pointer]
+              - columnheader "Acciones" [ref=e43]
+          - rowgroup [ref=e44]:
+            - row "Juan Pedro juan@pedro.com ESTUDIANTE Ver" [ref=e45]:
+              - cell "Juan" [ref=e46]
+              - cell "Pedro" [ref=e47]
+              - cell "juan@pedro.com" [ref=e48]
+              - cell "ESTUDIANTE" [ref=e49]
+              - cell "Ver" [ref=e50]:
+                - button "Ver" [ref=e51] [cursor=pointer]
+            - row "Juan Pablo Sales juanpablo.sales@ombook.com PROFESOR Ver" [ref=e52]:
+              - cell "Juan Pablo" [ref=e53]
+              - cell "Sales" [ref=e54]
+              - cell "juanpablo.sales@ombook.com" [ref=e55]
+              - cell "PROFESOR" [ref=e56]
+              - cell "Ver" [ref=e57]:
+                - button "Ver" [ref=e58] [cursor=pointer]
+            - row "Acosta Y Lara Maufinet Juan Manuel acosta.ylaramaufinetjuanmanuel@ombook.com ESTUDIANTE Ver" [ref=e59]:
+              - cell "Acosta" [ref=e60]
+              - cell "Y Lara Maufinet Juan Manuel" [ref=e61]
+              - cell "acosta.ylaramaufinetjuanmanuel@ombook.com" [ref=e62]
+              - cell "ESTUDIANTE" [ref=e63]
+              - cell "Ver" [ref=e64]:
+                - button "Ver" [ref=e65] [cursor=pointer]
+        - generic [ref=e66]:
+          - paragraph [ref=e67]: Mostrando página 1 de 1
+          - generic [ref=e68]:
+            - button "Anterior" [disabled] [ref=e69]
+            - button "Siguiente" [disabled] [ref=e70]
+    - contentinfo [ref=e71]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - link "Ombook" [ref=e75] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e76]
+            - paragraph [ref=e77]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e78]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e79]
+            - list [ref=e80]:
+              - listitem [ref=e81]:
+                - link "Cursos" [ref=e82] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e83]:
+                - link "Chat" [ref=e84] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e85]:
+            - heading "Soporte" [level=3] [ref=e86]
+            - list [ref=e87]:
+              - listitem [ref=e88]:
+                - link "Mi Perfil" [ref=e89] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e90]:
+                - link "Contacto" [ref=e91] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e92]:
+          - paragraph [ref=e93]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e94]:
+            - link "Privacidad" [ref=e95] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e96] [cursor=pointer]:
+              - /url: /terms
+```

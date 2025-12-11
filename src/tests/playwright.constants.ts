@@ -9,7 +9,7 @@ export const ADMIN_USER = {
 
 export const PROFESOR_USER = {
     mail: "prof1@ombook.com",
-    password: "Test.1234"
+    password: "Test.12341"
 };
 
 export const ESTUDIANTE_USER = {

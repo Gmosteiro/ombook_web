@@ -1,0 +1,66 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+  - generic [ref=e8]:
+    - main [ref=e9]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - heading "Iniciar Sesión" [level=1] [ref=e13]
+          - paragraph [ref=e14]: Bienvenido de nuevo a tu cuenta.
+        - generic [ref=e15]:
+          - generic [ref=e16]: Correo electronico o contrasena incorrectos
+          - generic [ref=e17]:
+            - generic [ref=e18]: Correo electrónico
+            - textbox "Correo electrónico" [ref=e19]:
+              - /placeholder: tucorreo@ejemplo.com
+              - text: prof1@ombook.com
+          - generic [ref=e20]:
+            - generic [ref=e21]: Contraseña
+            - textbox "Contraseña" [ref=e22]:
+              - /placeholder: Ingresa tu contraseña
+              - text: Test.1234
+          - button "Iniciar Sesión" [active] [ref=e24] [cursor=pointer]
+          - link "¿Olvidaste tu contraseña?" [ref=e26] [cursor=pointer]:
+            - /url: /forgot-password
+    - contentinfo [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - link "Ombook" [ref=e31] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e32]
+            - paragraph [ref=e33]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e34]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e35]
+            - list [ref=e36]:
+              - listitem [ref=e37]:
+                - link "Cursos" [ref=e38] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e39]:
+                - link "Chat" [ref=e40] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e41]:
+            - heading "Soporte" [level=3] [ref=e42]
+            - list [ref=e43]:
+              - listitem [ref=e44]:
+                - link "Mi Perfil" [ref=e45] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e46]:
+                - link "Contacto" [ref=e47] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e48]:
+          - paragraph [ref=e49]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e50]:
+            - link "Privacidad" [ref=e51] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e52] [cursor=pointer]:
+              - /url: /terms
+```

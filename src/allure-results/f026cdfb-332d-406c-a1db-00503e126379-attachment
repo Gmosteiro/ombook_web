@@ -1,0 +1,75 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Usuarios" [ref=e10] [cursor=pointer]:
+            - /url: /users
+          - link "Cursos" [ref=e11] [cursor=pointer]:
+            - /url: /courses
+          - link "Auditoria" [ref=e12] [cursor=pointer]:
+            - /url: /audit
+        - generic [ref=e13] [cursor=pointer]:
+          - button [ref=e15]:
+            - img [ref=e16]
+          - button "Abrir menú de usuario" [ref=e19]:
+            - img "Avatar" [ref=e20]
+            - img [ref=e21]
+  - generic [ref=e23]:
+    - main [ref=e24]:
+      - generic [ref=e26]:
+        - heading "Alta de Cursos" [level=2] [ref=e27]
+        - paragraph [ref=e28]: Selecciona la modalidad y completa los datos para añadir nuevos cursos.
+        - generic [ref=e30]:
+          - button "Individual" [ref=e31]
+          - button "Masiva" [ref=e32]
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: ⛅
+            - generic [ref=e36]: Sube un archivoo arrástralo aquí
+            - generic [ref=e37]: CSV hasta 10MB
+            - link "Descargar plantilla CSV" [ref=e39] [cursor=pointer]:
+              - /url: /plantillas/cursos.csv
+          - button "Importar Cursos" [disabled] [ref=e41]
+    - contentinfo [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - link "Ombook" [ref=e46] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e47]
+            - paragraph [ref=e48]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e49]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e50]
+            - list [ref=e51]:
+              - listitem [ref=e52]:
+                - link "Cursos" [ref=e53] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e54]:
+                - link "Chat" [ref=e55] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e56]:
+            - heading "Soporte" [level=3] [ref=e57]
+            - list [ref=e58]:
+              - listitem [ref=e59]:
+                - link "Mi Perfil" [ref=e60] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e61]:
+                - link "Contacto" [ref=e62] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e65]:
+            - link "Privacidad" [ref=e66] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e67] [cursor=pointer]:
+              - /url: /terms
+```

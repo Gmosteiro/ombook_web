@@ -1,0 +1,139 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Mis Cursos" [ref=e10] [cursor=pointer]:
+            - /url: /courses
+          - link "Chat" [ref=e11] [cursor=pointer]:
+            - /url: /chat
+        - generic [ref=e12] [cursor=pointer]:
+          - button [ref=e14]:
+            - img [ref=e15]
+          - button "Abrir menú de usuario" [ref=e18]:
+            - img "Avatar" [ref=e19]
+            - img [ref=e20]
+  - generic [ref=e22]:
+    - main [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - img "Banner curso" [ref=e26]
+          - heading "Quimica" [level=1] [ref=e29]
+        - generic [ref=e30]:
+          - complementary [ref=e31]:
+            - generic [ref=e32]:
+              - heading "Quimica" [level=2] [ref=e33]
+              - paragraph [ref=e34]: QUIM-01
+            - navigation [ref=e35]:
+              - link "General" [ref=e36] [cursor=pointer]:
+                - /url: /courses/3/general
+                - img [ref=e37]
+                - text: General
+              - link "Tareas" [active] [ref=e39] [cursor=pointer]:
+                - /url: /courses/3/tasks
+                - img [ref=e40]
+                - text: Tareas
+              - link "Foro" [ref=e42] [cursor=pointer]:
+                - /url: /courses/3/forums
+                - img [ref=e43]
+                - text: Foro
+              - link "Anuncios" [ref=e45] [cursor=pointer]:
+                - /url: /courses/3/announcements
+                - img [ref=e46]
+                - text: Anuncios
+              - link "Usuarios" [ref=e48] [cursor=pointer]:
+                - /url: /courses/3/students
+                - img [ref=e49]
+                - text: Usuarios
+              - link "Calificaciones" [ref=e51] [cursor=pointer]:
+                - /url: /courses/3/marks
+                - img [ref=e52]
+                - text: Calificaciones
+          - main [ref=e54]:
+            - generic [ref=e58]:
+              - heading "Tareas" [level=1] [ref=e60]
+              - generic [ref=e61]:
+                - generic [ref=e64] [cursor=pointer]:
+                  - generic [ref=e65]:
+                    - generic [ref=e66]: Calculo 1
+                    - generic [ref=e67]: En Fecha
+                  - generic [ref=e68]: 12/5/2025, 9:53:34 PM
+                  - paragraph [ref=e69]: Practico de Calculo 1
+                - generic [ref=e72] [cursor=pointer]:
+                  - generic [ref=e73]:
+                    - generic [ref=e74]: Calculo 1
+                    - generic [ref=e75]: En Fecha
+                  - generic [ref=e76]: 12/5/2025, 8:42:53 PM
+                  - paragraph [ref=e77]: Practico de Calculo 1
+                - generic [ref=e80] [cursor=pointer]:
+                  - generic [ref=e81]:
+                    - generic [ref=e82]: Calculo 1
+                    - generic [ref=e83]: En Fecha
+                  - generic [ref=e84]: 12/5/2025, 8:29:23 PM
+                  - paragraph [ref=e85]: Practico de Calculo 1
+                - generic [ref=e88] [cursor=pointer]:
+                  - generic [ref=e89]:
+                    - generic [ref=e90]: Calculo 1
+                    - generic [ref=e91]: En Fecha
+                  - generic [ref=e92]: 12/5/2025, 8:13:52 PM
+                  - paragraph [ref=e93]: Practico de Calculo 1
+                - generic [ref=e96] [cursor=pointer]:
+                  - generic [ref=e97]:
+                    - generic [ref=e98]: asdasdasd
+                    - generic [ref=e99]: Vencida
+                  - generic [ref=e100]: 11/25/2025, 3:59:24 PM
+                  - paragraph [ref=e101]: asdasdasdas
+                - generic [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105]:
+                    - generic [ref=e106]: asdasd
+                    - generic [ref=e107]: Vencida
+                  - generic [ref=e108]: 11/25/2025, 1:52:54 PM
+                  - paragraph [ref=e109]: asdasdasd
+                - generic [ref=e112] [cursor=pointer]:
+                  - generic [ref=e113]:
+                    - generic [ref=e114]: Mi primer protón
+                    - generic [ref=e115]: Vencida
+                  - generic [ref=e116]: 11/19/2025, 11:33:32 PM
+                  - paragraph [ref=e117]: AAA
+    - contentinfo [ref=e118]:
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - link "Ombook" [ref=e122] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e123]
+            - paragraph [ref=e124]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e125]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e126]
+            - list [ref=e127]:
+              - listitem [ref=e128]:
+                - link "Cursos" [ref=e129] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e130]:
+                - link "Chat" [ref=e131] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e132]:
+            - heading "Soporte" [level=3] [ref=e133]
+            - list [ref=e134]:
+              - listitem [ref=e135]:
+                - link "Mi Perfil" [ref=e136] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e137]:
+                - link "Contacto" [ref=e138] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e139]:
+          - paragraph [ref=e140]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e141]:
+            - link "Privacidad" [ref=e142] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e143] [cursor=pointer]:
+              - /url: /terms
+```

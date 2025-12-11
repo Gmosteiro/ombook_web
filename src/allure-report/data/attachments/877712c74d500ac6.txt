@@ -1,0 +1,112 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Mis Cursos" [active] [ref=e10] [cursor=pointer]:
+            - /url: /courses
+          - link "Chat" [ref=e11] [cursor=pointer]:
+            - /url: /chat
+        - generic [ref=e12] [cursor=pointer]:
+          - button [ref=e14]:
+            - img [ref=e15]
+          - button "Abrir menú de usuario" [ref=e18]:
+            - img "Avatar" [ref=e19]
+            - img [ref=e20]
+  - generic [ref=e22]:
+    - main [ref=e23]:
+      - generic [ref=e24]:
+        - heading "Cursos" [level=1] [ref=e26]
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - textbox "Buscar por nombre o código (mín. 3 caracteres)..." [ref=e34]
+          - combobox [ref=e35]:
+            - option "Filtrar por estado" [selected]
+            - option "Activo"
+            - option "Inactivo"
+            - option "Eliminado"
+          - combobox [ref=e36]:
+            - option "Más nuevos primero" [selected]
+            - option "Más antiguos primero"
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img "Matemática" [ref=e39]
+            - generic [ref=e40]:
+              - generic [ref=e41]:
+                - heading "Matemática" [level=3] [ref=e42]
+                - generic [ref=e43]: ACTIVO
+              - paragraph [ref=e44]: "Código: MAT"
+              - paragraph [ref=e45]: "Período: 2025/1"
+              - paragraph [ref=e46]: "Profesores: Profesor"
+              - paragraph [ref=e47]: "Descripcion: Curso de matemática"
+              - button "Ver Detalles" [ref=e49] [cursor=pointer]
+          - generic [ref=e50]:
+            - img "Quimica" [ref=e51]
+            - generic [ref=e52]:
+              - generic [ref=e53]:
+                - heading "Quimica" [level=3] [ref=e54]
+                - generic [ref=e55]: ACTIVO
+              - paragraph [ref=e56]: "Código: QUIM-01"
+              - paragraph [ref=e57]: "Período: 2025/1"
+              - paragraph [ref=e58]: "Profesores: Ana"
+              - paragraph [ref=e59]: "Descripcion: Quimica"
+              - button "Ver Detalles" [ref=e61] [cursor=pointer]
+          - generic [ref=e62]:
+            - img "Fisica" [ref=e63]
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - heading "Fisica" [level=3] [ref=e66]
+                - generic [ref=e67]: ACTIVO
+              - paragraph [ref=e68]: "Código: FIS-01"
+              - paragraph [ref=e69]: "Período: 2025/1"
+              - paragraph [ref=e70]: "Profesores: Profesor"
+              - paragraph [ref=e71]: "Descripcion: La materia y esas cosas"
+              - button "Ver Detalles" [ref=e73] [cursor=pointer]
+        - generic [ref=e74]:
+          - paragraph [ref=e75]: Mostrando página 1 de 1
+          - generic [ref=e76]:
+            - button "Anterior" [disabled] [ref=e77]
+            - button "Siguiente" [disabled] [ref=e78]
+    - contentinfo [ref=e79]:
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - link "Ombook" [ref=e83] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e84]
+            - paragraph [ref=e85]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e86]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e87]
+            - list [ref=e88]:
+              - listitem [ref=e89]:
+                - link "Cursos" [ref=e90] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e91]:
+                - link "Chat" [ref=e92] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e93]:
+            - heading "Soporte" [level=3] [ref=e94]
+            - list [ref=e95]:
+              - listitem [ref=e96]:
+                - link "Mi Perfil" [ref=e97] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e98]:
+                - link "Contacto" [ref=e99] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e100]:
+          - paragraph [ref=e101]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e102]:
+            - link "Privacidad" [ref=e103] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e104] [cursor=pointer]:
+              - /url: /terms
+```

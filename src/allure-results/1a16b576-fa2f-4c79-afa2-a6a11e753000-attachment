@@ -1,0 +1,79 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Ombook" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Ombook" [ref=e5]
+      - link "Home" [ref=e7] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Mis Cursos" [ref=e10] [cursor=pointer]:
+            - /url: /courses
+          - link "Chat" [ref=e11] [cursor=pointer]:
+            - /url: /chat
+        - generic [ref=e12] [cursor=pointer]:
+          - button [ref=e14]:
+            - img [ref=e15]
+          - button "Abrir menú de usuario" [ref=e18]:
+            - img "Avatar" [ref=e19]
+            - img [ref=e20]
+  - generic [ref=e22]:
+    - main [ref=e23]:
+      - generic [ref=e24]:
+        - heading "Mi Perfil" [level=1] [ref=e26]
+        - generic [ref=e27]:
+          - img "Avatar" [ref=e28]
+          - button "Choose File" [ref=e31]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e34]: Nombre
+            - textbox [ref=e35]: Gaston
+          - generic [ref=e36]:
+            - generic [ref=e37]: Apellido
+            - textbox [ref=e38]: Mosteiro
+          - generic [ref=e39]:
+            - generic [ref=e40]: Fecha de nacimiento
+            - textbox [ref=e41]
+          - generic [ref=e42]:
+            - button "Guardar" [ref=e43] [cursor=pointer]
+            - button "Cancelar" [ref=e44] [cursor=pointer]
+            - link "Cambiar Contraseña" [ref=e45] [cursor=pointer]:
+              - /url: /profile/change-password
+    - contentinfo [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]:
+            - link "Ombook" [ref=e50] [cursor=pointer]:
+              - /url: /
+              - img "Ombook" [ref=e51]
+            - paragraph [ref=e52]: Plataforma educativa integral para la gestión de cursos, estudiantes y contenido académico.
+          - generic [ref=e53]:
+            - heading "Enlaces Rápidos" [level=3] [ref=e54]
+            - list [ref=e55]:
+              - listitem [ref=e56]:
+                - link "Cursos" [ref=e57] [cursor=pointer]:
+                  - /url: /courses
+              - listitem [ref=e58]:
+                - link "Chat" [ref=e59] [cursor=pointer]:
+                  - /url: /chat
+          - generic [ref=e60]:
+            - heading "Soporte" [level=3] [ref=e61]
+            - list [ref=e62]:
+              - listitem [ref=e63]:
+                - link "Mi Perfil" [ref=e64] [cursor=pointer]:
+                  - /url: /profile
+              - listitem [ref=e65]:
+                - link "Contacto" [ref=e66] [cursor=pointer]:
+                  - /url: mailto:soporte@ombook.com
+        - generic [ref=e67]:
+          - paragraph [ref=e68]: © 2025 Ombook. Todos los derechos reservados.
+          - generic [ref=e69]:
+            - link "Privacidad" [ref=e70] [cursor=pointer]:
+              - /url: /privacy
+            - link "Términos y Condiciones" [ref=e71] [cursor=pointer]:
+              - /url: /terms
+```
