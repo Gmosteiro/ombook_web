@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { login } from '../all_users/helpers';
 import { PROFESOR_USER } from '../playwright.constants';
 
