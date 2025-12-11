@@ -1,28 +1,14 @@
 import { apiFetch } from "../features/auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
+import type { components } from "../../types/openapi";
 
-// Tipos
-export interface ResumenResponse {
-    totalUsuarios: number;
-    totalCursos: number;
-    totalMatriculas: number;
-    totalTareas: number;
-    totalEntregas: number;
-    totalAuditorias: number;
-}
-
-export interface TopAccionResponse {
-    action: string;
-    cantidad: number;
-}
-
-export interface ActividadDiaResponse {
-    dia: string;
-    cantidad: number;
-}
+// Tipos desde OpenAPI
+export type DashboardResponse = components["schemas"]["DashboardResponse"];
+export type TopAccionResponse = components["schemas"]["TopAccionResponse"];
+export type PuntoDiaResponse = components["schemas"]["PuntoDiaResponse"];
 
 // Obtener resumen del dashboard
-export async function getResumenDashboard(request: Request): Promise<ResumenResponse> {
+export async function getResumenDashboard(request: Request): Promise<DashboardResponse> {
     const jwtToken = await getValidJWTToken(request);
     const response = await apiFetch("/admin/dashboard/resumen", {
         method: "GET",
@@ -30,7 +16,7 @@ export async function getResumenDashboard(request: Request): Promise<ResumenResp
         jwtToken,
     });
     if (!response.ok) throw new Error("No se pudo obtener el resumen del dashboard");
-    return await response.json() as ResumenResponse;
+    return await response.json() as DashboardResponse;
 }
 
 // Obtener top acciones más ejecutadas
@@ -47,7 +33,7 @@ export async function getTopAcciones(request: Request): Promise<TopAccionRespons
 }
 
 // Obtener actividad de los últimos días
-export async function getActividadUltimosDias(request: Request): Promise<ActividadDiaResponse[]> {
+export async function getActividadUltimosDias(request: Request): Promise<PuntoDiaResponse[]> {
     const jwtToken = await getValidJWTToken(request);
     const response = await apiFetch("/admin/dashboard/actividad-ultimos-dias", {
         method: "GET",
@@ -56,5 +42,5 @@ export async function getActividadUltimosDias(request: Request): Promise<Activid
     });
     if (!response.ok) throw new Error("No se pudo obtener la actividad de los últimos días");
     const data = await response.json();
-    return Array.isArray(data) ? data as ActividadDiaResponse[] : [];
+    return Array.isArray(data) ? data as PuntoDiaResponse[] : [];
 }

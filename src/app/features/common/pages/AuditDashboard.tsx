@@ -35,18 +35,19 @@ export async function loader({ request }: { request: Request }) {
     // Fetch resumen
     const resumen = await getResumenDashboard(request);
 
+
     // Fetch top acciones
     const topAccionesRaw = await getTopAcciones(request);
     const topActions: TopAction[] = topAccionesRaw.map((item) => ({
-        label: item.action?.replace(/_/g, " "),
-        value: item.cantidad
+        label: item.action?.replace(/_/g, " ") ?? "",
+        value: item.cantidad ?? 0
     }));
 
     // Fetch actividad últimos días
     const actividadDiasRaw = await getActividadUltimosDias(request);
 
-    const weeklyActivity: number[] = actividadDiasRaw.map((item) => item.cantidad);
-    const weeklyLabels: string[] = actividadDiasRaw.map((item) => item.dia);
+    const weeklyActivity: number[] = actividadDiasRaw.map((item) => item.cantidad ?? 0);
+    const weeklyLabels: string[] = actividadDiasRaw.map((item) => item.dia ?? "");
     const weeklyTotal = weeklyActivity.reduce((acc, cur) => acc + cur, 0);
 
     // Donut chart data
@@ -63,7 +64,7 @@ export async function loader({ request }: { request: Request }) {
         usuariosTotales: resumen.totalUsuarios ?? 0,
         cursosTotales: resumen.totalCursos ?? 0,
         accionesHoy: resumen.totalAuditorias ?? 0,
-        loginsHoy: topActions.find(a => a.label === "LOGIN")?.value ?? 0,
+        loginsHoy: resumen.loginsHoy ?? 0,
         donutData,
         topActions,
         weeklyActivity,

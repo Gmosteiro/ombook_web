@@ -110,7 +110,7 @@ export default function Index() {
             {/* Hero Section */}
             <div className="mb-8">
                 <h1 className="ombook-heading ombook-heading-xl ombook-text-green mb-2">
-                    ¡Bienvenido a Ombook {nombre}! 👋
+                    ¡Bienvenido a Ombook, {nombre}! 👋
                 </h1>
             </div>
 
