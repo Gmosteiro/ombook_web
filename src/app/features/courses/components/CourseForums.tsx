@@ -180,7 +180,7 @@ export default function CourseForums() {
   };
   const publicaciones = loaderData?.publicaciones || [];
   const isProfesor = loaderData?.isProfesor || false;
-  const currentUserId = loaderData?.currentUserId || null;
+  const currentUserId = loaderData?.currentUserId ? Number(loaderData.currentUserId) : null;
   const submit = useSubmit();
   const revalidator = useRevalidator();
 
@@ -192,8 +192,10 @@ export default function CourseForums() {
   const [editingThreadId, setEditingThreadId] = useState<number | null>(null);
   const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
 
-  const canEditThread = (pub: Publicacion) => isProfesor || currentUserId === pub.autorId;
-  const canEditReply = (msg: Mensaje) => isProfesor || currentUserId === msg.autorId;
+  const canEditThread = (pub: Publicacion) => currentUserId === pub.autorId;
+  const canDeleteThread = (pub: Publicacion) => isProfesor || currentUserId === pub.autorId;
+  const canEditReply = (msg: Mensaje) => currentUserId === msg.autorId;
+  const canDeleteReply = (msg: Mensaje) => isProfesor || currentUserId === msg.autorId;
 
   const handleCreateThread = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -405,20 +407,24 @@ export default function CourseForums() {
                     </div>
                   </div>
                   <p className="text-sm text-gray-600 mt-1 line-clamp-2">{pub.contenido}</p>
-                  {canEditThread(pub) && (
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => setEditingThreadId(editingThreadId === pub.id ? null : pub.id)}
-                        className="ombook-link text-sm font-medium"
-                      >
-                        {editingThreadId === pub.id ? 'Cancelar' : 'Editar'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteThread(pub.id)}
-                        className="text-sm font-medium ombook-text-brown hover:underline"
-                      >
-                        Eliminar
-                      </button>
+                  {(canEditThread(pub) || canDeleteThread(pub)) && (
+                    <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                      {canEditThread(pub) && (
+                        <button
+                          onClick={() => setEditingThreadId(editingThreadId === pub.id ? null : pub.id)}
+                          className="ombook-link text-sm font-medium"
+                        >
+                          {editingThreadId === pub.id ? 'Cancelar' : 'Editar'}
+                        </button>
+                      )}
+                      {canDeleteThread(pub) && (
+                        <button
+                          onClick={() => handleDeleteThread(pub.id)}
+                          className="text-sm font-medium ombook-text-brown hover:underline"
+                        >
+                          Eliminar
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -513,20 +519,24 @@ export default function CourseForums() {
                               </div>
                               <p className="text-sm text-gray-700 mt-2 whitespace-pre-line">{msg.contenido}</p>
                             </div>
-                            {canEditReply(msg) && (
+                            {(canEditReply(msg) || canDeleteReply(msg)) && (
                               <div className="flex gap-1 ml-2">
-                                <button
-                                  onClick={() => setEditingReplyId(editingReplyId === msg.id ? null : msg.id)}
-                                  className="ombook-link text-xs font-medium"
-                                >
-                                  Editar
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteReply(pub.id, msg.id)}
-                                  className="text-xs font-medium ombook-text-brown hover:underline"
-                                >
-                                  Eliminar
-                                </button>
+                                {canEditReply(msg) && (
+                                  <button
+                                    onClick={() => setEditingReplyId(editingReplyId === msg.id ? null : msg.id)}
+                                    className="ombook-link text-xs font-medium"
+                                  >
+                                    Editar
+                                  </button>
+                                )}
+                                {canDeleteReply(msg) && (
+                                  <button
+                                    onClick={() => handleDeleteReply(pub.id, msg.id)}
+                                    className="text-xs font-medium ombook-text-brown hover:underline"
+                                  >
+                                    Eliminar
+                                  </button>
+                                )}
                               </div>
                             )}
                           </div>
