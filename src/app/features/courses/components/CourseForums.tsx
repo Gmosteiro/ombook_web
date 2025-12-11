@@ -499,7 +499,7 @@ export default function CourseForums() {
                                   }
                                 }}
                                 disabled={isSubmitting}
-                                className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
+                                className="ombook-btn ombook-btn-primary text-xs"
                               >
                                 Guardar
                               </button>
