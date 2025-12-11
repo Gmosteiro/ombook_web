@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { TaskForm } from "./TaskForm";
 import { TaskResourceList } from "./TaskResourceList";
 import { TaskSubmissionList } from "./TaskSubmissionList";
@@ -71,15 +70,12 @@ export function TaskItem({
     onShowUploadRecurso,
     onShowUploadEntrega,
 }: TaskItemProps) {
-
-
-
-    const [editFormData] = useState({
+    const editFormData = {
         titulo: task.titulo,
         descripcion: task.descripcion || '',
         fechaInicio: formatDateForInput(task.fechaInicio),
         fechaFin: formatDateForInput(task.fechaFin)
-    });
+    };
 
     return (
         <div

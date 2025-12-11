@@ -48,7 +48,12 @@ export function TaskForm({ mode, tareaId, defaultValues, onCancel }: TaskFormPro
     };
 
     return (
-        <fetcher.Form method="post" className="mb-4 bg-white p-4 rounded-md shadow" onSubmit={handleSubmit}>
+        <fetcher.Form
+            key={`${mode}-${tareaId}-${defaultValues?.titulo}-${defaultValues?.fechaInicio}`}
+            method="post"
+            className="mb-4 bg-white p-4 rounded-md shadow"
+            onSubmit={handleSubmit}
+        >
             <input type="hidden" name="_action" value={isCreate ? 'createTask' : 'updateTask'} />
             {!isCreate && tareaId && <input type="hidden" name="tareaId" value={tareaId} />}
 
