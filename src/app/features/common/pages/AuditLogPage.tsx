@@ -4,6 +4,7 @@ import { UserRole } from "~/features/auth/types";
 import { apiFetch } from "~/features/auth/utils/methods";
 import { getValidJWTToken } from "~/services/session.server";
 import { useState, useEffect } from "react";
+import { ACTIONS, RESULTADOS, getTodayDate, headers } from "~/features/common/utils/Auditoria";
 
 // Tipos
 type AuditoriaResponse = {
@@ -62,18 +63,17 @@ export async function loader({ request }: { request: Request }) {
         if (fechaHasta) queryParams.set("fechaHasta", fechaHasta);
 
         const res = await apiFetch(`/auditoria?${queryParams.toString()}`, { method: "GET", jwtToken, secure: true });
-        if (!res.ok) throw new Error("API error");
+
+        if (!res.ok) {
+            throw new Error("API error");
+        }
+
         const data = await res.json();
         return new Response(
             JSON.stringify({ data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1 }),
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Cache-Control": "no-store, no-cache, must-revalidate",
-                    "Pragma": "no-cache",
-                },
-            }
+            { headers: headers }
         );
+
     } catch (e) {
         return new Response(
             JSON.stringify({
@@ -82,51 +82,15 @@ export async function loader({ request }: { request: Request }) {
                 page: 1,
                 error: String(e)
             }),
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Cache-Control": "no-store, no-cache, must-revalidate",
-                    "Pragma": "no-cache",
-                },
-            }
+            { headers: headers }
         );
     }
 }
-
 
 export const meta = () => {
     return [
         { title: "Log de Auditoría - Ombook" },
     ]
-}
-
-// Acciones y resultados posibles
-const ACTIONS = [
-    "ANUNCIO_CREAR", "ANUNCIO_EDITAR", "ANUNCIO_ELIMINAR",
-    "PAGINA_CREAR", "PAGINA_EDITAR", "PAGINA_ELIMINAR",
-    "TAREA_CREAR", "TAREA_EDITAR", "TAREA_ELIMINAR", "TAREA_ENTREGA_SUBIR", "TAREA_ENTREGA_ELIMINAR",
-    "ENTREGA_SUBIR", "ENTREGA_CORREGIR",
-    "MATRICULA_INDIVIDUAL", "DESMATRICULA_INDIVIDUAL", "MATRICULA_MASIVA", "DESMATRICULA_MASIVA", "MATRICULA_RECHAZADA",
-    "CALIFICACION_PUBLICAR_MASIVA", "CALIFICACION_GUARDAR", "CALIFICACION_CARGA_MASIVA",
-    "LOGIN", "LOGOUT", "TOKEN_REFRESH",
-    "PASSWORD_CAMBIAR", "PASSWORD_RECUPERAR", "CUENTA_DESBLOQUEAR", "PASSWORD_RECUPERAR_REQUEST",
-    "USUARIO_CREAR", "USUARIO_EDITAR", "USUARIO_CARGA_MASIVA",
-    "EMAIL_CAMBIO_INICIAR", "EMAIL_CAMBIO_CONFIRMAR",
-    "AVATAR_ACTUALIZAR", "AVATAR_RESETEAR",
-    "CURSO_CREAR", "CURSO_EDITAR", "CURSO_ELIMINAR", "CURSO_CARGA_MASIVA", "CURSO_ELIMINACION_MASIVA",
-    "CURSO_CAMBIAR_ESTADO", "CURSO_IMAGEN_ACTUALIZAR", "CURSO_IMAGEN_RESETEAR",
-    "PUBLICACION_CREAR", "PUBLICACION_EDITAR", "PUBLICACION_ELIMINAR",
-    "MENSAJE_FORO_PUBLICAR", "MENSAJE_FORO_EDITAR", "MENSAJE_FORO_ELIMINAR", "MENSAJE_PRIVADO_ENVIAR",
-    "RECURSO_SUBIR", "RECURSO_ELIMINAR"
-];
-
-const RESULTADOS = [
-    "EXITO", "ERROR", "EXITO_PARCIAL"
-];
-
-// Componente principal
-function getToday() {
-    return new Date().toISOString().slice(0, 10);
 }
 
 export default function AuditLogPage() {
@@ -140,19 +104,22 @@ export default function AuditLogPage() {
     const [userInput, setUserInput] = useState(filters.userId || "");
     const [action, setAction] = useState(filters.action || "");
     const [resultado, setResultado] = useState(filters.resultado || "");
-    const [fechaDesde, setFechaDesde] = useState(filters.fechaDesde || getToday());
-    const [fechaHasta, setFechaHasta] = useState(filters.fechaHasta || getToday());
+    const [fechaDesde, setFechaDesde] = useState(filters.fechaDesde || getTodayDate());
+    const [fechaHasta, setFechaHasta] = useState(filters.fechaHasta || getTodayDate());
     const [sort, setSort] = useState<string[]>(() => {
-        const params = new URLSearchParams(window.location.search);
-        return params.getAll("sort");
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.getAll("sort");
+        }
+        return [];
     });
 
     useEffect(() => {
         setUserInput(filters.userId || "");
         setAction(filters.action || "");
         setResultado(filters.resultado || "");
-        setFechaDesde(filters.fechaDesde || getToday());
-        setFechaHasta(filters.fechaHasta || getToday());
+        setFechaDesde(filters.fechaDesde || getTodayDate());
+        setFechaHasta(filters.fechaHasta || getTodayDate());
     }, [filters.userId, filters.action, filters.resultado, filters.fechaDesde, filters.fechaHasta]);
 
     // Actualiza el sort cuando cambian los searchParams
@@ -244,7 +211,7 @@ export default function AuditLogPage() {
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-8 flex flex-wrap gap-3 items-center">
                 <input
                     type="text"
-                    placeholder="Buscar por CI"
+                    placeholder="Buscar por email"
                     className="flex-1 border border-gray-200 rounded-lg pl-4 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 transition text-gray-700 bg-gray-50 min-w-[220px]"
                     value={userInput}
                     onChange={e => handleUserSearch(e.target.value)}
@@ -326,7 +293,7 @@ export default function AuditLogPage() {
                                 <td className="px-4 py-2">{row.descripcion}</td>
                                 <td className="px-4 py-2">{row.entidad}</td>
                                 <td className="px-4 py-2">{row.ip}</td>
-                                <td className="px-4 py-2">{row.canal}</td>
+                                <td className="px-4 py-2">{row.canal?.toUpperCase()}</td>
                                 <td className="px-4 py-2">{row.fecha ? new Date(row.fecha).toLocaleString() : ""}</td>
                             </tr>
                         )) : (

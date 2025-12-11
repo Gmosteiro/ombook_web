@@ -91,7 +91,9 @@ async function refreshAccessToken(refreshToken: string, currentToken: string): P
         });
 
         if (!response.ok) {
-            console.error("Failed to refresh token:", response.status);
+            console.error("Failed to refresh token: status: " + response.status, "Body sent: " + JSON.stringify({
+                refreshToken: refreshToken
+            }),);
             console.error("Response text:", await response.text());
             return null;
         }
