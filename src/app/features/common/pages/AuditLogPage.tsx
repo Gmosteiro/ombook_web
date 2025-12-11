@@ -22,7 +22,11 @@ export async function loader({ request }: { request: Request }) {
         const params = url.searchParams;
         const page = params.get("page") ?? "0";
         const size = params.get("size") ?? "20";
-        const sort = params.getAll("sort");
+        let sort = params.getAll("sort");
+        // Si no hay sort definido, aplicar sort descendente por fecha por defecto
+        if (sort.length === 0) {
+            sort = ["fecha,desc"];
+        }
         const action = params.get("action") ?? "";
         const resultado = params.get("resultado") ?? "";
         const userId = params.get("userId") ?? "";
@@ -41,7 +45,7 @@ export async function loader({ request }: { request: Request }) {
         });
 
         return new Response(
-            JSON.stringify({ data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1 }),
+            JSON.stringify({ data, filters: { action, resultado, userId, fechaDesde, fechaHasta }, page: Number(page) + 1, sort }),
             { headers: headers }
         );
 
@@ -51,6 +55,7 @@ export async function loader({ request }: { request: Request }) {
                 data: { content: [], totalPages: 1 },
                 filters: { action: "", resultado: "", userId: "", fechaDesde: "", fechaHasta: "" },
                 page: 1,
+                sort: [],
                 error: String(e)
             }),
             { headers: headers }
@@ -65,10 +70,11 @@ export const meta = () => {
 }
 
 export default function AuditLogPage() {
-    const { data, filters, page, error } = useLoaderData() as {
+    const { data, filters, page, error, sort: initialSort } = useLoaderData() as {
         data: PaginatorResponseAuditoriaResponse;
         filters: AuditLogFilters;
         page: number;
+        sort: string[];
         error?: string;
     };
     const [searchParams, setSearchParams] = useSearchParams();
@@ -77,13 +83,7 @@ export default function AuditLogPage() {
     const [resultado, setResultado] = useState(filters.resultado || "");
     const [fechaDesde, setFechaDesde] = useState(filters.fechaDesde || getTodayDate());
     const [fechaHasta, setFechaHasta] = useState(filters.fechaHasta || getTodayDate());
-    const [sort, setSort] = useState<string[]>(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            return params.getAll("sort");
-        }
-        return [];
-    });
+    const [sort, setSort] = useState<string[]>(initialSort);
 
     useEffect(() => {
         setUserInput(filters.userId || "");
