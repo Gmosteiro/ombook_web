@@ -138,7 +138,7 @@ export async function getRecursosTarea(request: Request, cursoId: number, tareaI
   try {
     const jwtToken = await getValidJWTToken(request);
 
-    const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos`, {
+    const response = await apiFetch(`/cursos/${cursoId}/recursos?ownerRecurso=TAREA&ownerId=${tareaId}`, {
       method: "GET",
       secure: true,
       jwtToken,
@@ -183,10 +183,12 @@ export async function uploadRecursoTarea(
 ): Promise<Recurso> {
   const jwtToken = await getValidJWTToken(request);
   const formData = new FormData();
+  formData.append('ownerRecurso', 'TAREA');
+  formData.append('ownerId', tareaId.toString());
   formData.append('nombre', nombre);
   formData.append('archivo', file);
 
-  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos`, {
+  const response = await apiFetch(`/cursos/${cursoId}/recursos`, {
     method: "POST",
     secure: true,
     jwtToken,
