@@ -209,11 +209,11 @@ export async function uploadRecursoTarea(
 export async function deleteRecursoTarea(
   request: Request,
   cursoId: number,
-  tareaId: number,
   recursoId: number
 ): Promise<boolean> {
+
   const jwtToken = await getValidJWTToken(request);
-  const response = await apiFetch(`/cursos/${cursoId}/tareas/${tareaId}/recursos/${recursoId}`, {
+  const response = await apiFetch(`/cursos/${cursoId}/recursos/${recursoId}`, {
     method: "DELETE",
     secure: true,
     jwtToken,

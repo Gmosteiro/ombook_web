@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLoaderData, useOutletContext, Outlet, useLocation, redirect, type LoaderFunctionArgs, type ActionFunctionArgs } from "react-router";
+import { useState, useEffect } from "react";
+import { useLoaderData, useOutletContext, Outlet, useLocation, redirect, useFetcher, type LoaderFunctionArgs, type ActionFunctionArgs } from "react-router";
 import { getUserRole, getCurrentUserId } from "~/services/session.server";
 import { UserRole } from "~/features/auth/types";
 import { UploadResourceDialog } from "./UploadResourceDialog";
@@ -150,10 +150,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
       }
 
       case "deleteRecurso": {
-        const tareaId = parseInt(formData.get("tareaId") as string);
         const recursoId = parseInt(formData.get("recursoId") as string);
 
-        await deleteRecursoTarea(request, courseId, tareaId, recursoId);
+        await deleteRecursoTarea(request, courseId, recursoId);
         return redirect(`/courses/${courseId}/tasks`);
       }
 
@@ -168,17 +167,27 @@ export async function action({ request, params }: ActionFunctionArgs) {
       case "downloadRecurso": {
         const recursoId = parseInt(formData.get("recursoId") as string);
 
-        const url = await getRecursoUrl(request, courseId, recursoId);
-        console.log("CourseTask.tsx - downloadRecurso - returning URL:", url);
-        return { url };
+        try {
+          const url = await getRecursoUrl(request, courseId, recursoId);
+          console.log("CourseTask.tsx - downloadRecurso - returning URL:", url);
+          return Response.json({ url });
+        } catch (error) {
+          console.error("Error getting recurso URL:", error);
+          return Response.json({ error: error instanceof Error ? error.message : "Error al obtener URL" }, { status: 500 });
+        }
       }
 
       case "downloadEntrega": {
         const tareaId = parseInt(formData.get("tareaId") as string);
         const estudianteId = parseInt(formData.get("estudianteId") as string);
 
-        const url = await getEntregaUrl(request, courseId, tareaId, estudianteId);
-        return { url };
+        try {
+          const url = await getEntregaUrl(request, courseId, tareaId, estudianteId);
+          return Response.json({ url });
+        } catch (error) {
+          console.error("Error getting entrega URL:", error);
+          return Response.json({ error: error instanceof Error ? error.message : "Error al obtener URL" }, { status: 500 });
+        }
       }
 
       default:
@@ -196,6 +205,7 @@ export default function CourseTasks() {
   const location = useLocation();
 
   const { isProfesor, currentUserId, tasks, taskDetails } = useLoaderData<LoaderData>();
+  const fetcher = useFetcher();
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -211,47 +221,38 @@ export default function CourseTasks() {
     setExpandedId(expandedId === taskId ? null : taskId);
   };
 
-  const handleDownloadRecurso = async (recurso: Recurso) => {
+  // Escuchar cuando el fetcher devuelve la URL de descarga
+  useEffect(() => {
+    if (fetcher.data && fetcher.data.url) {
+      window.open(fetcher.data.url, '_blank');
+    }
+  }, [fetcher.data]);
+
+  const handleDownloadRecurso = (recurso: Recurso) => {
     if (!course?.id) return;
+
     const formData = new FormData();
     formData.append('_action', 'downloadRecurso');
     formData.append('recursoId', recurso.id.toString());
-    console.log("Downloading resource:", recurso);
 
-
-    debugger
-
-    try {
-      const response = await fetch(`/courses/${course.id}/tasks`, {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      console.log("Download URL data:", data);
-
-      if (data.url) window.open(data.url, '_blank');
-    } catch (err) {
-      console.error('Error getting download url:', err);
-    }
+    fetcher.submit(formData, {
+      method: 'POST',
+      action: `/courses/${course.id}/tasks`,
+    });
   };
 
-  const handleDownloadEntrega = async (tareaId: number, entrega: Entrega) => {
+  const handleDownloadEntrega = (tareaId: number, entrega: Entrega) => {
     if (!course?.id) return;
+
     const formData = new FormData();
     formData.append('_action', 'downloadEntrega');
     formData.append('tareaId', tareaId.toString());
     formData.append('estudianteId', entrega.estudianteId.toString());
 
-    try {
-      const response = await fetch(`/courses/${course.id}/tasks`, {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      if (data.url) window.open(data.url, '_blank');
-    } catch (err) {
-      console.error('Error getting submission download url:', err);
-    }
+    fetcher.submit(formData, {
+      method: 'POST',
+      action: `/courses/${course.id}/tasks`,
+    });
   };
 
   const handleUploadResource = async (nombre: string, file: File) => {
