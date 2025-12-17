@@ -181,7 +181,7 @@ export default function CourseTaskSubmissions() {
           <div className="p-6 md:p-8 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {course?.nombre || course?.id} — Detalle de la Entrega {entregaId}
+                {course?.nombre || course?.id} — Detalle de la Entrega
               </h1>
               <Link
                 to={`/courses/${cursoId}/tasks`}
