@@ -161,7 +161,6 @@ export async function getRecursosTarea(request: Request, cursoId: number, tareaI
 export async function getRecursoUrl(request: Request, cursoId: number, recursoId: number): Promise<string> {
   const jwtToken = await getValidJWTToken(request);
 
-
   const response = await apiFetch(`/cursos/${cursoId}/recursos/${recursoId}/descargar-url`, {
     method: "GET",
     secure: true,

@@ -169,7 +169,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         const recursoId = parseInt(formData.get("recursoId") as string);
 
         const url = await getRecursoUrl(request, courseId, recursoId);
-        console.log("Recurso URL:", url);
+        console.log("CourseTask.tsx - downloadRecurso - returning URL:", url);
         return { url };
       }
 
@@ -215,9 +215,12 @@ export default function CourseTasks() {
     if (!course?.id) return;
     const formData = new FormData();
     formData.append('_action', 'downloadRecurso');
-    formData.append('tareaId', recurso.ownerId.toString());
     formData.append('recursoId', recurso.id.toString());
     console.log("Downloading resource:", recurso);
+
+
+    debugger
+
     try {
       const response = await fetch(`/courses/${course.id}/tasks`, {
         method: 'POST',

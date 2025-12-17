@@ -31,6 +31,7 @@ export function TaskResourceList({ recursos, tareaId, isProfesor, onDownload, on
                                     onDownload(r);
                                 }}
                                 className="ombook-text-green text-sm"
+                            // Descargar recurso
                             >
                                 Descargar
                             </button>
