@@ -144,7 +144,7 @@ export default function CourseGeneral() {
         body: formData,
       });
     } catch (err) {
-      console.error('Error uploading recurso:', err);
+      console.error('Error uploading recurso courseGeneral:', err);
     }
   };
 

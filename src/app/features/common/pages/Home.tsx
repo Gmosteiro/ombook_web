@@ -60,7 +60,7 @@ export default function Index() {
             description: "Comunícate con estudiantes y profesores",
             icon: <MaterialIcon name="chat" color="var(--color-ombook-green)" size={36} />,
             link: "/chat",
-            roles: [UserRole.ADMINISTRADOR, UserRole.PROFESOR, UserRole.ESTUDIANTE]
+            roles: [UserRole.PROFESOR, UserRole.ESTUDIANTE]
         },
         {
             title: "Crear Curso",

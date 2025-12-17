@@ -243,10 +243,6 @@ export async function requireValidSession(request: Request): Promise<void> {
             },
         });
     }
-
-    if ((session as any)._tokenRefreshed) {
-        console.log("[requireValidSession] Token was refreshed for user:", userId);
-    }
 }
 
 /**
@@ -307,10 +303,6 @@ export async function getValidJWTToken(request: Request): Promise<string> {
                 "Pragma": "no-cache",
             },
         });
-    }
-
-    if ((session as any)._tokenRefreshed) {
-        console.log("[getValidJWTToken] Token was refreshed for user:", userId);
     }
 
     return token;

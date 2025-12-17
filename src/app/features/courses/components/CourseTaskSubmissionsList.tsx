@@ -128,10 +128,12 @@ export default function CourseTaskSubmissionsList() {
                         {submission.estado}
                       </td>
                       <td className="px-4 py-3 text-slate-800 dark:text-slate-200">
-                        {submission.calificacion ?? '-'}
+                        {submission.calificacion ?? 'Sin Calificar'}
                       </td>
                       <td className="px-4 py-3">
-                        <Link to={`${submission.id}`} className="ombook-text-blue text-sm">Ver Detalles</Link>
+                        <Link to={`${submission.id}`} className="ombook-link">
+                          Ver Detalles
+                        </Link>
                       </td>
                     </tr>
                   ))}

@@ -186,7 +186,7 @@ export async function uploadRecursoTarea(
   const formData = new FormData();
   formData.append('ownerRecurso', 'TAREA');
   formData.append('ownerId', tareaId.toString());
-  formData.append('nombre', nombre);
+  formData.append('nombre', "Archivo");
   formData.append('archivo', file);
 
   const response = await apiFetch(`/cursos/${cursoId}/recursos`, {
@@ -198,6 +198,7 @@ export async function uploadRecursoTarea(
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("Error uploading recurso api.tareas:", errorText);
     throw new Error(errorText || "Error al subir recurso");
   }
   return await response.json() as Recurso;

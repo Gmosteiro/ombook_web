@@ -203,7 +203,7 @@ export async function uploadRecursoPagina(
     const formData = new FormData();
     formData.append('ownerRecurso', 'PAGINA');
     formData.append('ownerId', paginaId.toString());
-    formData.append('nombre', nombre);
+    formData.append('nombre', "ArchivoPagina");
     formData.append('archivo', file);
 
     const response = await apiFetch(`/cursos/${cursoId}/recursos`, {

@@ -36,7 +36,7 @@ export function TaskSubmissionList({
                 <Link
                     to={`${tareaId}/submissions`}
                     onClick={(e) => e.stopPropagation()}
-                    className="px-3 py-1 bg-gray-100 rounded text-sm"
+                    className="ombook-btn ombook-btn-primary"
                 >
                     Ver Entregas
                 </Link>
