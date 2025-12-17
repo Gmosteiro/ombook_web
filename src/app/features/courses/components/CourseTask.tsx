@@ -166,10 +166,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
       }
 
       case "downloadRecurso": {
-        const tareaId = parseInt(formData.get("tareaId") as string);
         const recursoId = parseInt(formData.get("recursoId") as string);
 
-        const url = await getRecursoUrl(request, courseId, tareaId, recursoId);
+        const url = await getRecursoUrl(request, courseId, recursoId);
+        console.log("Recurso URL:", url);
         return { url };
       }
 
@@ -217,13 +217,15 @@ export default function CourseTasks() {
     formData.append('_action', 'downloadRecurso');
     formData.append('tareaId', recurso.ownerId.toString());
     formData.append('recursoId', recurso.id.toString());
-
+    console.log("Downloading resource:", recurso);
     try {
       const response = await fetch(`/courses/${course.id}/tasks`, {
         method: 'POST',
         body: formData,
       });
       const data = await response.json();
+      console.log("Download URL data:", data);
+
       if (data.url) window.open(data.url, '_blank');
     } catch (err) {
       console.error('Error getting download url:', err);
@@ -365,7 +367,6 @@ export default function CourseTasks() {
             isOpen={showUploadSubmissionFor !== null}
             onClose={() => setShowUploadSubmissionFor(null)}
             onUpload={(_, file) => handleUploadSubmission(file)}
-            showNombre={false}
           />
 
           {uploadSubmissionError && (

@@ -4,21 +4,19 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onUpload: (nombre: string, file: File) => Promise<void>;
-  showNombre?: boolean;
 }
 
-export const UploadResourceDialog = ({ isOpen, onClose, onUpload, showNombre = true }: Props) => {
+export const UploadResourceDialog = ({ isOpen, onClose, onUpload }: Props) => {
   const [file, setFile] = useState<File | null>(null);
-  const [nombre, setNombre] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || (showNombre && !nombre)) return;
+    if (!file) return;
 
     setIsUploading(true);
     try {
-      await onUpload(showNombre ? nombre : '', file);
+      await onUpload('', file);
       onClose();
     } finally {
       setIsUploading(false);
@@ -50,21 +48,7 @@ export const UploadResourceDialog = ({ isOpen, onClose, onUpload, showNombre = t
             <form onSubmit={handleSubmit} className="space-y-4">
               <h2 className="ombook-heading ombook-heading-md">Subir Recurso</h2>
 
-              {showNombre && (
-                <div>
-                  <label htmlFor="nombre" className="ombook-label">
-                    Nombre del recurso
-                  </label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    className="ombook-input"
-                    required
-                  />
-                </div>
-              )}
+
 
               <div>
                 <label htmlFor="archivo" className="ombook-label">
@@ -98,7 +82,7 @@ export const UploadResourceDialog = ({ isOpen, onClose, onUpload, showNombre = t
               <div className="mt-5 flex flex-row-reverse gap-3">
                 <button
                   type="submit"
-                  disabled={isUploading || !file || (showNombre && !nombre)}
+                  disabled={isUploading || !file}
                   className="ombook-btn ombook-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUploading ? (
